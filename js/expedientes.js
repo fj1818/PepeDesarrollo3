@@ -691,8 +691,8 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
     
     // Obtener el expediente si estamos cargando
     let datosRegistro = {
-        'id-expediente': '',
-        'fecha-registro': new Date().toLocaleDateString('es-ES'),
+        'id-expediente': '',  // Este valor será generado automáticamente en guardarRegistroExpediente
+        'fecha-registro': '',  // Este valor será generado automáticamente en guardarRegistroExpediente
         'numero-expediente': numeroExpediente,
         'peso-inicial': '',
         'peso-deseado': '',
@@ -861,7 +861,8 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
                     <div class="tab-pane fade show active" id="registro-tab-pane" role="tabpanel" aria-labelledby="registro-tab" tabindex="0">
                         <h5 class="card-title mb-3">${esCargar ? 'Cargar Registro de Expediente' : 'Crear Nuevo Registro'}</h5>
                         <form id="registro-expediente-form" class="needs-validation" novalidate>
-                            <input type="hidden" id="id-expediente" value="${datosRegistro['id-expediente']}">
+                            <!-- Campos ocultos solo para edición/actualización -->
+                            ${esCargar ? `<input type="hidden" id="id-expediente" value="${datosRegistro['id-expediente']}">` : ''}
                             <input type="hidden" id="numero-expediente" value="${datosRegistro['numero-expediente']}">
                             
                             <div class="row mb-3">
@@ -871,9 +872,11 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
                                     </label>
                                     <div class="input-group">
                                         <input type="text" class="form-control" id="fecha-registro" 
-                                            value="${fechaRegistroFormateada}" required>
+                                            value="${esCargar ? fechaRegistroFormateada : fechaActualFormateada}" 
+                                            ${esCargar ? '' : 'readonly'} required>
                                         <span class="input-group-text"><i class="far fa-calendar"></i></span>
                                     </div>
+                                    ${!esCargar ? '<small class="text-muted">La fecha actual se usará automáticamente</small>' : ''}
                                 </div>
                             </div>
                             
@@ -1023,8 +1026,6 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
         
         // Recopilar datos del formulario
         const formData = {
-            'id-expediente': document.getElementById('id-expediente').value,
-            'fecha-registro': document.getElementById('fecha-registro').value,
             'numero-expediente': document.getElementById('numero-expediente').value,
             'peso-inicial': document.getElementById('peso-inicial').value,
             'peso-deseado': document.getElementById('peso-deseado').value,
@@ -1039,6 +1040,15 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
             'disciplina': [],
             'objetivo': []
         };
+        
+        // Agregar id-expediente solo si estamos actualizando un registro existente
+        if (esCargar) {
+            const idExpElement = document.getElementById('id-expediente');
+            if (idExpElement) {
+                formData['id-expediente'] = idExpElement.value;
+            }
+            formData['fecha-registro'] = document.getElementById('fecha-registro').value;
+        }
         
         // Obtener valores de los checkboxes de disciplina
         document.querySelectorAll('.disciplina-check:checked').forEach(checkbox => {
@@ -1065,53 +1075,79 @@ function guardarRegistroExpediente(datos, esActualizacion) {
         showLoading(true);
         console.log('Guardando expediente, es actualización:', esActualizacion);
         
-        // Obtener fecha actual
+        // Generar nuevo objeto con los datos actualizados
+        const datosActualizados = {...datos};
+        
+        // Obtener fecha y hora actual para generar valores frescos
         const ahora = new Date();
+        
+        // Formatear día, mes y año para la fecha de registro
         const dia = String(ahora.getDate()).padStart(2, '0');
         const mes = String(ahora.getMonth() + 1).padStart(2, '0');
         const anio = ahora.getFullYear();
         
-        // Siempre establecer fecha actual formateada (DD/MM/YYYY) cuando no es actualización
-        if (!esActualizacion) {
-            datos['fecha-registro'] = `${dia}/${mes}/${anio}`;
-            console.log('Fecha de registro actualizada:', datos['fecha-registro']);
-            
-            // Generar siempre un nuevo ID para nuevos registros
-            const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-            const mesCorto = meses[ahora.getMonth()];
-            
-            const hora = String(ahora.getHours()).padStart(2, '0');
-            const minuto = String(ahora.getMinutes()).padStart(2, '0');
-            const segundo = String(ahora.getSeconds()).padStart(2, '0');
-            
-            datos['id-expediente'] = `EXP${dia}${mesCorto}${anio}${hora}${minuto}${segundo}`;
-            console.log('ID de expediente generado:', datos['id-expediente']);
-        }
+        // Formatear hora, minutos y segundos para el ID
+        const hora = String(ahora.getHours()).padStart(2, '0');
+        const minuto = String(ahora.getMinutes()).padStart(2, '0');
+        const segundo = String(ahora.getSeconds()).padStart(2, '0');
+        
+        // Obtener mes corto en español para el ID
+        const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const mesCorto = meses[ahora.getMonth()];
+        
+        // Generar valores finales con el formato correcto
+        const fechaRegistro = `${dia}/${mes}/${anio}`;
+        const idExpediente = `EXP${dia}${mesCorto}${anio}${hora}${minuto}${segundo}`;
+        
+        console.log('=== GENERANDO VALORES ACTUALES ===');
+        console.log('Fecha registro generada:', fechaRegistro);
+        console.log('ID expediente generado:', idExpediente);
+        
+        // FORZAR la asignación de valores nuevos para fecha e ID
+        // sin importar si es actualización o no
+        datosActualizados['fecha-registro'] = fechaRegistro;
+        datosActualizados['id-expediente'] = idExpediente;
+        
+        console.log('DESPUÉS DE FORZAR ACTUALIZACIÓN:');
+        console.log('id-expediente ahora es:', datosActualizados['id-expediente']);
+        console.log('fecha-registro ahora es:', datosActualizados['fecha-registro']);
         
         // Si los campos de disciplina y objetivo son arrays, convertirlos a string
-        if (Array.isArray(datos.disciplina)) {
-            datos.disciplina = datos.disciplina.join(', ');
+        if (Array.isArray(datosActualizados.disciplina)) {
+            datosActualizados.disciplina = datosActualizados.disciplina.join(', ');
         }
         
-        if (Array.isArray(datos.objetivo)) {
-            datos.objetivo = datos.objetivo.join(', ');
+        if (Array.isArray(datosActualizados.objetivo)) {
+            datosActualizados.objetivo = datosActualizados.objetivo.join(', ');
         }
+        
+        // Verificar y registrar los valores específicos que estamos enviando
+        console.log('VERIFICACIÓN DE CAMPOS CRÍTICOS:');
+        console.log('id-expediente:', datosActualizados['id-expediente']);
+        console.log('fecha-registro:', datosActualizados['fecha-registro']);
+        console.log('numero-expediente:', datosActualizados['numero-expediente']);
         
         // Preparar los datos para enviar al servidor
         const apiUrl = 'https://script.google.com/macros/s/AKfycbwUmM1zVgZq8kgYhCDv4n0Wqi8V7FQMGAYf7sUG2uAueI7vxLMTtkptgX35PF0rE49EOQ/exec';
         
-        // Crear estructura de datos exactamente como la de clientes.js
+        // Estructura correcta con expediente anidado en data
         const dataToSend = {
             action: 'insertexpediente',
             data: {
                 action: 'insertexpediente',
-                expediente: datos
+                expediente: datosActualizados
             }
         };
         
-        console.log('Datos a enviar:', JSON.stringify(dataToSend, null, 2));
+        // Verificar explícitamente que estos campos estén en el objeto final
+        const expedienteFinal = dataToSend.data.expediente;
+        console.log('VERIFICACIÓN FINAL:');
+        console.log('id-expediente en objeto final:', expedienteFinal['id-expediente']);
+        console.log('fecha-registro en objeto final:', expedienteFinal['fecha-registro']);
         
-        // Usar fetch con no-cors, igual que en clientes.js
+        console.log('Datos FINALES a enviar:', JSON.stringify(dataToSend, null, 2));
+        
+        // Enviar datos usando fetch con no-cors
         fetch(apiUrl, {
             method: 'POST',
             mode: 'no-cors',
