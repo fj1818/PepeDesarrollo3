@@ -1,0 +1,509 @@
+/* 
+  CRM Urueta - Comunicaciones Module Stylesheet
+  Author: Desarrollador
+  Version: 1.0
+*/
+
+/* Estilos específicos para la sección de comunicaciones */
+
+/* Estilos de la página de comunicaciones */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    display: flex;
+    align-items: center;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.page-title i {
+    margin-right: 0.75rem;
+    font-size: 1.75rem;
+}
+
+.page-description {
+    color: var(--text-color-light);
+    font-size: 1.1rem;
+}
+
+/* Estilos para las tarjetas */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow-hover) !important;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 1rem 1.25rem;
+}
+
+/* Estadísticas */
+.stats-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.stats-item:last-child {
+    border-bottom: none;
+}
+
+.stats-item i {
+    font-size: 1.25rem;
+}
+
+.badge.rounded-pill {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
+}
+
+/* Comunicaciones recientes */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 0.75rem 1.25rem;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Plantillas de mensaje */
+.templates-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.template-btn {
+    transition: all 0.3s;
+}
+
+.template-btn:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Estilos para la vista previa de WhatsApp */
+.whatsapp-preview {
+    width: 100%;
+    background-color: #e5ddd5;
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.whatsapp-header {
+    background-color: #075e54;
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+}
+
+.whatsapp-header .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.whatsapp-header .contact-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.whatsapp-header .contact-status {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.whatsapp-messages {
+    padding: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.whatsapp-messages .message {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 7.5px;
+    margin-bottom: 5px;
+    position: relative;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    word-wrap: break-word;
+}
+
+.whatsapp-messages .message.received {
+    background-color: white;
+    border-top-left-radius: 0;
+    margin-right: auto;
+}
+
+.whatsapp-messages .message.sent {
+    background-color: #dcf8c6;
+    border-top-right-radius: 0;
+    margin-left: auto;
+}
+
+/* Estilos para la vista previa de Email */
+.email-preview {
+    width: 100%;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+.email-header {
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.email-body {
+    padding: 20px;
+    min-height: 150px;
+    line-height: 1.6;
+}
+
+.email-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #fafafa;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Estilos adaptables para móviles */
+@media (max-width: 767.98px) {
+    .whatsapp-preview, .email-preview {
+        width: 100%;
+    }
+    
+    .template-btn {
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .page-description {
+        font-size: 1rem;
+    }
+}
+
+/* Animaciones */
+.animate__fadeIn {
+    animation-duration: 0.6s;
+}
+
+/* Comunicaciones Page Layout */
+.comunicaciones-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 992px) {
+    .comunicaciones-container {
+        grid-template-columns: 350px 1fr;
+    }
+}
+
+/* Contacts List */
+.contacts-list {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+}
+
+.list-header {
+    padding: 15px;
+    background-color: var(--dark-color);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.list-search {
+    padding: 15px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.list-search input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--gray-300);
+    background-color: var(--gray-100);
+}
+
+.contacts-items {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.contact-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.contact-item:hover {
+    background-color: var(--gray-100);
+}
+
+.contact-item.active {
+    background-color: rgba(69, 123, 157, 0.1);
+    border-left: 3px solid var(--secondary-color);
+}
+
+.contact-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 12px;
+    font-size: 16px;
+}
+
+.contact-info {
+    flex: 1;
+}
+
+.contact-name {
+    font-weight: 500;
+    margin: 0;
+    font-size: 14px;
+}
+
+.contact-meta {
+    color: var(--gray-600);
+    font-size: 12px;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.contact-actions button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    transition: transform 0.2s ease;
+}
+
+.contact-actions button:hover {
+    transform: scale(1.1);
+}
+
+.action-whatsapp {
+    background-color: #25D366;
+}
+
+.action-email {
+    background-color: #EA4335;
+}
+
+/* Message Composer */
+.message-composer {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+    height: 100%;
+}
+
+.composer-header {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.composer-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.composer-options {
+    display: flex;
+    gap: 10px;
+}
+
+.composer-body {
+    margin-bottom: 20px;
+}
+
+.composer-field {
+    margin-bottom: 15px;
+}
+
+.composer-field label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--gray-700);
+}
+
+.composer-field select,
+.composer-field input,
+.composer-field textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid var(--gray-300);
+    background-color: var(--gray-100);
+}
+
+.composer-field textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.template-selector {
+    display: flex;
+    margin-bottom: 15px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.template-option {
+    padding: 8px 15px;
+    border-radius: 20px;
+    background-color: var(--gray-200);
+    color: var(--gray-800);
+    margin-right: 10px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.template-option:hover {
+    background-color: var(--gray-300);
+}
+
+.template-option.active {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.preview-section {
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: var(--gray-100);
+}
+
+.preview-section h3 {
+    color: var(--gray-700);
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.message-preview {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 3px solid var(--secondary-color);
+}
+
+.composer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Message Templates */
+.templates-section {
+    margin-top: 30px;
+}
+
+.templates-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.templates-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.template-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 15px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-left: 3px solid var(--primary-color);
+}
+
+.template-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.template-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.template-card-excerpt {
+    color: var(--gray-600);
+    font-size: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+} 
