@@ -138,6 +138,7 @@ async function loadContent(section) {
             case 'prospectos': headerTitle.textContent = 'Prospectos'; break;
             case 'clientes': headerTitle.textContent = 'Clientes'; break;
             case 'expedientes': headerTitle.textContent = 'Expedientes'; break;
+            case 'comunicaciones': headerTitle.textContent = 'Comunicaciones'; break;
             default: headerTitle.textContent = 'Home';
         }
     }
@@ -231,6 +232,20 @@ async function loadContent(section) {
                     await window.initExpedientes();
                 } else {
                     throw new Error('La función initExpedientes no está definida.');
+                }
+                break;
+                
+            case 'comunicaciones':
+                if (!window.comunicacionesInitialized) {
+                    await loadScript('js/comunicaciones.js');
+                    window.comunicacionesInitialized = true;
+                }
+                if (typeof initComunicaciones === 'function') {
+                    await initComunicaciones();
+                } else if (typeof window.initComunicaciones === 'function') {
+                    await window.initComunicaciones();
+                } else {
+                    throw new Error('La función initComunicaciones no está definida.');
                 }
                 break;
                 
