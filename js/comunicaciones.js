@@ -21,6 +21,13 @@ let messageTemplates = {
             id: 'w3',
             title: 'Invitación a cita',
             content: 'Hola [nombre], me gustaría invitarte a una reunión para discutir cómo podemos ayudarte. ¿Te parece bien el [fecha] a las [hora]?'
+        },
+        {
+            id: 'w4',
+            title: 'Avance de Entrenamiento',
+            content: 'Hola [nombre], te envío un resumen de tu avance de entrenamiento. Hemos preparado un informe detallado con tus progresos, que podrás ver en el siguiente enlace: [link_informe]\n\nTus resultados son excelentes, continuemos trabajando para alcanzar tus objetivos.\n\n¿Tienes alguna pregunta sobre los resultados?',
+            requiresAttachment: true,
+            attachmentType: 'pdf'
         }
     ],
     email: [
@@ -38,6 +45,13 @@ let messageTemplates = {
             id: 'e3',
             title: 'Envío de documentación',
             content: 'Estimado/a [nombre],\n\nAdjunto encontrarás la documentación solicitada relacionada con [tema].\n\nSi necesitas cualquier aclaración o tienes alguna pregunta, no dudes en contactarme.\n\nSaludos cordiales,\n[remitente]\nURUETA CRM'
+        },
+        {
+            id: 'e4',
+            title: 'Informe de Avance de Entrenamiento',
+            content: 'Estimado/a [nombre],\n\nAdjunto a este correo encontrarás un informe detallado de tu avance de entrenamiento con fecha [fecha_evaluacion].\n\nEn este informe podrás revisar:\n\n- Tus datos actuales de seguimiento\n- Gráficos comparativos de tu progreso\n- Análisis de tus resultados\n- Recomendaciones personalizadas\n\nEstamos muy satisfechos con tu progreso y compromiso. Te animamos a continuar con la misma dedicación para alcanzar tus objetivos de forma óptima.\n\nSi tienes alguna duda sobre los resultados o deseas programar una sesión para revisar el informe en detalle, no dudes en contactarnos.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal\nURUETA CRM',
+            requiresAttachment: true,
+            attachmentType: 'pdf'
         }
     ]
 };
@@ -1083,10 +1097,8 @@ function selectContact(contactId, contactType, contactEmail, contactPhone) {
             const currentMessageType = window.currentMessageType || 'whatsapp';
             if (currentMessageType === 'whatsapp') {
                 infoElement.textContent = selectedContact.telefono || 'Sin teléfono';
-                console.log('Información de contacto (teléfono):', selectedContact.telefono || 'Sin teléfono');
             } else {
                 infoElement.textContent = selectedContact.email || 'Sin email';
-                console.log('Información de contacto (email):', selectedContact.email || 'Sin email');
             }
         }
         
@@ -1236,8 +1248,23 @@ function applyTemplate(templateId) {
         // Reemplazar remitente por defecto
         content = content.replace(/\[remitente\]/g, 'Administrador');
         
+        // Reemplazar fecha actual en formato DD/MM/YYYY
+        const fechaActual = new Date();
+        const fechaFormateada = `${fechaActual.getDate().toString().padStart(2, '0')}/${(fechaActual.getMonth() + 1).toString().padStart(2, '0')}/${fechaActual.getFullYear()}`;
+        content = content.replace(/\[fecha_evaluacion\]/g, fechaFormateada);
+        
+        // Si es una plantilla de avance, generar link temporal o placeholder
+        if (template.requiresAttachment && template.attachmentType === 'pdf') {
+            content = content.replace(/\[link_informe\]/g, '#informe-generado-al-enviar');
+        }
+        
         // Establecer contenido y actualizar vista previa
         messageContent.value = content;
+        
+        // Guardar la referencia a la plantilla seleccionada para saber si requiere adjunto
+        messageContent.dataset.templateId = templateId;
+        messageContent.dataset.requiresAttachment = template.requiresAttachment ? 'true' : 'false';
+        
         updateMessagePreview();
     }
 }
@@ -1279,12 +1306,20 @@ function clearMessage() {
 /**
  * Enviar el mensaje
  */
-function sendMessage() {
-    const messageContent = document.getElementById('message-content').value;
+async function sendMessage() {
+    const messageContent = document.getElementById('message-content');
+    if (!messageContent) {
+        console.error('No se encontró el elemento message-content');
+        return;
+    }
+    
+    const mensaje = messageContent.value;
     const type = window.currentMessageType;
+    const templateId = messageContent.dataset.templateId;
+    const requiresAttachment = messageContent.dataset.requiresAttachment === 'true';
     
     // Verificar que haya contenido
-    if (!messageContent) {
+    if (!mensaje) {
         Swal.fire({
             title: 'Mensaje vacío',
             text: 'Debes escribir un mensaje antes de enviarlo.',
@@ -1303,6 +1338,44 @@ function sendMessage() {
             confirmButtonColor: '#E63946'
         });
         return;
+    }
+    
+    // Si la plantilla requiere adjunto PDF, generarlo
+    let pdfInfo = null;
+    if (requiresAttachment) {
+        // Mostrar loader mientras se genera el PDF
+        Swal.fire({
+            title: 'Generando informe',
+            text: 'Estamos preparando el informe personalizado...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        try {
+            pdfInfo = await generarPDFAvance(selectedContact);
+            Swal.close();
+            
+            if (!pdfInfo) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo generar el informe PDF. Verifica que el cliente tenga datos de seguimiento.',
+                    icon: 'error',
+                    confirmButtonColor: '#E63946'
+                });
+                return;
+            }
+        } catch (error) {
+            console.error('Error al generar PDF:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Ocurrió un error al generar el informe PDF.',
+                icon: 'error',
+                confirmButtonColor: '#E63946'
+            });
+            return;
+        }
     }
     
     if (type === 'whatsapp') {
@@ -1330,18 +1403,50 @@ function sendMessage() {
         telefono = telefono.replace(/[^0-9+]/g, '');
         console.log('Teléfono después de procesar:', telefono);
         
-        // Enviar mensaje por WhatsApp
-        const whatsappURL = `https://wa.me/${telefono}?text=${encodeURIComponent(messageContent)}`;
-        console.log('URL de WhatsApp:', whatsappURL);
-        window.open(whatsappURL, '_blank');
-        
-        // Mostrar confirmación
-        Swal.fire({
-            title: 'Mensaje preparado',
-            text: 'Se ha abierto WhatsApp con tu mensaje. Haz clic para enviarlo.',
-            icon: 'success',
-            confirmButtonColor: '#25D366'
-        });
+        // Si tenemos un PDF y es plantilla de avance, ofrecer descargarlo primero
+        if (pdfInfo) {
+            const { blob, fileName } = pdfInfo;
+            
+            // Crear URL para descargar el PDF
+            const pdfUrl = URL.createObjectURL(blob);
+            
+            Swal.fire({
+                title: 'Informe generado',
+                html: `
+                    <p>El informe de avance se ha generado correctamente.</p>
+                    <p>Descarga el PDF para enviarlo manualmente a través de WhatsApp:</p>
+                    <a href="${pdfUrl}" download="${fileName}" class="btn btn-success mt-3">
+                        <i class="fas fa-download me-2"></i> Descargar PDF
+                    </a>
+                    <p class="mt-3">O envía un mensaje con un enlace para acceder al informe:</p>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Enviar mensaje',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#25D366',
+                cancelButtonColor: '#6c757d',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Enviar mensaje por WhatsApp (el PDF debe enviarse manualmente)
+                    const whatsappURL = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+                    console.log('URL de WhatsApp:', whatsappURL);
+                    window.open(whatsappURL, '_blank');
+                }
+            });
+        } else {
+            // Enviar mensaje normal por WhatsApp
+            const whatsappURL = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+            console.log('URL de WhatsApp:', whatsappURL);
+            window.open(whatsappURL, '_blank');
+            
+            // Mostrar confirmación
+            Swal.fire({
+                title: 'Mensaje preparado',
+                text: 'Se ha abierto WhatsApp con tu mensaje. Haz clic para enviarlo.',
+                icon: 'success',
+                confirmButtonColor: '#25D366'
+            });
+        }
     } else {
         // Obtener el email
         let email = selectedContact.email || '';
@@ -1363,19 +1468,56 @@ function sendMessage() {
             email = String(email);
         }
         
-        // Abrir cliente de correo con el mensaje
-        const subject = 'Mensaje importante - URUETA CRM';
-        const mailtoURL = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(messageContent)}`;
-        console.log('URL de correo:', mailtoURL);
-        window.location.href = mailtoURL;
-        
-        // Mostrar confirmación
-        Swal.fire({
-            title: 'Email preparado',
-            text: 'Se ha abierto tu cliente de correo electrónico con el mensaje.',
-            icon: 'success',
-            confirmButtonColor: '#4a6cf7'
-        });
+        // Si tenemos un PDF generado, ofrecer descargarlo
+        if (pdfInfo) {
+            const { blob, fileName } = pdfInfo;
+            
+            // Crear URL para descargar el PDF
+            const pdfUrl = URL.createObjectURL(blob);
+            
+            Swal.fire({
+                title: 'Informe generado',
+                html: `
+                    <p>El informe de avance se ha generado correctamente.</p>
+                    <p>Para enviarlo por correo electrónico:</p>
+                    <ol class="text-start">
+                        <li>Primero descarga el PDF usando el botón de abajo</li>
+                        <li>Luego, al hacer clic en "Enviar correo", se abrirá tu cliente de correo</li>
+                        <li>Adjunta manualmente el PDF descargado a tu correo</li>
+                    </ol>
+                    <a href="${pdfUrl}" download="${fileName}" class="btn btn-primary mt-3">
+                        <i class="fas fa-download me-2"></i> Descargar PDF
+                    </a>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Enviar correo',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#4a6cf7',
+                cancelButtonColor: '#6c757d',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Abrir cliente de correo con el mensaje
+                    const subject = 'Informe de Avance de Entrenamiento - URUETA CRM';
+                    const mailtoURL = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mensaje)}`;
+                    console.log('URL de correo:', mailtoURL);
+                    window.location.href = mailtoURL;
+                }
+            });
+        } else {
+            // Enviar correo normal
+            const subject = 'Mensaje importante - URUETA CRM';
+            const mailtoURL = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mensaje)}`;
+            console.log('URL de correo:', mailtoURL);
+            window.location.href = mailtoURL;
+            
+            // Mostrar confirmación
+            Swal.fire({
+                title: 'Email preparado',
+                text: 'Se ha abierto tu cliente de correo electrónico con el mensaje.',
+                icon: 'success',
+                confirmButtonColor: '#4a6cf7'
+            });
+        }
     }
     
     // Limpiar mensaje después de enviar
@@ -1615,4 +1757,335 @@ function setupComunicacionesEventos() {
     
     // Inicialmente mostrar mensaje de selección
     mostrarMensajeSeleccion();
+}
+
+/**
+ * Generar PDF con avance del cliente
+ */
+async function generarPDFAvance(cliente) {
+    // Comprobar si la biblioteca jsPDF está disponible
+    if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
+        // Cargar dinámicamente jsPDF si no está disponible
+        await cargarLibreriaPDF();
+    }
+    
+    console.log('Generando PDF para el cliente:', cliente);
+    
+    try {
+        // Crear un nuevo documento PDF
+        const { jsPDF } = jspdf;
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        // Configurar fuentes
+        doc.setFont('helvetica', 'normal');
+        
+        // Obtener el último registro de expediente del cliente
+        let ultimoRegistro = null;
+        if (window.apiData && window.apiData.expedientes) {
+            // Buscar registros asociados al cliente
+            const expedientes = Object.values(window.apiData.expedientes).filter(
+                exp => exp.clienteId === cliente.id || exp.id === cliente.expedienteId
+            );
+            
+            if (expedientes.length > 0) {
+                // Ordenar por fecha más reciente
+                expedientes.sort((a, b) => {
+                    const fechaA = a['fecha-registro'] ? new Date(a['fecha-registro'].split('/').reverse().join('-')) : new Date(0);
+                    const fechaB = b['fecha-registro'] ? new Date(b['fecha-registro'].split('/').reverse().join('-')) : new Date(0);
+                    return fechaB - fechaA;
+                });
+                
+                ultimoRegistro = expedientes[0];
+                console.log('Último registro encontrado:', ultimoRegistro);
+            }
+        }
+        
+        // --- Portada ---
+        // Logo y encabezado
+        doc.setFillColor(41, 128, 185); // Azul corporativo
+        doc.rect(0, 0, 210, 40, 'F');
+        
+        // Título del documento
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.text('INFORME DE AVANCE DE ENTRENAMIENTO', 105, 20, { align: 'center' });
+        
+        // Datos del cliente
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(14);
+        doc.text(`Cliente: ${cliente.nombre || 'Sin nombre'}`, 20, 60);
+        
+        // Fecha del informe
+        const fechaActual = new Date();
+        const fechaFormateada = `${fechaActual.getDate().toString().padStart(2, '0')}/${(fechaActual.getMonth() + 1).toString().padStart(2, '0')}/${fechaActual.getFullYear()}`;
+        doc.text(`Fecha del informe: ${fechaFormateada}`, 20, 70);
+        
+        // Si tenemos el último registro, mostrar su fecha
+        if (ultimoRegistro && ultimoRegistro['fecha-registro']) {
+            doc.text(`Fecha de última evaluación: ${ultimoRegistro['fecha-registro']}`, 20, 80);
+        }
+        
+        // Línea divisoria
+        doc.setDrawColor(200, 200, 200);
+        doc.line(20, 90, 190, 90);
+        
+        // Imagen o gráfica de ejemplo (posición donde iría)
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(55, 100, 100, 60, 3, 3, 'F');
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Gráfica de Progreso', 105, 130, { align: 'center' });
+        
+        // Intro del documento
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text([
+            'Este informe presenta un análisis detallado de su progreso en el programa de entrenamiento.',
+            'A continuación encontrará sus datos actuales, análisis comparativo y recomendaciones',
+            'personalizadas para optimizar sus resultados.'
+        ], 20, 180);
+        
+        // --- Segunda página: Datos del registro ---
+        doc.addPage();
+        
+        // Encabezado
+        doc.setFillColor(41, 128, 185);
+        doc.rect(0, 0, 210, 20, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.text('DATOS DE SEGUIMIENTO', 105, 13, { align: 'center' });
+        
+        // Si tenemos registro, mostrar sus datos
+        if (ultimoRegistro) {
+            // Datos actuales
+            doc.setFontSize(14);
+            doc.setTextColor(41, 128, 185);
+            doc.text('Mediciones Actuales', 20, 30);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            
+            // Tabla de datos principales
+            const datosCliente = [
+                { label: 'Peso Actual', valor: ultimoRegistro['peso-actual'] ? `${ultimoRegistro['peso-actual']} kg` : 'No disponible' },
+                { label: 'Grasa Corporal', valor: ultimoRegistro['grasa-actual'] ? `${ultimoRegistro['grasa-actual']}%` : 'No disponible' },
+                { label: 'IMC', valor: ultimoRegistro['imc'] ? `${ultimoRegistro['imc']}` : 'No calculado' },
+                { label: 'Días entrenados/semana', valor: ultimoRegistro['dias-entrenamiento'] ? `${ultimoRegistro['dias-entrenamiento']}` : 'No registrado' },
+                { label: 'Horas totales', valor: ultimoRegistro['horas-entrenamiento'] ? `${ultimoRegistro['horas-entrenamiento']}` : 'No registrado' }
+            ];
+            
+            let yPos = 40;
+            datosCliente.forEach(dato => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${dato.label}:`, 20, yPos);
+                doc.setFont('helvetica', 'normal');
+                doc.text(String(dato.valor), 100, yPos);
+                yPos += 10;
+            });
+            
+            // Objetivos
+            yPos += 10;
+            doc.setFontSize(14);
+            doc.setTextColor(41, 128, 185);
+            doc.text('Objetivos Planteados', 20, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            
+            const objetivos = [
+                { label: 'Peso Objetivo', valor: ultimoRegistro['peso-deseado'] ? `${ultimoRegistro['peso-deseado']} kg` : 'No establecido' },
+                { label: 'Grasa Objetivo', valor: ultimoRegistro['grasa-deseada'] ? `${ultimoRegistro['grasa-deseada']}%` : 'No establecido' },
+                { label: 'Objetivo General', valor: ultimoRegistro['objetivo'] ? `${ultimoRegistro['objetivo']}` : 'No especificado' }
+            ];
+            
+            objetivos.forEach(dato => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${dato.label}:`, 20, yPos);
+                doc.setFont('helvetica', 'normal');
+                doc.text(String(dato.valor), 100, yPos);
+                yPos += 10;
+            });
+            
+            // Información adicional
+            yPos += 10;
+            doc.setFontSize(14);
+            doc.setTextColor(41, 128, 185);
+            doc.text('Información Adicional', 20, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            
+            // Disciplina y datos médicos
+            const infoAdicional = [
+                { label: 'Disciplina', valor: ultimoRegistro['disciplina'] ? `${ultimoRegistro['disciplina']}` : 'No especificada' },
+                { label: 'Condiciones Médicas', valor: ultimoRegistro['condiciones-medicas'] ? `${ultimoRegistro['condiciones-medicas']}` : 'Ninguna registrada' },
+                { label: 'Medicamentos', valor: ultimoRegistro['medicamentos'] ? `${ultimoRegistro['medicamentos']}` : 'Ninguno registrado' }
+            ];
+            
+            infoAdicional.forEach(dato => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${dato.label}:`, 20, yPos);
+                doc.setFont('helvetica', 'normal');
+                
+                // Manejar textos largos
+                if (dato.valor && String(dato.valor).length > 40) {
+                    const lineas = doc.splitTextToSize(String(dato.valor), 110);
+                    doc.text(lineas, 100, yPos);
+                    yPos += (lineas.length - 1) * 7; // Ajustar posición Y basado en número de líneas
+                } else {
+                    doc.text(String(dato.valor), 100, yPos);
+                }
+                
+                yPos += 10;
+            });
+        } else {
+            // Mensaje si no hay registros
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text('No se encontraron registros de seguimiento para este cliente.', 20, 40);
+            doc.text('Por favor, complete una evaluación para generar informes detallados.', 20, 50);
+        }
+        
+        // --- Tercera página: Gráficos y Análisis ---
+        doc.addPage();
+        
+        // Encabezado
+        doc.setFillColor(41, 128, 185);
+        doc.rect(0, 0, 210, 20, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.text('ANÁLISIS DE PROGRESO', 105, 13, { align: 'center' });
+        
+        // Espacio para gráficos
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Evolución del Peso', 105, 35, { align: 'center' });
+        
+        // Placeholder para gráfico de peso
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(30, 40, 150, 50, 3, 3, 'F');
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Gráfico de evolución de peso', 105, 65, { align: 'center' });
+        
+        // Gráfico de % de grasa
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Evolución del % de Grasa Corporal', 105, 110, { align: 'center' });
+        
+        // Placeholder para gráfico de grasa
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(30, 115, 150, 50, 3, 3, 'F');
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Gráfico de evolución de grasa corporal', 105, 140, { align: 'center' });
+        
+        // Análisis y recomendaciones
+        doc.setFontSize(14);
+        doc.setTextColor(41, 128, 185);
+        doc.text('Análisis y Recomendaciones', 20, 180);
+        
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
+        
+        // Texto de análisis genérico que se adaptaría según los datos reales
+        let analisisTexto = 'Basado en sus resultados actuales, ';
+        
+        if (ultimoRegistro) {
+            if (ultimoRegistro['peso-inicial'] && ultimoRegistro['peso-actual']) {
+                const pesoInicial = parseFloat(String(ultimoRegistro['peso-inicial']));
+                const pesoActual = parseFloat(String(ultimoRegistro['peso-actual']));
+                
+                if (pesoActual < pesoInicial) {
+                    analisisTexto += `ha logrado reducir su peso en ${(pesoInicial - pesoActual).toFixed(1)} kg desde el inicio. `;
+                } else if (pesoActual > pesoInicial) {
+                    analisisTexto += `ha aumentado su peso en ${(pesoActual - pesoInicial).toFixed(1)} kg desde el inicio. `;
+                } else {
+                    analisisTexto += 'ha mantenido su peso estable desde el inicio. ';
+                }
+            }
+            
+            if (ultimoRegistro['dias-entrenamiento']) {
+                const diasEntrenamiento = parseInt(String(ultimoRegistro['dias-entrenamiento']));
+                if (diasEntrenamiento >= 4) {
+                    analisisTexto += 'Su frecuencia de entrenamiento es excelente. ';
+                } else if (diasEntrenamiento >= 2) {
+                    analisisTexto += 'Su frecuencia de entrenamiento es adecuada. ';
+                } else {
+                    analisisTexto += 'Se recomienda aumentar la frecuencia de entrenamiento para mejores resultados. ';
+                }
+            }
+        } else {
+            analisisTexto = 'No hay suficientes datos para realizar un análisis detallado. Es recomendable completar evaluaciones regulares para un seguimiento óptimo.';
+        }
+        
+        // Añadir recomendaciones generales
+        analisisTexto += 'Recomendamos mantener una alimentación balanceada, hidratación adecuada y respetar los tiempos de descanso para optimizar los resultados de su entrenamiento.';
+        
+        // Escribir el análisis con formato multilínea
+        const lineasAnalisis = doc.splitTextToSize(analisisTexto, 170);
+        doc.text(lineasAnalisis, 20, 190);
+        
+        // --- Pie de documento ---
+        // Número de página en todas las páginas
+        const numPages = doc.getNumberOfPages();
+        for (let i = 1; i <= numPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(10);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Página ${i} de ${numPages}`, 105, 285, { align: 'center' });
+            
+            // Footer en todas las páginas
+            doc.text('URUETA CRM - Informe de Avance de Entrenamiento', 105, 292, { align: 'center' });
+        }
+        
+        // Guardar PDF
+        const pdfBlob = doc.output('blob');
+        const pdfFileName = `Avance_${cliente.nombre.replace(/\s+/g, '_')}_${fechaFormateada.replace(/\//g, '-')}.pdf`;
+        
+        return {
+            blob: pdfBlob,
+            fileName: pdfFileName
+        };
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        return null;
+    }
+}
+
+/**
+ * Cargar la biblioteca jsPDF si no está disponible
+ */
+async function cargarLibreriaPDF() {
+    return new Promise((resolve, reject) => {
+        if (typeof jspdf !== 'undefined') {
+            resolve();
+            return;
+        }
+        
+        console.log('Cargando biblioteca jsPDF...');
+        
+        // Crear elemento script para cargar jsPDF
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = () => {
+            console.log('jsPDF cargado correctamente');
+            resolve();
+        };
+        script.onerror = (error) => {
+            console.error('Error al cargar jsPDF:', error);
+            reject(error);
+        };
+        
+        document.head.appendChild(script);
+    });
 } 
