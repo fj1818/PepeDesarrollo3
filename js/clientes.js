@@ -103,7 +103,6 @@ function cargarInterfazClientes() {
                                         <th>Teléfono</th>
                                         <th>Tipo</th>
                                         <th>Finalizado</th>
-                                        <th>Expediente</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -214,6 +213,12 @@ function setupClientesEventos() {
         if (e.target.closest('.btn-edit-cliente')) {
             const id = e.target.closest('.btn-edit-cliente').dataset.id;
             mostrarFormularioCliente(id);
+        }
+        
+        // Botón para agregar expediente
+        if (e.target.closest('.btn-add-expediente')) {
+            const id = e.target.closest('.btn-add-expediente').dataset.id;
+            mostrarConfirmacionNuevoExpediente(id);
         }
     });
 }
@@ -335,11 +340,14 @@ function actualizarTablaConClientes(clientes) {
                         ${finalizado ? 'checked' : ''}>
                 </div>
             </td>
-            <td>${cliente.numeroExpediente || 'No asignado'}</td>
             <td>
                 <button class="btn btn-sm btn-outline-warning btn-edit-cliente" data-id="${cliente.id}">
                     <i class="fas fa-edit"></i>
                 </button>
+                ${finalizado ? 
+                `<button class="btn btn-sm btn-outline-primary btn-add-expediente ms-1" data-id="${cliente.id}">
+                    <i class="fas fa-folder-plus"></i>
+                </button>` : ''}
             </td>
         `;
         tbody.appendChild(fila);
@@ -436,17 +444,40 @@ async function guardarCambiosToggleCliente(id, campo, valor) {
         const cliente = window.apiData.clientes[id];
         if (!cliente) throw new Error('Cliente no encontrado');
         
-        // Crear objeto con los cambios
-        const cambios = {
-            [campo]: valor
+        // Convertir explícitamente el valor booleano a cadena para el API
+        const valorString = valor;
+        
+        console.log(`Actualizando cliente ${id}, campo ${campo} con valor ${valorString}`);
+        
+        // Estructura de datos específica para la API
+        const datosCliente = {
+            "id-contacto": cliente["id-contacto"],
+            "nombre": cliente.nombre,
+            "telefono": cliente.telefono,
+            "email": cliente.email,
+            "fecha-nacimiento": cliente["fecha-nacimiento"],
+            "genero": cliente.genero,
+            "ubicacion": cliente.ubicacion,
+            "peso-inicial": cliente["peso-inicial"],
+            "peso-deseado": cliente["peso-deseado"],
+            "grasa-inicial": cliente["grasa-inicial"],
+            "grasa-deseada": cliente["grasa-deseada"],
+            "fecha-prospecto": cliente["fecha-prospecto"],
+            "fecha-cliente": cliente["fecha-cliente"],
+            "canal": cliente.canal,
+            "numero-expediente": cliente["numero-expediente"],
+            "numero-cliente": cliente["numero-cliente"],
+            "plan": cliente.plan,
+            "finalizado": valorString
         };
         
-        // Preparar datos para la API
-        const datosParaAPI = {};
-        datosParaAPI[id] = cambios;
-        
-        console.log(`Actualizando cliente ${id}, campo ${campo} con valor ${valor}`);
-        console.log('Datos para API:', datosParaAPI);
+        console.log('Datos completos para API:', JSON.stringify({
+            action: 'updateclientes',
+            data: {
+                action: 'updateclientes',
+                cliente: datosCliente
+            }
+        }));
         
         // Llamar a la API para actualizar
         try {
@@ -457,9 +488,10 @@ async function guardarCambiosToggleCliente(id, campo, valor) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    action: 'updatecliente',
+                    action: 'updateclientes',
                     data: {
-                        cliente: datosParaAPI
+                        action: 'updateclientes',
+                        cliente: datosCliente
                     }
                 })
             });
@@ -470,23 +502,23 @@ async function guardarCambiosToggleCliente(id, campo, valor) {
             if (window.apiData.clientes[id]) {
                 window.apiData.clientes[id] = {
                     ...window.apiData.clientes[id],
-                    ...cambios
+                    finalizado: valorString
                 };
-                console.log('Datos locales actualizados');
+                console.log('Datos locales actualizados:', window.apiData.clientes[id].finalizado);
             }
             
-            showMessage(`Campo ${campo} actualizado`, 'success');
+            showMessage(`Estado de cliente actualizado`, 'success');
         } catch (error) {
             console.warn('Error al actualizar cliente en servidor:', error);
             // Actualizar datos localmente de todos modos
             if (window.apiData.clientes[id]) {
                 window.apiData.clientes[id] = {
                     ...window.apiData.clientes[id],
-                    ...cambios
+                    finalizado: valorString
                 };
-                console.log('Datos locales actualizados (después de error)');
+                console.log('Datos locales actualizados (después de error):', window.apiData.clientes[id].finalizado);
             }
-            showMessage(`Campo ${campo} actualizado localmente`, 'warning');
+            showMessage(`Estado de cliente actualizado localmente`, 'warning');
         }
         
         // Actualizar la interfaz
@@ -531,7 +563,14 @@ function mostrarFormularioCliente(clienteId = null) {
         try {
             const fecha = new Date(cliente['fecha-prospecto']);
             if (!isNaN(fecha)) {
-                fechaProspectoFormateada = fecha.toISOString().split('T')[0];
+                const dia = String(fecha.getDate()).padStart(2, '0');
+                const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                const año = fecha.getFullYear();
+                const horas = String(fecha.getHours()).padStart(2, '0');
+                const minutos = String(fecha.getMinutes()).padStart(2, '0');
+                const segundos = String(fecha.getSeconds()).padStart(2, '0');
+                
+                fechaProspectoFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
             }
         } catch (e) {
             console.warn('Error al formatear fecha de prospecto:', e);
@@ -543,7 +582,14 @@ function mostrarFormularioCliente(clienteId = null) {
         try {
             const fecha = new Date(cliente['fecha-cliente']);
             if (!isNaN(fecha)) {
-                fechaClienteFormateada = fecha.toISOString().split('T')[0];
+                const dia = String(fecha.getDate()).padStart(2, '0');
+                const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                const año = fecha.getFullYear();
+                const horas = String(fecha.getHours()).padStart(2, '0');
+                const minutos = String(fecha.getMinutes()).padStart(2, '0');
+                const segundos = String(fecha.getSeconds()).padStart(2, '0');
+                
+                fechaClienteFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
             }
         } catch (e) {
             console.warn('Error al formatear fecha de cliente:', e);
@@ -554,10 +600,7 @@ function mostrarFormularioCliente(clienteId = null) {
         title: 'Editar Cliente',
         html: `
             <form id="cliente-form" class="text-start" style="max-height: 70vh; overflow-y: auto;">
-                <div class="mb-3">
-                    <label for="id-contacto" class="form-label">ID de Contacto</label>
-                    <input type="text" class="form-control" id="id-contacto" value="${cliente['id-contacto'] || ''}">
-                </div>
+                <input type="hidden" id="id-contacto" value="${cliente['id-contacto'] || ''}">
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre completo</label>
                     <input type="text" class="form-control" id="nombre" value="${cliente.nombre || ''}" required>
@@ -578,9 +621,9 @@ function mostrarFormularioCliente(clienteId = null) {
                     <label for="genero" class="form-label">Género</label>
                     <select class="form-control" id="genero">
                         <option value="" ${!cliente.genero ? 'selected' : ''}>Seleccionar</option>
-                        <option value="masculino" ${cliente.genero === 'masculino' ? 'selected' : ''}>Masculino</option>
-                        <option value="femenino" ${cliente.genero === 'femenino' ? 'selected' : ''}>Femenino</option>
-                        <option value="otro" ${cliente.genero === 'otro' ? 'selected' : ''}>Otro</option>
+                        <option value="Masculino" ${cliente.genero === 'Masculino' || cliente.genero === 'masculino' ? 'selected' : ''}>Masculino</option>
+                        <option value="Femenino" ${cliente.genero === 'Femenino' || cliente.genero === 'femenino' ? 'selected' : ''}>Femenino</option>
+                        <option value="Otro" ${cliente.genero === 'Otro' || cliente.genero === 'otro' ? 'selected' : ''}>Otro</option>
                     </select>
                 </div>
                 <div class="mb-3">
@@ -605,11 +648,11 @@ function mostrarFormularioCliente(clienteId = null) {
                 </div>
                 <div class="mb-3">
                     <label for="fecha-prospecto" class="form-label">Fecha de Prospecto</label>
-                    <input type="text" class="form-control datepicker" id="fecha-prospecto" value="${fechaProspectoFormateada || ''}">
+                    <input type="text" class="form-control" id="fecha-prospecto" value="${fechaProspectoFormateada || ''}" readonly>
                 </div>
                 <div class="mb-3">
                     <label for="fecha-cliente" class="form-label">Fecha de Cliente</label>
-                    <input type="text" class="form-control datepicker" id="fecha-cliente" value="${fechaClienteFormateada || ''}">
+                    <input type="text" class="form-control" id="fecha-cliente" value="${fechaClienteFormateada || ''}" readonly>
                 </div>
                 <div class="mb-3">
                     <label for="canal" class="form-label">Canal</label>
@@ -627,9 +670,16 @@ function mostrarFormularioCliente(clienteId = null) {
                     <label for="plan" class="form-label">Plan</label>
                     <select class="form-control" id="plan">
                         <option value="" ${!cliente.plan ? 'selected' : ''}>Seleccionar</option>
-                        <option value="basico" ${cliente.plan === 'basico' ? 'selected' : ''}>Básico</option>
-                        <option value="estandar" ${cliente.plan === 'estandar' ? 'selected' : ''}>Estándar</option>
-                        <option value="premium" ${cliente.plan === 'premium' ? 'selected' : ''}>Premium</option>
+                        <option value="Plan 1" ${cliente.plan === 'Plan 1' ? 'selected' : ''}>Plan 1</option>
+                        <option value="Plan 2" ${cliente.plan === 'Plan 2' ? 'selected' : ''}>Plan 2</option>
+                        <option value="Plan 3" ${cliente.plan === 'Plan 3' ? 'selected' : ''}>Plan 3</option>
+                        <option value="Plan 4" ${cliente.plan === 'Plan 4' ? 'selected' : ''}>Plan 4</option>
+                        <option value="Plan 5" ${cliente.plan === 'Plan 5' ? 'selected' : ''}>Plan 5</option>
+                        <option value="Plan 6" ${cliente.plan === 'Plan 6' ? 'selected' : ''}>Plan 6</option>
+                        <option value="Plan 7" ${cliente.plan === 'Plan 7' ? 'selected' : ''}>Plan 7</option>
+                        <option value="Plan 8" ${cliente.plan === 'Plan 8' ? 'selected' : ''}>Plan 8</option>
+                        <option value="Plan 9" ${cliente.plan === 'Plan 9' ? 'selected' : ''}>Plan 9</option>
+                        <option value="Plan 10" ${cliente.plan === 'Plan 10' ? 'selected' : ''}>Plan 10</option>
                     </select>
                 </div>
                 <div class="mb-3 d-flex align-items-center">
@@ -637,10 +687,6 @@ function mostrarFormularioCliente(clienteId = null) {
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="finalizado" ${finalizado ? 'checked' : ''}>
                     </div>
-                </div>
-                <div class="mb-3">
-                    <label for="notas" class="form-label">Notas</label>
-                    <textarea class="form-control" id="notas" rows="3">${cliente.notas || ''}</textarea>
                 </div>
             </form>
         `,
@@ -722,7 +768,6 @@ function mostrarFormularioCliente(clienteId = null) {
                 'numero-cliente': document.getElementById('numero-cliente').value,
                 plan: document.getElementById('plan').value,
                 finalizado: document.getElementById('finalizado').checked,
-                notas: document.getElementById('notas').value,
                 fechaModificacion: new Date().toISOString().split('T')[0]
             };
         }
@@ -744,9 +789,10 @@ function mostrarFormularioCliente(clienteId = null) {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            action: 'updatecliente',
+                            action: 'updateclientes',
                             data: {
-                                cliente: datosParaAPI
+                                action: 'updateclientes',
+                                cliente: result.value
                             }
                         })
                     });
@@ -871,4 +917,272 @@ function transformarClientes(datosServidor) {
     });
     
     return resultado;
+}
+
+/**
+ * Mostrar confirmación para crear un nuevo expediente
+ */
+function mostrarConfirmacionNuevoExpediente(clienteId) {
+    const cliente = window.apiData.clientes[clienteId];
+    if (!cliente) {
+        showMessage('Cliente no encontrado', 'error');
+        return;
+    }
+    
+    Swal.fire({
+        title: 'Crear Nuevo Expediente',
+        text: `¿Desea crear un nuevo expediente para el cliente ${cliente.nombre}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, crear',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            mostrarFormularioNuevoExpediente(cliente);
+        }
+    });
+}
+
+/**
+ * Mostrar formulario para crear nuevo expediente
+ */
+function mostrarFormularioNuevoExpediente(cliente) {
+    // Generar nuevo ID de expediente
+    const fechaActual = new Date();
+    const dia = String(fechaActual.getDate()).padStart(2, '0');
+    const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
+    const año = fechaActual.getFullYear();
+    const hora = String(fechaActual.getHours()).padStart(2, '0');
+    const minutos = String(fechaActual.getMinutes()).padStart(2, '0');
+    const segundos = String(fechaActual.getSeconds()).padStart(2, '0');
+    
+    const nuevoExpedienteId = `EXP${dia}${mes}${año}${hora}${minutos}${segundos}`;
+    
+    // Incrementar número de expediente
+    let numeroExpediente = '';
+    if (cliente['numero-expediente']) {
+        // Buscar el número más alto de expediente existente en clientes
+        const clientes = Object.values(window.apiData.clientes || {});
+        const maxExpNum = clientes.reduce((max, cli) => {
+            const numExp = cli['numero-expediente'] || '';
+            if (numExp.startsWith('EXP')) {
+                const num = parseInt(numExp.substring(3), 10);
+                return isNaN(num) ? max : Math.max(max, num);
+            }
+            return max;
+        }, 0);
+        
+        numeroExpediente = `EXP${String(maxExpNum + 1).padStart(5, '0')}`;
+    } else {
+        numeroExpediente = 'EXP00001';
+    }
+    
+    Swal.fire({
+        title: 'Nuevo Expediente',
+        html: `
+            <form id="nuevo-expediente-form" class="text-start">
+                <p>Cliente: <strong>${cliente.nombre}</strong></p>
+                <p>Número de Cliente: <strong>${cliente['numero-cliente']}</strong></p>
+                
+                <div class="mb-3">
+                    <label for="peso-inicial" class="form-label">Peso Inicial (kg)</label>
+                    <input type="number" step="0.1" class="form-control" id="peso-inicial" value="${cliente['peso-inicial'] || ''}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="peso-deseado" class="form-label">Peso Deseado (kg)</label>
+                    <input type="number" step="0.1" class="form-control" id="peso-deseado" value="${cliente['peso-deseado'] || ''}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="grasa-inicial" class="form-label">Grasa Inicial (%)</label>
+                    <input type="number" step="0.1" class="form-control" id="grasa-inicial" value="${cliente['grasa-inicial'] || ''}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="grasa-deseada" class="form-label">Grasa Deseada (%)</label>
+                    <input type="number" step="0.1" class="form-control" id="grasa-deseada" value="${cliente['grasa-deseada'] || ''}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="plan" class="form-label">Plan</label>
+                    <select class="form-control" id="plan" required>
+                        <option value="">Seleccionar</option>
+                        <option value="Plan 1">Plan 1</option>
+                        <option value="Plan 2">Plan 2</option>
+                        <option value="Plan 3">Plan 3</option>
+                        <option value="Plan 4">Plan 4</option>
+                        <option value="Plan 5">Plan 5</option>
+                        <option value="Plan 6">Plan 6</option>
+                        <option value="Plan 7">Plan 7</option>
+                        <option value="Plan 8">Plan 8</option>
+                        <option value="Plan 9">Plan 9</option>
+                        <option value="Plan 10">Plan 10</option>
+                    </select>
+                </div>
+                <input type="hidden" id="nuevo-expediente-id" value="${nuevoExpedienteId}">
+                <input type="hidden" id="numero-expediente" value="${numeroExpediente}">
+            </form>
+        `,
+        width: '600px',
+        showCancelButton: true,
+        confirmButtonText: 'Crear Expediente',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        preConfirm: () => {
+            const form = document.getElementById('nuevo-expediente-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return false;
+            }
+            
+            return {
+                'peso-inicial': document.getElementById('peso-inicial').value,
+                'peso-deseado': document.getElementById('peso-deseado').value,
+                'grasa-inicial': document.getElementById('grasa-inicial').value,
+                'grasa-deseada': document.getElementById('grasa-deseada').value,
+                'plan': document.getElementById('plan').value,
+                'id-expediente': document.getElementById('nuevo-expediente-id').value,
+                'numero-expediente': document.getElementById('numero-expediente').value
+            };
+        }
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                showLoading(true);
+                
+                // Crear nuevo cliente con los mismos datos pero nuevo expediente
+                const fechaActual = new Date();
+                const dia = String(fechaActual.getDate()).padStart(2, '0');
+                const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
+                const año = fechaActual.getFullYear();
+                const hora = String(fechaActual.getHours()).padStart(2, '0');
+                const minutos = String(fechaActual.getMinutes()).padStart(2, '0');
+                const segundos = String(fechaActual.getSeconds()).padStart(2, '0');
+                
+                // Formato fecha cliente para mostrar: DD/MM/AAAA HH:MM:SS
+                const fechaClienteFormateada = `${dia}/${mes}/${año} ${hora}:${minutos}:${segundos}`;
+                
+                // Formato fecha para registro (sin hora)
+                const fechaRegistroFormateada = `${dia}/${mes}/${año}`;
+                
+                const nuevoIdCliente = `CC${dia}${mes}${año}${hora}${minutos}${segundos}`;
+                
+                const nuevoCliente = {
+                    "id-contacto": nuevoIdCliente,
+                    "nombre": cliente.nombre,
+                    "telefono": cliente.telefono,
+                    "email": cliente.email,
+                    "fecha-nacimiento": formatearFechaDDMMYYYY(cliente["fecha-nacimiento"]),
+                    "genero": cliente.genero,
+                    "ubicacion": cliente.ubicacion,
+                    "peso-inicial": result.value["peso-inicial"],
+                    "peso-deseado": result.value["peso-deseado"],
+                    "grasa-inicial": result.value["grasa-inicial"],
+                    "grasa-deseada": result.value["grasa-deseada"],
+                    "fecha-prospecto": cliente["fecha-prospecto"],
+                    "fecha-cliente": fechaClienteFormateada,
+                    "canal": cliente.canal,
+                    "numero-expediente": result.value["numero-expediente"],
+                    "numero-cliente": cliente["numero-cliente"],
+                    "plan": result.value.plan,
+                    "finalizado": "false"
+                };
+                
+                console.log("Nuevo cliente a crear:", nuevoCliente);
+                console.log("Estado de finalizado:", nuevoCliente.finalizado);
+                
+                // Llamar a la API para crear cliente
+                try {
+                    console.log("Enviando a API:", JSON.stringify({
+                        action: 'insertcliente',
+                        data: {
+                            action: 'insertcliente',
+                            cliente: nuevoCliente
+                        }
+                    }));
+                    
+                    const response = await fetch(API_ENDPOINT, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'insertcliente',
+                            data: {
+                                action: 'insertcliente',
+                                cliente: nuevoCliente
+                            }
+                        })
+                    });
+                    
+                    // Actualizar datos locales
+                    if (!window.apiData.clientes) window.apiData.clientes = {};
+                    window.apiData.clientes[nuevoIdCliente] = {
+                        ...nuevoCliente,
+                        finalizado: "false"
+                    };
+                    
+                    // Crear expediente inicial
+                    const nuevoExpediente = {
+                        "id-expediente": result.value["id-expediente"],
+                        "fecha-registro": fechaRegistroFormateada,
+                        "numero-expediente": result.value["numero-expediente"],
+                        "peso-inicial": result.value["peso-inicial"],
+                        "peso-deseado": result.value["peso-deseado"],
+                        "peso-actual": result.value["peso-inicial"],
+                        "grasa-inicial": result.value["grasa-inicial"],
+                        "grasa-deseada": result.value["grasa-deseada"],
+                        "grasa-actual": result.value["grasa-inicial"],
+                        "dias-entrenamiento": 0,
+                        "horas-entrenamiento": 0,
+                        "nivel": "Principiante",
+                        "disciplina": "",
+                        "objetivo": "",
+                        "condiciones-medicas": ""
+                    };
+                    
+                    // Opcional: Llamar API para crear expediente si existe esa funcionalidad
+                    // Actualizar datos locales
+                    if (!window.apiData.expedientes) window.apiData.expedientes = {};
+                    window.apiData.expedientes[result.value["id-expediente"]] = nuevoExpediente;
+                    
+                    showMessage('Nuevo expediente creado con éxito', 'success');
+                    
+                    // Actualizar la interfaz
+                    actualizarTablaClientes();
+                    
+                } catch (error) {
+                    console.warn('Error al crear nuevo expediente en servidor:', error);
+                    showMessage('Error al crear expediente: ' + error.message, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error al crear nuevo expediente:', error);
+                showMessage('Error al crear expediente: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+    });
+}
+
+/**
+ * Formatea una fecha en formato ISO a DD/MM/AAAA
+ */
+function formatearFechaDDMMYYYY(fechaISO) {
+    if (!fechaISO) return '';
+    try {
+        const fecha = new Date(fechaISO);
+        if (isNaN(fecha)) return fechaISO;
+        
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const año = fecha.getFullYear();
+        
+        return `${dia}/${mes}/${año}`;
+    } catch (e) {
+        console.warn('Error al formatear fecha:', e);
+        return fechaISO;
+    }
 } 

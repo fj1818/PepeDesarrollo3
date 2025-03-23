@@ -356,4 +356,48 @@ function handleResize() {
         sidebar.classList.add('close');
         mainContent.classList.add('expanded');
     }
+}
+
+// Función para enviar datos a la API
+async function enviarDatosAPI(dataToSend, esActualizacion) {
+    const apiUrl = 'https://tu-api.com/insertarExpediente'; // Reemplaza con la URL correcta de tu API
+
+    // Crear objeto XMLHttpRequest
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', apiUrl, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    // Configurar manejador de respuesta
+    xhr.onload = function() {
+        showLoading(false);
+        if (xhr.status === 200) {
+            let response;
+            try {
+                response = JSON.parse(xhr.responseText);
+                if (response.result === 'success') {
+                    showMessage(esActualizacion ? 'Registro actualizado correctamente' : 'Registro creado correctamente', 'success');
+                    setTimeout(() => {
+                        window.apiService.obtenerTodosLosDatos().then(() => {
+                            cargarInterfazExpedientes();
+                        });
+                    }, 1000);
+                } else {
+                    showMessage('Error en la respuesta del servidor: ' + (response.message || 'Error desconocido'), 'error');
+                }
+            } catch (e) {
+                showMessage('Error al procesar la respuesta del servidor', 'error');
+            }
+        } else {
+            showMessage('Error al enviar datos: ' + xhr.status, 'error');
+        }
+    };
+
+    // Manejar errores
+    xhr.onerror = function() {
+        showLoading(false);
+        showMessage('Error de conexión al servidor', 'error');
+    };
+
+    // Enviar los datos
+    xhr.send(JSON.stringify(dataToSend));
 } 

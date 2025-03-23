@@ -334,7 +334,7 @@ function mostrarFormularioProspecto(prospectoId = null) {
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="fecha-prospecto" class="form-label">Fecha de Registro</label>
+                    <label for="fecha-prospecto" class="form-label">Fecha de Prospecto</label>
                     <input type="text" class="form-control" id="fecha-prospecto" value="${fechaFormateada || ''}" readonly>
                 </div>
                 <div class="mb-3">
@@ -721,9 +721,16 @@ function mostrarFormularioConversion(id) {
                     <label for="plan" class="form-label">Plan</label>
                     <select class="form-control" id="plan" required>
                         <option value="">Seleccionar</option>
-                        <option value="basico">Básico</option>
-                        <option value="premium">Premium</option>
-                        <option value="vip">VIP</option>
+                        <option value="Plan 1">Plan 1</option>
+                        <option value="Plan 2">Plan 2</option>
+                        <option value="Plan 3">Plan 3</option>
+                        <option value="Plan 4">Plan 4</option>
+                        <option value="Plan 5">Plan 5</option>
+                        <option value="Plan 6">Plan 6</option>
+                        <option value="Plan 7">Plan 7</option>
+                        <option value="Plan 8">Plan 8</option>
+                        <option value="Plan 9">Plan 9</option>
+                        <option value="Plan 10">Plan 10</option>
                     </select>
                 </div>
                 <div class="mb-3">
@@ -904,6 +911,7 @@ async function convertirProspectoACliente(id, datosExtra) {
                 body: JSON.stringify({
                     action: 'insertcliente',
                     data: {
+                        action: 'insertcliente',
                         cliente: {
                             "id-contacto": nuevoCliente["id-contacto"],
                             "nombre": nuevoCliente.nombre,
@@ -922,7 +930,7 @@ async function convertirProspectoACliente(id, datosExtra) {
                             "numero-expediente": nuevoCliente["numero-expediente"],
                             "numero-cliente": nuevoCliente["numero-cliente"],
                             "plan": nuevoCliente.plan,
-                            "finalizado": "false"
+                            "finalizado": false
                         }
                     }
                 })
