@@ -158,7 +158,7 @@ function setupExpedientesEventos() {
     const expedienteDetalleContainer = document.getElementById('expediente-detalle-container');
     
     // Función para cargar fechas de registro asociadas a un número de expediente
-    function cargarFechasDeRegistro(numeroExpediente, campoOrigen = null) {
+    function cargarFechasDeRegistro(numeroExpediente, campoOrigen = null, autoSeleccionar = true) {
         if (!filtroFechaRegistro) return;
         
         // Obtener expedientes
@@ -167,6 +167,8 @@ function setupExpedientesEventos() {
         
         console.log('Cargando fechas para expediente:', numeroExpediente);
         console.log('Total expedientes disponibles:', Object.keys(expedientes).length);
+        console.log('Campo origen:', campoOrigen);
+        console.log('Auto seleccionar:', autoSeleccionar);
         
         // Limpiar opciones actuales
         while (filtroFechaRegistro.options.length > 1) {
@@ -283,8 +285,8 @@ function setupExpedientesEventos() {
         
         console.log('Total fechas encontradas:', fechasFormateadas.length);
         
-        // Seleccionar la primera fecha si hay disponibles
-        if (fechasFormateadas.length > 0) {
+        // Verificar si debemos autoseleccionar una fecha o dejar para elección manual
+        if (fechasFormateadas.length > 0 && autoSeleccionar) {
             if (useSelect2) {
                 console.log('Actualizando Select2 con valor:', fechasFormateadas[0]);
                 try {
@@ -312,6 +314,26 @@ function setupExpedientesEventos() {
                 setTimeout(() => {
                     actualizarFiltros('fecha-registro', fechasFormateadas[0]);
                 }, 100);
+            }
+        } else if (fechasFormateadas.length > 0) {
+            // No autoseleccionamos, solo dejamos disponibles las opciones para selección manual
+            if (useSelect2) {
+                try {
+                    // Destruir y reinicializar Select2 para asegurar que muestre las nuevas opciones
+                    jQuery(filtroFechaRegistro).select2('destroy');
+                    jQuery(filtroFechaRegistro).select2({
+                        placeholder: "Seleccionar fecha...",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                    // No trigger change para no seleccionar automáticamente
+                    jQuery(filtroFechaRegistro).val('');
+                } catch (e) {
+                    console.warn('Error al reinicializar Select2:', e);
+                    jQuery(filtroFechaRegistro).val('');
+                }
+            } else {
+                filtroFechaRegistro.value = '';
             }
         } else {
             // Si no se encontraron fechas a pesar de tener expedientes
@@ -342,6 +364,8 @@ function setupExpedientesEventos() {
             return;
         }
         
+        console.log(`Actualizando filtros - Campo: ${campoSeleccionado}, Valor: ${valorSeleccionado}`);
+        
         // Cliente seleccionado
         let clienteSeleccionado = null;
         
@@ -365,8 +389,16 @@ function setupExpedientesEventos() {
             // Obtener la fecha formateada
             const fechaSeleccionada = valorSeleccionado;
             
-            // Buscar expedientes por fecha
+            // Obtener numero-expediente actualmente seleccionado para mantener el contexto
+            const numeroExpedienteActual = filtroNumeroExpediente ? filtroNumeroExpediente.value : null;
+            
+            // Buscar expedientes por fecha pero filtrar por el número de expediente actual si está disponible
             const expedientesConEstaFecha = Object.values(expedientes).filter(expediente => {
+                // Si tenemos un número de expediente seleccionado, solo considerar expedientes con ese número
+                if (numeroExpedienteActual && expediente['numero-expediente'] !== numeroExpedienteActual) {
+                    return false;
+                }
+                
                 if (!expediente['fecha-registro']) return false;
                 
                 try {
@@ -408,6 +440,8 @@ function setupExpedientesEventos() {
                 }
             });
             
+            console.log('Expedientes encontrados con esta fecha:', expedientesConEstaFecha.length);
+            
             if (expedientesConEstaFecha.length > 0) {
                 // Tomamos el primer expediente encontrado
                 expedienteSeleccionado = expedientesConEstaFecha[0];
@@ -425,6 +459,8 @@ function setupExpedientesEventos() {
         
         // Actualizar los otros selectores sin disparar sus eventos
         if (clienteSeleccionado) {
+            console.log('Cliente seleccionado:', clienteSeleccionado.nombre);
+            
             // Si es un campo diferente al nombre, actualizar el selector de nombre
             if (campoSeleccionado !== 'nombre' && filtroNombre) {
                 if (useSelect2) {
@@ -452,11 +488,73 @@ function setupExpedientesEventos() {
                 }
                 
                 // Cargar fechas de registro asociadas al expediente
-                cargarFechasDeRegistro(clienteSeleccionado['numero-expediente'], campoSeleccionado);
+                // Si la selección viene del nombre o número de cliente, no autoseleccionamos fecha
+                if (campoSeleccionado === 'nombre' || campoSeleccionado === 'numero-cliente') {
+                    cargarFechasDeRegistro(clienteSeleccionado['numero-expediente'], campoSeleccionado, false);
+                    
+                    // Solo mostrar mensaje indicando que debe seleccionar fecha
+                    expedienteDetalleContainer.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> Por favor, seleccione una fecha de registro para continuar.
+                        </div>
+                    `;
+                    return; // Detenemos la ejecución aquí
+                } else if (campoSeleccionado !== 'fecha-registro') {
+                    // Si venimos de otro campo que no sea fecha, cargar fechas normalmente
+                    cargarFechasDeRegistro(clienteSeleccionado['numero-expediente'], campoSeleccionado);
+                }
             }
             
             // Buscar expediente si no lo tenemos ya
-            if (!expedienteSeleccionado && clienteSeleccionado['numero-expediente']) {
+            if (!expedienteSeleccionado && clienteSeleccionado['numero-expediente'] && campoSeleccionado === 'fecha-registro') {
+                // Cuando seleccionamos una fecha, buscar el expediente específico con esa fecha
+                const numeroExpediente = clienteSeleccionado['numero-expediente'];
+                const fechaSeleccionada = valorSeleccionado;
+                
+                const expedientesConEstaFecha = Object.values(expedientes).filter(exp => {
+                    if (exp['numero-expediente'] !== numeroExpediente) return false;
+                    
+                    try {
+                        // Formatear la fecha del expediente para compararla
+                        let fecha;
+                        const fechaRegistro = exp['fecha-registro'];
+                        
+                        if (typeof fechaRegistro === 'string' && fechaRegistro.includes('/')) {
+                            const partesFecha = fechaRegistro.split(' ')[0].split('/');
+                            if (partesFecha.length === 3) {
+                                const dia = parseInt(partesFecha[0], 10);
+                                const mes = parseInt(partesFecha[1], 10) - 1;
+                                const anio = parseInt(partesFecha[2], 10);
+                                
+                                if (!isNaN(dia) && !isNaN(mes) && !isNaN(anio)) {
+                                    fecha = new Date(anio, mes, dia);
+                                }
+                            }
+                        }
+                        
+                        if (!fecha || isNaN(fecha)) {
+                            fecha = new Date(fechaRegistro);
+                        }
+                        
+                        if (isNaN(fecha)) return false;
+                        
+                        const dia = String(fecha.getDate()).padStart(2, '0');
+                        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                        const anio = fecha.getFullYear();
+                        const fechaFormateada = `${dia}/${mes}/${anio}`;
+                        
+                        return fechaFormateada === fechaSeleccionada;
+                    } catch (e) {
+                        console.warn('Error al comparar fechas para expediente específico:', e);
+                        return false;
+                    }
+                });
+                
+                if (expedientesConEstaFecha.length > 0) {
+                    expedienteSeleccionado = expedientesConEstaFecha[0];
+                    console.log('Expediente específico encontrado para fecha seleccionada:', expedienteSeleccionado);
+                }
+            } else if (!expedienteSeleccionado && clienteSeleccionado['numero-expediente']) {
                 expedienteSeleccionado = Object.values(expedientes).find(expediente => 
                     expediente['numero-expediente'] === clienteSeleccionado['numero-expediente']);
             }
@@ -689,16 +787,26 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
     const expedienteDetalleContainer = document.getElementById('expediente-detalle-container');
     if (!expedienteDetalleContainer) return;
     
+    // Obtener datos de clientes y expedientes
+    const clientes = window.apiData.clientes || {};
+    const expedientes = window.apiData.expedientes || {};
+    
+    // Buscar el cliente asociado al número de expediente
+    const clienteAsociado = Object.values(clientes).find(cliente => 
+        cliente['numero-expediente'] === numeroExpediente);
+    
+    console.log('Cliente asociado encontrado:', clienteAsociado);
+    
     // Obtener el expediente si estamos cargando
     let datosRegistro = {
         'id-expediente': '',  // Este valor será generado automáticamente en guardarRegistroExpediente
         'fecha-registro': '',  // Este valor será generado automáticamente en guardarRegistroExpediente
         'numero-expediente': numeroExpediente,
-        'peso-inicial': '',
-        'peso-deseado': '',
+        'peso-inicial': clienteAsociado ? clienteAsociado['peso-inicial'] || '' : '',
+        'peso-deseado': clienteAsociado ? clienteAsociado['peso-deseado'] || '' : '',
         'peso-actual': '',
-        'grasa-inicial': '',
-        'grasa-deseada': '',
+        'grasa-inicial': clienteAsociado ? clienteAsociado['grasa-inicial'] || '' : '',
+        'grasa-deseada': clienteAsociado ? clienteAsociado['grasa-deseada'] || '' : '',
         'grasa-actual': '',
         'dias-entrenamiento': '',
         'horas-entrenamiento': '',
@@ -708,7 +816,6 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
         'condiciones-medicas': ''
     };
     
-    const expedientes = window.apiData.expedientes || {};
     let expedienteActual = null;
     
     if (esCargar && numeroExpediente) {
@@ -720,7 +827,7 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
             // Tomar el primero disponible o mostrar selector
             expedienteActual = expedientesConEsteNumero[0];
             
-            // Llenar datos
+            // Llenar datos del expediente - esto sobrescribirá los valores iniciales si existen
             Object.keys(datosRegistro).forEach(key => {
                 if (expedienteActual[key] !== undefined) {
                     datosRegistro[key] = expedienteActual[key];
@@ -728,6 +835,36 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
             });
         }
     }
+    
+    // Verificar los valores después de cargar datos
+    console.log('Datos de registro después de cargar:', {
+        'peso-inicial': datosRegistro['peso-inicial'],
+        'peso-deseado': datosRegistro['peso-deseado'],
+        'grasa-inicial': datosRegistro['grasa-inicial'],
+        'grasa-deseada': datosRegistro['grasa-deseada']
+    });
+    
+    // Obtener todos los expedientes con este número para gráficos
+    const historialExpedientes = Object.values(expedientes).filter(exp => 
+        exp['numero-expediente'] === numeroExpediente && exp['fecha-registro']);
+    
+    // Ordenar expedientes por fecha
+    historialExpedientes.sort((a, b) => {
+        // Parsear fechas en formato DD/MM/YYYY
+        const parseDate = dateStr => {
+            if (!dateStr) return null;
+            const [day, month, year] = dateStr.split('/').map(num => parseInt(num, 10));
+            return new Date(year, month - 1, day);
+        };
+        
+        const dateA = parseDate(a['fecha-registro']);
+        const dateB = parseDate(b['fecha-registro']);
+        
+        if (!dateA || !dateB) return 0;
+        return dateA - dateB;
+    });
+    
+    console.log('Historial de expedientes encontrados:', historialExpedientes.length);
     
     // Obtener la fecha actual para el valor por defecto
     const fechaActual = new Date();
@@ -835,6 +972,67 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
         `;
     }).join('');
     
+    // Preparar contenido para la pestaña de avance
+    let contenidoAvance = '';
+    
+    if (historialExpedientes.length === 0) {
+        contenidoAvance = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No hay registros disponibles para mostrar el avance.
+            </div>
+        `;
+    } else {
+        // Preparar datos para los gráficos
+        const fechas = historialExpedientes.map(exp => {
+            // Quitar la parte de horas si existe
+            if (exp['fecha-registro'] && exp['fecha-registro'].includes(' ')) {
+                return exp['fecha-registro'].split(' ')[0]; // Solo tomar la parte de la fecha
+            }
+            return exp['fecha-registro'];
+        });
+        
+        // Datos para gráfico de peso
+        const pesoInicial = parseFloat(historialExpedientes[0]['peso-inicial']) || 0;
+        const pesoDeseado = parseFloat(historialExpedientes[0]['peso-deseado']) || 0;
+        const pesosActuales = historialExpedientes.map(exp => parseFloat(exp['peso-actual']) || 0);
+        
+        // Datos para gráfico de grasa
+        const grasaInicial = parseFloat(historialExpedientes[0]['grasa-inicial']) || 0;
+        const grasaDeseada = parseFloat(historialExpedientes[0]['grasa-deseada']) || 0;
+        const grasasActuales = historialExpedientes.map(exp => parseFloat(exp['grasa-actual']) || 0);
+        
+        // Datos para gráficos de entrenamiento separados
+        const diasEntrenamiento = historialExpedientes.map(exp => parseFloat(exp['dias-entrenamiento']) || 0);
+        const horasEntrenamiento = historialExpedientes.map(exp => parseFloat(exp['horas-entrenamiento']) || 0);
+        
+        contenidoAvance = `
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">Evolución de peso</h5>
+                    <canvas id="grafico-peso" width="400" height="200"></canvas>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">Evolución de porcentaje de grasa</h5>
+                    <canvas id="grafico-grasa" width="400" height="200"></canvas>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">Días de entrenamiento por semana</h5>
+                    <canvas id="grafico-dias" width="400" height="200"></canvas>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">Horas de entrenamiento por semana</h5>
+                    <canvas id="grafico-horas" width="400" height="200"></canvas>
+                </div>
+            </div>
+        `;
+    }
+    
     // Crear el HTML del contenedor con pestañas
     let htmlFormulario = `
         <div class="card mt-4">
@@ -860,6 +1058,12 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
                 <div class="tab-content" id="expedienteTabContent">
                     <div class="tab-pane fade show active" id="registro-tab-pane" role="tabpanel" aria-labelledby="registro-tab" tabindex="0">
                         <h5 class="card-title mb-3">${esCargar ? 'Cargar Registro de Expediente' : 'Crear Nuevo Registro'}</h5>
+                        ${clienteAsociado ? `
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i> 
+                            Datos cargados del cliente: <strong>${clienteAsociado.nombre || 'Cliente'}</strong>
+                        </div>
+                        ` : ''}
                         <form id="registro-expediente-form" class="needs-validation" novalidate>
                             <!-- Campos ocultos solo para edición/actualización -->
                             ${esCargar ? `<input type="hidden" id="id-expediente" value="${datosRegistro['id-expediente']}">` : ''}
@@ -887,6 +1091,7 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
                                     </label>
                                     <input type="number" step="0.1" class="form-control" id="peso-inicial" 
                                         value="${datosRegistro['peso-inicial']}" required>
+                                    ${clienteAsociado && clienteAsociado['peso-inicial'] ? '<small class="text-muted">Datos obtenidos del cliente</small>' : ''}
                                 </div>
                                 <div class="col-md-4">
                                     <label for="peso-deseado" class="form-label">
@@ -894,6 +1099,7 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
                                     </label>
                                     <input type="number" step="0.1" class="form-control" id="peso-deseado" 
                                         value="${datosRegistro['peso-deseado']}" required>
+                                    ${clienteAsociado && clienteAsociado['peso-deseado'] ? '<small class="text-muted">Datos obtenidos del cliente</small>' : ''}
                                 </div>
                                 <div class="col-md-4">
                                     <label for="peso-actual" class="form-label">
@@ -911,6 +1117,7 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
                                     </label>
                                     <input type="number" step="0.1" class="form-control" id="grasa-inicial" 
                                         value="${datosRegistro['grasa-inicial']}" required>
+                                    ${clienteAsociado && clienteAsociado['grasa-inicial'] ? '<small class="text-muted">Datos obtenidos del cliente</small>' : ''}
                                 </div>
                                 <div class="col-md-4">
                                     <label for="grasa-deseada" class="form-label">
@@ -918,6 +1125,7 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
                                     </label>
                                     <input type="number" step="0.1" class="form-control" id="grasa-deseada" 
                                         value="${datosRegistro['grasa-deseada']}" required>
+                                    ${clienteAsociado && clienteAsociado['grasa-deseada'] ? '<small class="text-muted">Datos obtenidos del cliente</small>' : ''}
                                 </div>
                                 <div class="col-md-4">
                                     <label for="grasa-actual" class="form-label">
@@ -996,9 +1204,7 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
                         </form>
                     </div>
                     <div class="tab-pane fade" id="avance-tab-pane" role="tabpanel" aria-labelledby="avance-tab" tabindex="0">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i> Sección en desarrollo. Próximamente podrás ver el avance de este expediente.
-                        </div>
+                        ${contenidoAvance}
                     </div>
                 </div>
             </div>
@@ -1007,6 +1213,301 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
     
     // Agregar el formulario al contenedor
     expedienteDetalleContainer.innerHTML = htmlFormulario;
+    
+    // Verificar si se necesita cargar la librería Chart.js
+    if (historialExpedientes.length > 0) {
+        // Asegurar que Chart.js esté disponible
+        if (typeof Chart === 'undefined') {
+            console.log('Cargando Chart.js dinámicamente');
+            // Cargar Chart.js dinámicamente si no está disponible
+            const chartScript = document.createElement('script');
+            chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            chartScript.onload = function() {
+                console.log('Chart.js cargado correctamente');
+                inicializarGraficos(historialExpedientes);
+            };
+            document.head.appendChild(chartScript);
+        } else {
+            console.log('Chart.js ya está disponible');
+            // Si Chart.js ya está disponible, inicializar los gráficos directamente
+            setTimeout(() => {
+                inicializarGraficos(historialExpedientes);
+            }, 100);
+        }
+    }
+    
+    // Función para inicializar los gráficos
+    function inicializarGraficos(historialExpedientes) {
+        console.log('Inicializando gráficos con historial:', historialExpedientes.length);
+        
+        // Preparar datos para los gráficos - Formatear las fechas para quitar la parte de horas
+        const fechas = historialExpedientes.map(exp => {
+            // Asegurar que tenemos un formato dd/mm/yyyy
+            if (exp['fecha-registro']) {
+                // Si tiene formato con hora, quitar la hora
+                if (exp['fecha-registro'].includes(' ')) {
+                    return exp['fecha-registro'].split(' ')[0];
+                }
+                
+                // Si ya tiene formato dd/mm/yyyy, devolverlo como está
+                if (exp['fecha-registro'].includes('/')) {
+                    return exp['fecha-registro'];
+                }
+                
+                // Si está en otro formato (ISO), convertirlo
+                try {
+                    const fecha = new Date(exp['fecha-registro']);
+                    if (!isNaN(fecha)) {
+                        const dia = String(fecha.getDate()).padStart(2, '0');
+                        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                        const anio = fecha.getFullYear();
+                        return `${dia}/${mes}/${anio}`;
+                    }
+                } catch (e) {
+                    console.error('Error al formatear fecha:', e);
+                }
+            }
+            return exp['fecha-registro'] || '';
+        });
+        
+        // Datos para gráfico de peso
+        const pesoInicial = parseFloat(historialExpedientes[0]['peso-inicial']) || 0;
+        const pesoDeseado = parseFloat(historialExpedientes[0]['peso-deseado']) || 0;
+        const pesosActuales = historialExpedientes.map(exp => parseFloat(exp['peso-actual']) || 0);
+        
+        // Datos para gráfico de grasa
+        const grasaInicial = parseFloat(historialExpedientes[0]['grasa-inicial']) || 0;
+        const grasaDeseada = parseFloat(historialExpedientes[0]['grasa-deseada']) || 0;
+        const grasasActuales = historialExpedientes.map(exp => parseFloat(exp['grasa-actual']) || 0);
+        
+        // Datos para gráficos de entrenamiento
+        const diasEntrenamiento = historialExpedientes.map(exp => parseFloat(exp['dias-entrenamiento']) || 0);
+        const horasEntrenamiento = historialExpedientes.map(exp => parseFloat(exp['horas-entrenamiento']) || 0);
+        
+        // Configuración común para todos los gráficos
+        const opcionesComunesGraficos = {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Fecha'
+                    }
+                }
+            }
+        };
+        
+        // Inicializar el gráfico de peso
+        const ctxPeso = document.getElementById('grafico-peso');
+        if (ctxPeso) {
+            console.log('Inicializando gráfico de peso');
+            new Chart(ctxPeso, {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [
+                        {
+                            label: 'Peso Actual',
+                            data: pesosActuales,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            tension: 0.1,
+                            fill: false,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Peso Inicial',
+                            data: Array(fechas.length).fill(pesoInicial),
+                            borderColor: 'rgba(54, 162, 235, 0.7)',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: 'Peso Deseado',
+                            data: Array(fechas.length).fill(pesoDeseado),
+                            borderColor: 'rgba(255, 99, 132, 0.7)',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    ...opcionesComunesGraficos,
+                    scales: {
+                        ...opcionesComunesGraficos.scales,
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Peso (kg)'
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('No se encontró el elemento canvas para el gráfico de peso');
+        }
+        
+        // Inicializar el gráfico de grasa
+        const ctxGrasa = document.getElementById('grafico-grasa');
+        if (ctxGrasa) {
+            console.log('Inicializando gráfico de grasa');
+            new Chart(ctxGrasa, {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [
+                        {
+                            label: 'Grasa Actual',
+                            data: grasasActuales,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            tension: 0.1,
+                            fill: false,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Grasa Inicial',
+                            data: Array(fechas.length).fill(grasaInicial),
+                            borderColor: 'rgba(54, 162, 235, 0.7)',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: 'Grasa Deseada',
+                            data: Array(fechas.length).fill(grasaDeseada),
+                            borderColor: 'rgba(255, 99, 132, 0.7)',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    ...opcionesComunesGraficos,
+                    scales: {
+                        ...opcionesComunesGraficos.scales,
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Grasa corporal (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('No se encontró el elemento canvas para el gráfico de grasa');
+        }
+        
+        // Inicializar el gráfico de días de entrenamiento
+        const ctxDias = document.getElementById('grafico-dias');
+        if (ctxDias) {
+            console.log('Inicializando gráfico de días de entrenamiento');
+            new Chart(ctxDias, {
+                type: 'line', // Cambiado de 'bar' a 'line'
+                data: {
+                    labels: fechas,
+                    datasets: [
+                        {
+                            label: 'Días por semana',
+                            data: diasEntrenamiento,
+                            borderColor: 'rgb(54, 162, 235)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            tension: 0.1,
+                            fill: false,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    ...opcionesComunesGraficos,
+                    scales: {
+                        ...opcionesComunesGraficos.scales,
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Días'
+                            },
+                            min: 0,
+                            max: 7,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('No se encontró el elemento canvas para el gráfico de días de entrenamiento');
+        }
+        
+        // Inicializar el gráfico de horas de entrenamiento
+        const ctxHoras = document.getElementById('grafico-horas');
+        if (ctxHoras) {
+            console.log('Inicializando gráfico de horas de entrenamiento');
+            new Chart(ctxHoras, {
+                type: 'line', // Cambiado de 'bar' a 'line'
+                data: {
+                    labels: fechas,
+                    datasets: [
+                        {
+                            label: 'Horas por semana',
+                            data: horasEntrenamiento,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            tension: 0.1,
+                            fill: false,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    ...opcionesComunesGraficos,
+                    scales: {
+                        ...opcionesComunesGraficos.scales,
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Horas'
+                            },
+                            min: 0,
+                            max: 4,
+                            ticks: {
+                                stepSize: 0.5
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('No se encontró el elemento canvas para el gráfico de horas de entrenamiento');
+        }
+    }
+    
+    // Inicializar evento para mostrar gráficos cuando se cambia a la pestaña de avance
+    document.getElementById('avance-tab').addEventListener('shown.bs.tab', function() {
+        console.log('Pestaña de avance mostrada');
+        if (historialExpedientes.length > 0 && typeof Chart !== 'undefined') {
+            inicializarGraficos(historialExpedientes);
+        }
+    });
     
     // Agregar eventos a los botones
     document.getElementById('btn-cancelar-registro').addEventListener('click', function() {
