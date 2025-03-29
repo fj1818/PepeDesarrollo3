@@ -48,14 +48,10 @@ async function initExpedientes() {
  * Cargar la interfaz de expedientes
  */
 function cargarInterfazExpedientes() {
-    const contentElement = document.getElementById('content');
+    const contentElement = document.getElementById('content-expedientes');
     if (!contentElement) return;
     
-    // Obtener expedientes y clientes
-    const expedientes = window.apiData.expedientes || {};
-    const clientes = window.apiData.clientes || {};
-    
-    // Crear el HTML para la sección
+    // Crear HTML para la sección
     contentElement.innerHTML = `
         <div class="section-header mb-4">
             <h1>Expedientes</h1>
@@ -64,63 +60,76 @@ function cargarInterfazExpedientes() {
         
         <div class="row mb-4">
             <div class="col-12">
+                <div class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle me-2"></i> Por favor, seleccione una fecha de registro para continuar.
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-12">
                 <div class="crm-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title">
-                            <i class="fas fa-folder-open me-2"></i> Filtros de Expedientes
+                            <i class="fas fa-folder me-2"></i> Filtros de Expedientes
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3 mb-3">
+                        <div class="row g-3">
+                            <div class="col-md-3">
                                 <label for="filtro-nombre" class="form-label">Nombre</label>
-                                <select class="form-select select2" id="filtro-nombre">
-                                    <option value="">Seleccionar cliente</option>
-                                    ${Object.values(clientes).map(cliente => 
+                                <select class="form-control" id="filtro-nombre">
+                                    <option value="">Seleccionar...</option>
+                                    ${Object.values(window.apiData.clientes || {}).map(cliente => 
                                         `<option value="${cliente['id-contacto']}">${cliente.nombre}</option>`
                                     ).join('')}
                                 </select>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-3">
                                 <label for="filtro-numero-cliente" class="form-label">Número de cliente</label>
-                                <select class="form-select select2" id="filtro-numero-cliente">
-                                    <option value="">Seleccionar número</option>
-                                    ${Object.values(clientes).map(cliente => 
-                                        `<option value="${cliente['numero-cliente']}">${cliente['numero-cliente']}</option>`
-                                    ).join('')}
+                                <select class="form-control" id="filtro-numero-cliente">
+                                    <option value="">Seleccionar...</option>
+                                    ${Object.values(window.apiData.clientes || {})
+                                        .filter(cliente => cliente['numero-cliente'])
+                                        .map(cliente => 
+                                            `<option value="${cliente['numero-cliente']}">${cliente['numero-cliente']}</option>`
+                                        ).join('')}
                                 </select>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-3">
                                 <label for="filtro-numero-expediente" class="form-label">Número de expediente</label>
-                                <select class="form-select select2" id="filtro-numero-expediente">
-                                    <option value="">Seleccionar expediente</option>
-                                    ${Object.values(clientes)
+                                <select class="form-control" id="filtro-numero-expediente">
+                                    <option value="">Seleccionar...</option>
+                                    ${Object.values(window.apiData.clientes || {})
                                         .filter(cliente => cliente['numero-expediente'])
                                         .map(cliente => 
                                             `<option value="${cliente['numero-expediente']}">${cliente['numero-expediente']}</option>`
                                         ).join('')}
                                 </select>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-3">
                                 <label for="filtro-fecha-registro" class="form-label">Fecha de registro</label>
-                                <select class="form-select select2" id="filtro-fecha-registro">
-                                    <option value="">Seleccione un expediente primero</option>
+                                <select class="form-control" id="filtro-fecha-registro">
+                                    <option value="">Seleccionar fecha</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row mt-3">
                             <div class="col-12 text-end">
                                 <button class="btn btn-secondary" id="limpiar-filtros-btn">
                                     <i class="fas fa-eraser me-1"></i> Limpiar filtros
                                 </button>
                             </div>
                         </div>
-                        <div class="mt-4" id="expediente-detalle-container">
-                            <div class="alert alert-info">
-                                Seleccione un filtro para ver los detalles del expediente.
-                            </div>
-                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div id="expediente-detalle-container">
+                    <!-- Aquí se cargará el detalle del expediente -->
                 </div>
             </div>
         </div>
@@ -492,12 +501,29 @@ function setupExpedientesEventos() {
                 if (campoSeleccionado === 'nombre' || campoSeleccionado === 'numero-cliente') {
                     cargarFechasDeRegistro(clienteSeleccionado['numero-expediente'], campoSeleccionado, false);
                     
-                    // Solo mostrar mensaje indicando que debe seleccionar fecha
+                    // Mostrar tarjeta con el botón para crear registro
                     expedienteDetalleContainer.innerHTML = `
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i> Por favor, seleccione una fecha de registro para continuar.
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title mb-4">${clienteSeleccionado.nombre} - ${clienteSeleccionado['numero-expediente'] || 'Sin expediente'}</h5>
+                                <div class="d-grid gap-2 col-md-6 mx-auto">
+                                    <button class="btn btn-success btn-crear-registro" data-numero-expediente="${clienteSeleccionado['numero-expediente'] || ''}">
+                                        <i class="fas fa-plus-circle me-2"></i> Crear Registro
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     `;
+                    
+                    // Asignar evento al botón
+                    const btnCrearRegistro = expedienteDetalleContainer.querySelector('.btn-crear-registro');
+                    if (btnCrearRegistro) {
+                        btnCrearRegistro.addEventListener('click', function() {
+                            const numExpediente = this.getAttribute('data-numero-expediente');
+                            mostrarFormularioRegistro(numExpediente, false);
+                        });
+                    }
+                    
                     return; // Detenemos la ejecución aquí
                 } else if (campoSeleccionado !== 'fecha-registro') {
                     // Si venimos de otro campo que no sea fecha, cargar fechas normalmente
@@ -679,11 +705,58 @@ function setupExpedientesEventos() {
     // Función para mostrar mensaje de selección
     function mostrarMensajeSeleccion() {
         if (!expedienteDetalleContainer) return;
-        expedienteDetalleContainer.innerHTML = `
-            <div class="alert alert-info">
-                Seleccione un filtro para ver los detalles del expediente.
-            </div>
-        `;
+        
+        // Obtener los valores de los filtros
+        const nombreSeleccionado = filtroNombre ? filtroNombre.value : '';
+        const numeroClienteSeleccionado = filtroNumeroCliente ? filtroNumeroCliente.value : '';
+        const numeroExpedienteSeleccionado = filtroNumeroExpediente ? filtroNumeroExpediente.value : '';
+        
+        // Verificar si hay al menos un filtro seleccionado, excepto fecha
+        const haySeleccion = nombreSeleccionado || numeroClienteSeleccionado || numeroExpedienteSeleccionado;
+        
+        // Si hay selección pero no hay fecha seleccionada, mostrar botón de crear
+        if (haySeleccion) {
+            // Buscar cliente seleccionado
+            const clientes = window.apiData.clientes || {};
+            let clienteSeleccionado = null;
+            
+            if (nombreSeleccionado) {
+                clienteSeleccionado = Object.values(clientes).find(c => c['id-contacto'] === nombreSeleccionado);
+            } else if (numeroClienteSeleccionado) {
+                clienteSeleccionado = Object.values(clientes).find(c => c['numero-cliente'] === numeroClienteSeleccionado);
+            } else if (numeroExpedienteSeleccionado) {
+                clienteSeleccionado = Object.values(clientes).find(c => c['numero-expediente'] === numeroExpedienteSeleccionado);
+            }
+            
+            if (clienteSeleccionado) {
+                expedienteDetalleContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-4">${clienteSeleccionado.nombre} - ${clienteSeleccionado['numero-expediente'] || 'Sin expediente'}</h5>
+                            <div class="d-grid gap-2 col-md-6 mx-auto">
+                                <button class="btn btn-success btn-crear-registro" data-numero-expediente="${clienteSeleccionado['numero-expediente'] || ''}">
+                                    <i class="fas fa-plus-circle me-2"></i> Crear Registro
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Asignar evento al botón
+                const btnCrearRegistro = expedienteDetalleContainer.querySelector('.btn-crear-registro');
+                if (btnCrearRegistro) {
+                    btnCrearRegistro.addEventListener('click', function() {
+                        const numExpediente = this.getAttribute('data-numero-expediente');
+                        mostrarFormularioRegistro(numExpediente, false);
+                    });
+                }
+                
+                return;
+            }
+        }
+        
+        // No mostrar mensaje por defecto, el área queda vacía ya que tenemos instrucciones en la parte superior
+        expedienteDetalleContainer.innerHTML = '';
     }
     
     // Función para mostrar mensaje de no encontrado

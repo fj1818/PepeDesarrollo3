@@ -199,5 +199,37 @@
     <!-- Bootstrap Datepicker -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.es.min.js"></script>
+    
+    <!-- Script para manejar errores de carga en la sección de comunicaciones -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar que la sección de comunicaciones se cargue correctamente
+        setTimeout(function() {
+            const comunicacionesSection = document.getElementById('content-comunicaciones');
+            const mainContent = document.querySelector('.content-section');
+            
+            // Si estamos en la sección de comunicaciones y no hay contenido
+            if ((window.location.hash === '#comunicaciones' || 
+                (mainContent && mainContent.getAttribute('data-section') === 'comunicaciones')) && 
+                (!comunicacionesSection || (comunicacionesSection && comunicacionesSection.innerHTML.trim() === ''))) {
+                
+                console.error('Se detectó un problema al cargar la sección de comunicaciones');
+                
+                // Intentar cargar el contenido de comunicaciones de forma manual
+                const contentElement = document.getElementById('content') || mainContent;
+                if (contentElement) {
+                    contentElement.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h4><i class="fas fa-exclamation-triangle"></i> Problema detectado</h4>
+                            <p>La sección de comunicaciones no se cargó correctamente. Esto puede deberse a un error en el código JavaScript.</p>
+                            <button class="btn btn-primary mt-2" onclick="location.reload()">Recargar página</button>
+                            <button class="btn btn-secondary mt-2" onclick="window.location.href='#home'">Ir al inicio</button>
+                        </div>
+                    `;
+                }
+            }
+        }, 3000); // Esperar 3 segundos para verificar la carga
+    });
+    </script>
 </body>
 </html>

@@ -285,16 +285,21 @@ function mostrarFormularioProspecto(prospectoId = null) {
             const fecha = new Date(prospecto['fecha-prospecto']);
             if (!isNaN(fecha)) {
                 const dia = String(fecha.getDate()).padStart(2, '0');
-                const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                const mes = String(fecha.getMonth() + 1);
                 const año = fecha.getFullYear();
                 const horas = String(fecha.getHours()).padStart(2, '0');
                 const minutos = String(fecha.getMinutes()).padStart(2, '0');
                 const segundos = String(fecha.getSeconds()).padStart(2, '0');
                 
                 fechaFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+            } else if (prospecto['fecha-prospecto'].includes('/')) {
+                // Si ya está en formato DD/M/YYYY HH:MM:SS, usarlo directamente
+                fechaFormateada = prospecto['fecha-prospecto'];
             }
         } catch (e) {
             console.warn('Error al formatear fecha de prospecto:', e);
+            // Si hay error, intentar usar el valor original
+            fechaFormateada = prospecto['fecha-prospecto'] || '';
         }
     }
     
@@ -303,8 +308,9 @@ function mostrarFormularioProspecto(prospectoId = null) {
     
     Swal.fire({
         title: titulo,
+        width: '700px',
         html: `
-            <form id="prospecto-form" class="form-prospecto">
+            <form id="prospecto-form" class="form-prospecto text-start" style="max-height: 70vh; overflow-y: auto;">
                 <input type="hidden" id="id-prospecto" value="${idProspecto}">
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre completo</label>
@@ -360,6 +366,11 @@ function mostrarFormularioProspecto(prospectoId = null) {
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#28a745',
         cancelButtonColor: '#6c757d',
+        buttonsStyling: true,
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'swal2-confirm fw-bold',
+        },
         didOpen: () => {
             // Inicializar datepickers utilizando el objeto jQuery de SweetAlert2
             try {
@@ -556,23 +567,30 @@ function mostrarDetallesProspecto(id) {
         return;
     }
     
-    // Formatear fecha en DD/MM/YYYY HH:MM:SS
+    // Formatear fecha en DD/M/YYYY HH:MM:SS
     let fechaFormateada = 'No disponible';
     if (prospecto['fecha-prospecto']) {
         try {
-            const fecha = new Date(prospecto['fecha-prospecto']);
-            if (!isNaN(fecha)) {
-                const dia = String(fecha.getDate()).padStart(2, '0');
-                const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                const año = fecha.getFullYear();
-                const horas = String(fecha.getHours()).padStart(2, '0');
-                const minutos = String(fecha.getMinutes()).padStart(2, '0');
-                const segundos = String(fecha.getSeconds()).padStart(2, '0');
-                
-                fechaFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+            // Primero verificar si ya está en formato DD/M/YYYY
+            if (prospecto['fecha-prospecto'].includes('/')) {
+                fechaFormateada = prospecto['fecha-prospecto'];
+            } else {
+                const fecha = new Date(prospecto['fecha-prospecto']);
+                if (!isNaN(fecha)) {
+                    const dia = String(fecha.getDate()).padStart(2, '0');
+                    const mes = String(fecha.getMonth() + 1); // Sin padStart para el mes
+                    const año = fecha.getFullYear();
+                    const horas = String(fecha.getHours()).padStart(2, '0');
+                    const minutos = String(fecha.getMinutes()).padStart(2, '0');
+                    const segundos = String(fecha.getSeconds()).padStart(2, '0');
+                    
+                    fechaFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+                }
             }
         } catch (e) {
             console.warn('Error al formatear fecha:', e);
+            // Si hay error, intentar usar el valor original
+            fechaFormateada = prospecto['fecha-prospecto'] || 'No disponible';
         }
     }
     
@@ -681,6 +699,7 @@ function mostrarFormularioConversion(id) {
 
     Swal.fire({
         title: 'Convertir a Cliente',
+        width: '700px',
         html: `
             <form id="cliente-form" class="text-start">
                 <input type="hidden" id="id-contacto" value="${idContacto}">
@@ -805,21 +824,26 @@ async function convertirProspectoACliente(id, datosExtra) {
         
         // Obtener la fecha de prospecto formateada
         let fechaProspectoFormateada = prospecto['fecha-prospecto'] || '';
-        if (fechaProspectoFormateada && !fechaProspectoFormateada.includes('/')) {
-            try {
-                const fecha = new Date(fechaProspectoFormateada);
-                if (!isNaN(fecha)) {
-                    const dia = String(fecha.getDate()).padStart(2, '0');
-                    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                    const año = fecha.getFullYear();
-                    const horas = String(fecha.getHours()).padStart(2, '0');
-                    const minutos = String(fecha.getMinutes()).padStart(2, '0');
-                    const segundos = String(fecha.getSeconds()).padStart(2, '0');
-                    
-                    fechaProspectoFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+        if (fechaProspectoFormateada) {
+            // Si ya tiene el formato DD/M/YYYY, usarlo directamente
+            if (fechaProspectoFormateada.includes('/')) {
+                // Ya está en formato correcto
+            } else {
+                try {
+                    const fecha = new Date(fechaProspectoFormateada);
+                    if (!isNaN(fecha)) {
+                        const dia = String(fecha.getDate()).padStart(2, '0');
+                        const mes = String(fecha.getMonth() + 1); // Sin padStart para el mes
+                        const año = fecha.getFullYear();
+                        const horas = String(fecha.getHours()).padStart(2, '0');
+                        const minutos = String(fecha.getMinutes()).padStart(2, '0');
+                        const segundos = String(fecha.getSeconds()).padStart(2, '0');
+                        
+                        fechaProspectoFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+                    }
+                } catch (e) {
+                    console.warn('Error al formatear fecha de prospecto:', e);
                 }
-            } catch (e) {
-                console.warn('Error al formatear fecha de prospecto:', e);
             }
         }
         
@@ -1209,20 +1233,22 @@ function actualizarTablaConProspectos(prospectos) {
             <td>${prospecto.email || ''}</td>
             <td>${prospecto.telefono || ''}</td>
             <td>
+                ${!esCliente ? `
                 <div class="form-check form-switch">
                     <input class="form-check-input toggle-contactado" type="checkbox" role="switch" 
                         data-id="${prospecto.id}" 
-                        ${prospecto.contactado === true || prospecto.contactado === 'true' ? 'checked' : ''}
-                        ${esCliente ? 'disabled' : ''}>
+                        ${prospecto.contactado === true || prospecto.contactado === 'true' ? 'checked' : ''}>
                 </div>
+                ` : `<span class="text-muted"><i class="fas fa-check-circle"></i> Contactado</span>`}
             </td>
             <td>
+                ${!esCliente ? `
                 <div class="form-check form-switch">
                     <input class="form-check-input toggle-interesado" type="checkbox" role="switch" 
                         data-id="${prospecto.id}" 
-                        ${prospecto.interesado === true || prospecto.interesado === 'true' ? 'checked' : ''}
-                        ${esCliente ? 'disabled' : ''}>
+                        ${prospecto.interesado === true || prospecto.interesado === 'true' ? 'checked' : ''}>
                 </div>
+                ` : `<span class="text-muted"><i class="fas fa-check-circle"></i> Interesado</span>`}
             </td>
             <td>
                 <span class="badge ${esCliente ? 'bg-success' : 'bg-secondary'} text-white">

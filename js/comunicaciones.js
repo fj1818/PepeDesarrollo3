@@ -10,59 +10,138 @@ let messageTemplates = {
         {
             id: 'w1',
             title: 'Saludo inicial',
-            content: 'Hola [nombre], soy [remitente] de URUETA CRM. Me gustaría hablar sobre nuestros servicios. ¿Tienes unos minutos?'
+            content: 'Hola [nombre], soy [remitente], entrenador personal. Me gustaría ofrecerte mis servicios de entrenamiento personalizado para ayudarte a alcanzar tus metas físicas. ¿Tienes unos minutos para conocer más sobre cómo puedo ayudarte a mejorar tu condición física?'
         },
         {
             id: 'w2',
             title: 'Seguimiento',
-            content: 'Hola [nombre], espero que estés bien. Te escribo para hacer seguimiento sobre nuestros servicios. ¿Has tenido tiempo de revisar la información que te envié?'
+            content: 'Hola [nombre], espero que estés bien. Soy [remitente], tu entrenador personal. Te escribo para hacer seguimiento de tu plan de entrenamiento. ¿Cómo te has sentido con los ejercicios? ¿Has notado alguna mejora o tienes alguna dificultad que podamos resolver?'
         },
         {
             id: 'w3',
             title: 'Invitación a cita',
-            content: 'Hola [nombre], me gustaría invitarte a una reunión para discutir cómo podemos ayudarte. ¿Te parece bien el [fecha] a las [hora]?'
+            content: 'Hola [nombre], me gustaría invitarte a una sesión de evaluación física para diseñar un plan de entrenamiento personalizado que se adapte a tus objetivos y condición actual. ¿Te parece bien el [fecha] a las [hora]? Respóndeme para confirmar o sugerir otro horario que te resulte más conveniente.'
         },
         {
             id: 'w4',
-            title: 'Avance de Entrenamiento',
-            content: 'Hola [nombre], te envío un resumen de tu avance de entrenamiento. Hemos preparado un informe detallado con tus progresos, que podrás ver en el siguiente enlace: [link_informe]\n\nTus resultados son excelentes, continuemos trabajando para alcanzar tus objetivos.\n\n¿Tienes alguna pregunta sobre los resultados?',
+            title: 'Reporte de seguimiento',
+            content: 'Hola [nombre], te envío un resumen de tu avance de entrenamiento hasta la fecha. He preparado un reporte detallado con tus progresos y gráficas de evolución.\n\nTus resultados son excelentes, has logrado [progreso_destacado]. Continuemos trabajando para alcanzar tu meta de [objetivo_cliente].\n\n¿Tienes alguna pregunta sobre los resultados o necesitas ajustes en tu rutina?',
             requiresAttachment: true,
             attachmentType: 'pdf'
+        },
+        {
+            id: 'w5',
+            title: 'Tips nutricionales',
+            content: 'Hola [nombre], como parte de tu programa de entrenamiento, quiero compartirte algunos consejos nutricionales que complementarán tu rutina de ejercicios:\n\n• Asegúrate de consumir proteínas después de cada entrenamiento\n• Mantente hidratado durante todo el día (mínimo 2 litros de agua)\n• Evita alimentos procesados y azúcares refinados\n• Incluye verduras en cada comida\n\n¿Necesitas recomendaciones más específicas para tu plan alimenticio?'
+        },
+        {
+            id: 'w6',
+            title: 'Recordatorio de rutina',
+            content: 'Hola [nombre], te recuerdo tu rutina de entrenamiento para esta semana:\n\n• Lunes: Entrenamiento de fuerza - piernas\n• Martes: Cardio - 30 minutos de intensidad moderada\n• Miércoles: Descanso activo\n• Jueves: Entrenamiento de fuerza - parte superior\n• Viernes: HIIT - 20 minutos\n• Fin de semana: Actividad recreativa y recuperación\n\nRecuerda mantener buena hidratación y seguir las técnicas correctas. ¿Necesitas alguna aclaración sobre los ejercicios?'
         }
     ],
     email: [
         {
             id: 'e1',
             title: 'Presentación de servicios',
-            content: 'Estimado/a [nombre],\n\nEspero que este correo te encuentre bien. Me pongo en contacto contigo desde URUETA CRM para presentarte nuestros servicios de asesoría legal y contable.\n\nNuestro equipo especializado puede ayudarte con:\n- Asistencia fiscal y contable\n- Asesoramiento legal empresarial\n- Trámites administrativos\n\nQuedo a tu disposición para cualquier consulta.\n\nSaludos cordiales,\n[remitente]\nURUETA CRM'
+            content: 'Estimado/a [nombre],\n\nEspero que este correo te encuentre bien. Me pongo en contacto contigo para presentarte mis servicios como entrenador personal.\n\nPuedo ayudarte con:\n- Rutinas de ejercicio personalizadas según tus objetivos\n- Asesoramiento nutricional complementario\n- Seguimiento continuo de tu progreso\n- Apoyo motivacional durante todo el proceso\n\nMe especializo en ayudar a personas como tú a alcanzar sus metas físicas, ya sea perder peso, aumentar masa muscular, mejorar resistencia o simplemente adoptar un estilo de vida más saludable.\n\n¿Te gustaría agendar una sesión de evaluación inicial gratuita? Responde a este correo y coordinaremos una fecha conveniente para ti.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal'
         },
         {
             id: 'e2',
             title: 'Recordatorio de cita',
-            content: 'Estimado/a [nombre],\n\nTe escribo para confirmar nuestra cita programada para el [fecha] a las [hora].\n\nPor favor, confirma tu asistencia respondiendo a este correo.\n\nSaludos cordiales,\n[remitente]\nURUETA CRM'
+            content: 'Estimado/a [nombre],\n\nTe escribo para confirmar nuestra sesión de entrenamiento programada para el [fecha] a las [hora].\n\nRecuerda traer:\n- Ropa cómoda para hacer ejercicio\n- Zapatillas deportivas adecuadas\n- Botella de agua\n- Toalla pequeña\n\nPor favor, confirma tu asistencia respondiendo a este correo o avísame con anticipación si necesitas reprogramar.\n\n¡Nos vemos pronto para una excelente sesión!\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal'
         },
         {
             id: 'e3',
-            title: 'Envío de documentación',
-            content: 'Estimado/a [nombre],\n\nAdjunto encontrarás la documentación solicitada relacionada con [tema].\n\nSi necesitas cualquier aclaración o tienes alguna pregunta, no dudes en contactarme.\n\nSaludos cordiales,\n[remitente]\nURUETA CRM'
+            title: 'Plan de entrenamiento',
+            content: 'Estimado/a [nombre],\n\nAdjunto encontrarás tu plan de entrenamiento personalizado basado en la evaluación que realizamos y tus objetivos de [objetivo_cliente].\n\nEl plan incluye:\n- Rutinas de ejercicios detalladas con ilustraciones\n- Calendario de entrenamiento semanal\n- Recomendaciones de intensidad y descanso\n- Sugerencias nutricionales complementarias\n\nRecuerda que este plan está diseñado específicamente para ti y tus necesidades. Es importante que sigas las indicaciones de forma progresiva para maximizar resultados y evitar lesiones.\n\nEstaré disponible para resolver cualquier duda y realizaremos ajustes periódicos según tu progreso.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal',
+            requiresAttachment: true,
+            attachmentType: 'pdf'
         },
         {
             id: 'e4',
-            title: 'Informe de Avance de Entrenamiento',
-            content: 'Estimado/a [nombre],\n\nAdjunto a este correo encontrarás un informe detallado de tu avance de entrenamiento con fecha [fecha_evaluacion].\n\nEn este informe podrás revisar:\n\n- Tus datos actuales de seguimiento\n- Gráficos comparativos de tu progreso\n- Análisis de tus resultados\n- Recomendaciones personalizadas\n\nEstamos muy satisfechos con tu progreso y compromiso. Te animamos a continuar con la misma dedicación para alcanzar tus objetivos de forma óptima.\n\nSi tienes alguna duda sobre los resultados o deseas programar una sesión para revisar el informe en detalle, no dudes en contactarnos.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal\nURUETA CRM',
+            title: 'Reporte de seguimiento',
+            content: 'Estimado/a [nombre],\n\nAdjunto a este correo encontrarás un reporte detallado de tu avance de entrenamiento con fecha [fecha_evaluacion].\n\nEn este reporte podrás revisar:\n\n- Tus medidas corporales actuales y comparativas\n- Gráficos de progreso en peso, masa muscular y porcentaje de grasa\n- Análisis de rendimiento en ejercicios clave\n- Recomendaciones personalizadas para la siguiente fase\n\nEstoy muy satisfecho con tu progreso, especialmente en [área_destacada]. Has mostrado gran compromiso y disciplina que están dando resultados visibles.\n\nTe animo a continuar con la misma dedicación y te recuerdo la importancia de mantener también los hábitos alimenticios recomendados para optimizar los resultados del entrenamiento.\n\nSi tienes alguna duda sobre los resultados o deseas programar una sesión para revisar el reporte en detalle, no dudes en contactarme.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal',
             requiresAttachment: true,
             attachmentType: 'pdf'
+        },
+        {
+            id: 'e5',
+            title: 'Recomendaciones nutricionales',
+            content: 'Estimado/a [nombre],\n\nComo complemento a tu programa de entrenamiento, te envío algunas recomendaciones nutricionales que te ayudarán a optimizar tus resultados.\n\nRecomendaciones generales:\n\n1. Distribución de macronutrientes:\n   - Proteínas: 25-30% de tu ingesta calórica diaria\n   - Carbohidratos: 40-50% (priorizando carbohidratos complejos)\n   - Grasas saludables: 20-30%\n\n2. Hidratación:\n   - Mínimo 2 litros de agua diarios\n   - Aumentar 500ml por cada hora de ejercicio intenso\n\n3. Timing nutricional:\n   - Comida pre-entrenamiento: 1-2 horas antes, rica en carbohidratos complejos\n   - Comida post-entrenamiento: dentro de los 30-60 minutos después, combinar proteínas y carbohidratos\n\n4. Alimentos recomendados:\n   - Proteínas: pollo, pavo, pescado, huevos, legumbres, tofu\n   - Carbohidratos: avena, arroz integral, patata, batata, frutas\n   - Grasas saludables: aguacate, frutos secos, aceite de oliva\n\nRecuerda que estas son recomendaciones generales. Para un plan nutricional más detallado y personalizado, te recomendaría consultar con un nutricionista especializado.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal'
         }
     ]
 };
 
 // Inicializar módulo
-document.addEventListener('DOMContentLoaded', initComunicaciones);
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded: Inicializando módulo de comunicaciones');
+    try {
+        // Cargar biblioteca de calendario si no está disponible
+        if (typeof flatpickr === 'undefined') {
+            // Cargar CSS de flatpickr
+            const linkElem = document.createElement('link');
+            linkElem.rel = 'stylesheet';
+            linkElem.href = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
+            document.head.appendChild(linkElem);
+            
+            // Cargar CSS del tema
+            const linkTheme = document.createElement('link');
+            linkTheme.rel = 'stylesheet';
+            linkTheme.href = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css';
+            document.head.appendChild(linkTheme);
+            
+            // Cargar JavaScript de flatpickr
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/flatpickr';
+            script.onload = function() {
+                console.log('Flatpickr cargado correctamente');
+                initComunicaciones();
+            };
+            script.onerror = function(error) {
+                console.error('Error al cargar Flatpickr:', error);
+                // Intentar inicializar de todos modos
+                initComunicaciones();
+            };
+            document.head.appendChild(script);
+        } else {
+            initComunicaciones();
+        }
+
+        // Verificar si hay errores de JavaScript
+        window.addEventListener('error', function(event) {
+            console.error('Error de JavaScript detectado:', event.error);
+            const errorMsg = event.error ? event.error.toString() : 'Error desconocido';
+            
+            // Mostrar un mensaje de error al usuario
+            const contentElement = document.getElementById('content') || document.querySelector('.content-section');
+            if (contentElement) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger mt-3';
+                errorDiv.innerHTML = `
+                    <h4><i class="fas fa-exclamation-triangle"></i> Error de JavaScript</h4>
+                    <p>Se ha producido un error en la carga de la página. Por favor, recargue la página.</p>
+                    <p><small>Detalles técnicos: ${errorMsg}</small></p>
+                    <button class="btn btn-sm btn-primary mt-2" onclick="location.reload()">Recargar página</button>
+                `;
+                contentElement.prepend(errorDiv);
+            }
+        });
+    } catch (error) {
+        console.error('Error en inicialización de comunicaciones:', error);
+        alert('Error al cargar el módulo de comunicaciones. Por favor, recargue la página.');
+    }
+});
 
 // Reiniciar si el script ya estaba cargado
 document.addEventListener('script-reloaded', function(e) {
     if (e.detail.script === 'js/comunicaciones.js') {
-        initComunicaciones();
+        console.log('Script de comunicaciones recargado, reinicializando...');
+        try {
+            initComunicaciones();
+        } catch (error) {
+            console.error('Error al reinicializar comunicaciones:', error);
+        }
     }
 });
 
@@ -70,17 +149,36 @@ document.addEventListener('script-reloaded', function(e) {
  * Inicializar el módulo de comunicaciones
  */
 function initComunicaciones() {
-    console.log('Inicializando módulo de comunicaciones');
-    
-    // Cargar directamente la UI en vez de esperar al evento load-content
-    loadComunicacionesUI();
-    
-    // También mantener el evento por compatibilidad
-    document.addEventListener('load-content', function(e) {
-        if (e.detail.section === 'comunicaciones') {
-            loadComunicacionesUI();
+    try {
+        console.log('Inicializando módulo de comunicaciones');
+        
+        // Cargar directamente la UI en vez de esperar al evento load-content
+        loadComunicacionesUI();
+        
+        // También mantener el evento por compatibilidad
+        document.addEventListener('load-content', function(e) {
+            if (e.detail && e.detail.section === 'comunicaciones') {
+                console.log('Evento load-content detectado para comunicaciones');
+                loadComunicacionesUI();
+            }
+        });
+        
+        console.log('Módulo de comunicaciones inicializado correctamente');
+    } catch (error) {
+        console.error('Error al inicializar el módulo de comunicaciones:', error);
+        // Mostrar mensaje de error al usuario
+        const contentElement = document.getElementById('content') || document.querySelector('.content-section');
+        if (contentElement) {
+            contentElement.innerHTML = `
+                <div class="alert alert-danger">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Error al cargar el módulo de comunicaciones</h4>
+                    <p>Se ha producido un error al cargar la sección de comunicaciones. Por favor, recargue la página o contacte al administrador.</p>
+                    <p>Detalles técnicos: ${error.message}</p>
+                    <button class="btn btn-primary mt-3" onclick="location.reload()">Recargar página</button>
+                </div>
+            `;
         }
-    });
+    }
 }
 
 /**
@@ -1232,6 +1330,7 @@ function setMessageType(type) {
  */
 function applyTemplate(templateId) {
     const messageContent = document.getElementById('message-content');
+    const previewSection = document.getElementById('message-preview').parentElement;
     const type = window.currentMessageType;
     
     const templates = messageTemplates[type];
@@ -1243,15 +1342,164 @@ function applyTemplate(templateId) {
         // Reemplazar variables si hay un contacto seleccionado
         if (selectedContact) {
             content = content.replace(/\[nombre\]/g, selectedContact.nombre);
+            
+            // Si hay objetivo de cliente, intentar usarlo
+            if (selectedContact.objetivo) {
+                content = content.replace(/\[objetivo_cliente\]/g, selectedContact.objetivo);
+            } else {
+                content = content.replace(/\[objetivo_cliente\]/g, "mejorar tu condición física");
+            }
+            
+            // Si hay progreso destacado, intentar usarlo
+            if (selectedContact.progreso) {
+                content = content.replace(/\[progreso_destacado\]/g, selectedContact.progreso);
+            } else {
+                content = content.replace(/\[progreso_destacado\]/g, "avances significativos");
+            }
+            
+            // Si hay área destacada, intentar usarla
+            if (selectedContact.area_destacada) {
+                content = content.replace(/\[área_destacada\]/g, selectedContact.area_destacada);
+            } else {
+                content = content.replace(/\[área_destacada\]/g, "tus ejercicios de fuerza");
+            }
         }
         
         // Reemplazar remitente por defecto
-        content = content.replace(/\[remitente\]/g, 'Administrador');
+        content = content.replace(/\[remitente\]/g, 'Pepe Urueta');
         
         // Reemplazar fecha actual en formato DD/MM/YYYY
         const fechaActual = new Date();
         const fechaFormateada = `${fechaActual.getDate().toString().padStart(2, '0')}/${(fechaActual.getMonth() + 1).toString().padStart(2, '0')}/${fechaActual.getFullYear()}`;
         content = content.replace(/\[fecha_evaluacion\]/g, fechaFormateada);
+        
+        // Si es una plantilla de citas, añadir selector de fecha y hora
+        if (templateId === 'w3' || templateId === 'e2') {
+            // Verificar si ya existe el selector de fecha/hora
+            if (!document.getElementById('date-time-selector')) {
+                // Crear selector de fecha y hora con interfaz simplificada
+                const dateTimeSelector = document.createElement('div');
+                dateTimeSelector.id = 'date-time-selector';
+                dateTimeSelector.className = 'date-time-selector mt-3 p-3 border rounded bg-light';
+                dateTimeSelector.innerHTML = `
+                    <h5 class="mb-3"><i class="far fa-calendar-alt me-2"></i> Programar cita</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="cita-fecha" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="cita-fecha" min="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="cita-hora" class="form-label">Hora</label>
+                            <select class="form-control" id="cita-hora">
+                                <option value="">Seleccionar hora</option>
+                                <option value="08:00">8:00 AM</option>
+                                <option value="09:00">9:00 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="13:00">1:00 PM</option>
+                                <option value="14:00">2:00 PM</option>
+                                <option value="15:00">3:00 PM</option>
+                                <option value="16:00">4:00 PM</option>
+                                <option value="17:00">5:00 PM</option>
+                                <option value="18:00">6:00 PM</option>
+                                <option value="19:00">7:00 PM</option>
+                                <option value="20:00">8:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button class="btn btn-primary w-100" id="btn-aplicar-fecha-hora">
+                                <i class="fas fa-check me-2"></i> Aplicar al mensaje
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Insertar antes del área de vista previa
+                previewSection.before(dateTimeSelector);
+                
+                // Inicializar flatpickr para selección de fecha y hora
+                if (typeof flatpickr !== 'undefined') {
+                    const fechaHoraInput = document.getElementById('cita-fecha-hora');
+                    if (fechaHoraInput) {
+                        // Configurar hora mínima (8:00 AM) y máxima (8:00 PM)
+                        const horaMin = '08:00';
+                        const horaMax = '20:00';
+                        
+                        // Inicializar el selector con flatpickr
+                        const datePicker = flatpickr(fechaHoraInput, {
+                            enableTime: true,
+                            dateFormat: "d/m/Y H:i",
+                            minDate: "today",
+                            maxDate: new Date().fp_incr(60), // Próximos 60 días
+                            minTime: horaMin,
+                            maxTime: horaMax,
+                            disableMobile: "true",
+                            locale: {
+                                firstDayOfWeek: 1,
+                                weekdays: {
+                                    shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                                    longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+                                },
+                                months: {
+                                    shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                                    longhand: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+                                }
+                            },
+                            time_24hr: false
+                        });
+                    }
+                }
+                
+                // Añadir evento para aplicar fecha y hora seleccionadas
+                document.getElementById('btn-aplicar-fecha-hora').addEventListener('click', function() {
+                    const fechaInput = document.getElementById('cita-fecha');
+                    const horaInput = document.getElementById('cita-hora');
+                    
+                    if (fechaInput.value && horaInput.value) {
+                        // Formatear fecha seleccionada a DD/MM/YYYY
+                        const fechaObj = new Date(fechaInput.value);
+                        const dia = String(fechaObj.getDate()).padStart(2, '0');
+                        const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+                        const anio = fechaObj.getFullYear();
+                        const fechaFormat = `${dia}/${mes}/${anio}`;
+                        
+                        // Convertir hora de formato 24h a 12h con AM/PM
+                        let horaFormat = '';
+                        const [hora] = horaInput.value.split(':');
+                        const horaNum = parseInt(hora, 10);
+                        const ampm = horaNum >= 12 ? 'PM' : 'AM';
+                        const hora12 = horaNum % 12 || 12;
+                        horaFormat = `${hora12}:00 ${ampm}`;
+                        
+                        // Aplicar al contenido actual
+                        let nuevoContenido = messageContent.value;
+                        nuevoContenido = nuevoContenido.replace(/\[fecha\]/g, fechaFormat);
+                        nuevoContenido = nuevoContenido.replace(/\[hora\]/g, horaFormat);
+                        
+                        // Actualizar el contenido y vista previa
+                        messageContent.value = nuevoContenido;
+                        updateMessagePreview();
+                    } else {
+                        // Mostrar alerta si faltan datos
+                        Swal.fire({
+                            title: 'Datos incompletos',
+                            text: 'Por favor, selecciona fecha y hora para la cita.',
+                            icon: 'warning',
+                            confirmButtonColor: '#E63946'
+                        });
+                    }
+                });
+            }
+        } else {
+            // Eliminar selector si existe y no es una plantilla de citas
+            const existingSelector = document.getElementById('date-time-selector');
+            if (existingSelector) {
+                existingSelector.remove();
+            }
+        }
         
         // Si es una plantilla de avance, generar link temporal o placeholder
         if (template.requiresAttachment && template.attachmentType === 'pdf') {
@@ -1403,36 +1651,73 @@ async function sendMessage() {
         telefono = telefono.replace(/[^0-9+]/g, '');
         console.log('Teléfono después de procesar:', telefono);
         
-        // Si tenemos un PDF y es plantilla de avance, ofrecer descargarlo primero
+        // Si tenemos un PDF y es plantilla de avance, crear botón de descarga
         if (pdfInfo) {
-            const { blob, fileName } = pdfInfo;
+            // Extraer URL y nombre del archivo del PDF
+            const pdfUrl = pdfInfo.url;
+            const fileName = pdfInfo.fileName;
             
-            // Crear URL para descargar el PDF
-            const pdfUrl = URL.createObjectURL(blob);
-            
+            // Mostrar dialog para descargar primero el reporte y luego abrir WhatsApp
             Swal.fire({
-                title: 'Informe generado',
+                title: 'Reporte de Seguimiento',
                 html: `
-                    <p>El informe de avance se ha generado correctamente.</p>
-                    <p>Descarga el PDF para enviarlo manualmente a través de WhatsApp:</p>
-                    <a href="${pdfUrl}" download="${fileName}" class="btn btn-success mt-3">
-                        <i class="fas fa-download me-2"></i> Descargar PDF
-                    </a>
-                    <p class="mt-3">O envía un mensaje con un enlace para acceder al informe:</p>
+                    <p>Para enviar correctamente el reporte por WhatsApp:</p>
+                    <p>1. Primero descarga el reporte usando el botón de abajo</p>
+                    <p>2. Después, envía el mensaje por WhatsApp</p>
+                    <p>3. En WhatsApp, adjunta el archivo descargado usando el icono de clip</p>
+                    <div class="d-grid gap-2 col-12 mx-auto mt-4">
+                        <a href="${pdfUrl}" download="${fileName}" class="btn btn-primary" id="descargar-reporte-btn">
+                            <i class="fas fa-download me-2"></i> Descargar Reporte
+                        </a>
+                    </div>
                 `,
+                icon: 'info',
                 showCancelButton: true,
-                confirmButtonText: 'Enviar mensaje',
-                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Continuar a WhatsApp',
                 confirmButtonColor: '#25D366',
-                cancelButtonColor: '#6c757d',
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false,
+                preConfirm: () => {
+                    // Verificar si el usuario ha hecho clic en el botón de descarga
+                    const descargarBtn = document.getElementById('descargar-reporte-btn');
+                    if (descargarBtn && !descargarBtn.classList.contains('btn-success')) {
+                        Swal.showValidationMessage('Por favor, descarga el reporte primero');
+                        return false;
+                    }
+                    return true;
+                },
+                didOpen: () => {
+                    // Agregar evento para marcar cuando el usuario ha descargado el reporte
+                    const descargarBtn = document.getElementById('descargar-reporte-btn');
+                    if (descargarBtn) {
+                        descargarBtn.addEventListener('click', function() {
+                            setTimeout(() => {
+                                this.classList.remove('btn-primary');
+                                this.classList.add('btn-success');
+                                this.innerHTML = '<i class="fas fa-check me-2"></i> Reporte Descargado';
+                            }, 1000);
+                        });
+                    }
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Enviar mensaje por WhatsApp (el PDF debe enviarse manualmente)
-                    const whatsappURL = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+                    // Abrir WhatsApp con el mensaje
+                    const whatsappURL = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
                     console.log('URL de WhatsApp:', whatsappURL);
                     window.open(whatsappURL, '_blank');
+                    
+                    // Mostrar mensaje de confirmación
+                    Swal.fire({
+                        title: 'Mensaje enviado',
+                        text: 'Recuerda adjuntar el reporte descargado en WhatsApp',
+                        icon: 'success',
+                        confirmButtonColor: '#25D366'
+                    });
                 }
             });
+            
+            return true; // Indicar que se ha gestionado el adjunto
         } else {
             // Enviar mensaje normal por WhatsApp
             const whatsappURL = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
@@ -1763,15 +2048,15 @@ function setupComunicacionesEventos() {
  * Generar PDF con avance del cliente
  */
 async function generarPDFAvance(cliente) {
-    // Comprobar si la biblioteca jsPDF está disponible
-    if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
-        // Cargar dinámicamente jsPDF si no está disponible
-        await cargarLibreriaPDF();
-    }
-    
-    console.log('Generando PDF para el cliente:', cliente);
-    
     try {
+        // Comprobar si la biblioteca jsPDF está disponible
+        if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
+            // Cargar dinámicamente jsPDF si no está disponible
+            await cargarLibreriaPDF();
+        }
+        
+        console.log('Generando PDF para el cliente:', cliente);
+        
         // Crear un nuevo documento PDF
         const { jsPDF } = jspdf;
         const doc = new jsPDF({
@@ -1783,25 +2068,81 @@ async function generarPDFAvance(cliente) {
         // Configurar fuentes
         doc.setFont('helvetica', 'normal');
         
-        // Obtener el último registro de expediente del cliente
+        // Obtener todos los registros de expediente del cliente para mostrar evolución
+        let expedientesCliente = [];
         let ultimoRegistro = null;
         if (window.apiData && window.apiData.expedientes) {
             // Buscar registros asociados al cliente
-            const expedientes = Object.values(window.apiData.expedientes).filter(
+            expedientesCliente = Object.values(window.apiData.expedientes).filter(
                 exp => exp.clienteId === cliente.id || exp.id === cliente.expedienteId
             );
             
-            if (expedientes.length > 0) {
-                // Ordenar por fecha más reciente
-                expedientes.sort((a, b) => {
+            if (expedientesCliente.length > 0) {
+                // Ordenar por fecha
+                expedientesCliente.sort((a, b) => {
                     const fechaA = a['fecha-registro'] ? new Date(a['fecha-registro'].split('/').reverse().join('-')) : new Date(0);
                     const fechaB = b['fecha-registro'] ? new Date(b['fecha-registro'].split('/').reverse().join('-')) : new Date(0);
-                    return fechaB - fechaA;
+                    return fechaA - fechaB; // Orden cronológico para las gráficas
                 });
                 
-                ultimoRegistro = expedientes[0];
+                // El último registro es el más reciente
+                ultimoRegistro = expedientesCliente[expedientesCliente.length - 1];
                 console.log('Último registro encontrado:', ultimoRegistro);
+                console.log('Total registros para gráficas:', expedientesCliente.length);
             }
+        }
+
+        // Intentar capturar las gráficas disponibles de la sección de Avance
+        let chartImages = {};
+        
+        // Función para capturar cualquier gráfico visible en la página como imagen base64
+        const captureCharts = async () => {
+            try {
+                // Buscar todos los canvas de Chart.js en la página
+                const chartCanvases = document.querySelectorAll('canvas.chartjs-render-monitor');
+                if (chartCanvases.length > 0) {
+                    console.log(`Se encontraron ${chartCanvases.length} gráficas en la página`);
+                    
+                    // Identificar gráficas por su contenedor o ID
+                    for (let canvas of chartCanvases) {
+                        const parentId = canvas.parentElement.id || '';
+                        const chartId = canvas.id || '';
+                        
+                        if (parentId.includes('peso') || chartId.includes('peso')) {
+                            chartImages.peso = canvas.toDataURL('image/png');
+                            console.log('Capturada gráfica de peso');
+                        } else if (parentId.includes('grasa') || chartId.includes('grasa')) {
+                            chartImages.grasa = canvas.toDataURL('image/png');
+                            console.log('Capturada gráfica de grasa corporal');
+                        } else if (parentId.includes('entrenamiento') || chartId.includes('entrenamiento')) {
+                            chartImages.entrenamiento = canvas.toDataURL('image/png');
+                            console.log('Capturada gráfica de entrenamiento');
+                        } else {
+                            // Si no se puede identificar, guardar como otra gráfica
+                            const genericKey = `other_${Object.keys(chartImages).length}`;
+                            chartImages[genericKey] = canvas.toDataURL('image/png');
+                            console.log(`Capturada gráfica genérica: ${genericKey}`);
+                        }
+                    }
+                } else {
+                    console.warn('No se encontraron gráficas en la página');
+                }
+            } catch (e) {
+                console.error('Error al capturar gráficas:', e);
+            }
+            
+            return chartImages;
+        };
+        
+        // Intentar capturar gráficas si no tenemos las imágenes desde window
+        if (!window.chartImageBase64 || Object.keys(window.chartImageBase64).length === 0) {
+            console.log('Intentando capturar gráficas de la página actual');
+            chartImages = await captureCharts();
+            // Almacenar para uso futuro
+            window.chartImageBase64 = chartImages;
+        } else {
+            console.log('Usando gráficas previamente capturadas');
+            chartImages = window.chartImageBase64;
         }
         
         // --- Portada ---
@@ -1813,7 +2154,7 @@ async function generarPDFAvance(cliente) {
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(24);
-        doc.text('INFORME DE AVANCE DE ENTRENAMIENTO', 105, 20, { align: 'center' });
+        doc.text('REPORTE DE SEGUIMIENTO', 105, 20, { align: 'center' });
         
         // Datos del cliente
         doc.setTextColor(0, 0, 0);
@@ -1834,12 +2175,24 @@ async function generarPDFAvance(cliente) {
         doc.setDrawColor(200, 200, 200);
         doc.line(20, 90, 190, 90);
         
-        // Imagen o gráfica de ejemplo (posición donde iría)
-        doc.setFillColor(240, 240, 240);
-        doc.roundedRect(55, 100, 100, 60, 3, 3, 'F');
-        doc.setFontSize(12);
-        doc.setTextColor(100, 100, 100);
-        doc.text('Gráfica de Progreso', 105, 130, { align: 'center' });
+        // Verificar si tenemos imagen de gráfica para la portada
+        if (chartImages && (chartImages.peso || chartImages.grasa)) {
+            // Usar la imagen de la gráfica de peso para la portada si está disponible
+            if (chartImages.peso) {
+                doc.addImage(chartImages.peso, 'PNG', 55, 100, 100, 60);
+                console.log('Agregada gráfica de peso a la portada');
+            } else if (chartImages.grasa) {
+                doc.addImage(chartImages.grasa, 'PNG', 55, 100, 100, 60);
+                console.log('Agregada gráfica de grasa a la portada');
+            }
+        } else {
+            // Rectángulo de ejemplo si no hay gráfica
+            doc.setFillColor(240, 240, 240);
+            doc.roundedRect(55, 100, 100, 60, 3, 3, 'F');
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Gráfica de Progreso', 105, 130, { align: 'center' });
+        }
         
         // Intro del documento
         doc.setFontSize(12);
@@ -1871,13 +2224,13 @@ async function generarPDFAvance(cliente) {
             doc.setFontSize(11);
             doc.setTextColor(0, 0, 0);
             
-            // Tabla de datos principales
+            // Tabla de datos principales - ASEGURARSE DE QUE TODO SEA STRING
             const datosCliente = [
                 { label: 'Peso Actual', valor: ultimoRegistro['peso-actual'] ? `${ultimoRegistro['peso-actual']} kg` : 'No disponible' },
                 { label: 'Grasa Corporal', valor: ultimoRegistro['grasa-actual'] ? `${ultimoRegistro['grasa-actual']}%` : 'No disponible' },
-                { label: 'IMC', valor: ultimoRegistro['imc'] ? `${ultimoRegistro['imc']}` : 'No calculado' },
-                { label: 'Días entrenados/semana', valor: ultimoRegistro['dias-entrenamiento'] ? `${ultimoRegistro['dias-entrenamiento']}` : 'No registrado' },
-                { label: 'Horas totales', valor: ultimoRegistro['horas-entrenamiento'] ? `${ultimoRegistro['horas-entrenamiento']}` : 'No registrado' }
+                { label: 'IMC', valor: ultimoRegistro['imc'] ? String(ultimoRegistro['imc']) : 'No calculado' },
+                { label: 'Días entrenados/semana', valor: ultimoRegistro['dias-entrenamiento'] ? String(ultimoRegistro['dias-entrenamiento']) : 'No registrado' },
+                { label: 'Horas totales', valor: ultimoRegistro['horas-entrenamiento'] ? String(ultimoRegistro['horas-entrenamiento']) : 'No registrado' }
             ];
             
             let yPos = 40;
@@ -1902,7 +2255,7 @@ async function generarPDFAvance(cliente) {
             const objetivos = [
                 { label: 'Peso Objetivo', valor: ultimoRegistro['peso-deseado'] ? `${ultimoRegistro['peso-deseado']} kg` : 'No establecido' },
                 { label: 'Grasa Objetivo', valor: ultimoRegistro['grasa-deseada'] ? `${ultimoRegistro['grasa-deseada']}%` : 'No establecido' },
-                { label: 'Objetivo General', valor: ultimoRegistro['objetivo'] ? `${ultimoRegistro['objetivo']}` : 'No especificado' }
+                { label: 'Objetivo General', valor: ultimoRegistro['objetivo'] ? String(ultimoRegistro['objetivo']) : 'No especificado' }
             ];
             
             objetivos.forEach(dato => {
@@ -1925,9 +2278,9 @@ async function generarPDFAvance(cliente) {
             
             // Disciplina y datos médicos
             const infoAdicional = [
-                { label: 'Disciplina', valor: ultimoRegistro['disciplina'] ? `${ultimoRegistro['disciplina']}` : 'No especificada' },
-                { label: 'Condiciones Médicas', valor: ultimoRegistro['condiciones-medicas'] ? `${ultimoRegistro['condiciones-medicas']}` : 'Ninguna registrada' },
-                { label: 'Medicamentos', valor: ultimoRegistro['medicamentos'] ? `${ultimoRegistro['medicamentos']}` : 'Ninguno registrado' }
+                { label: 'Disciplina', valor: ultimoRegistro['disciplina'] ? String(ultimoRegistro['disciplina']) : 'No especificada' },
+                { label: 'Condiciones Médicas', valor: ultimoRegistro['condiciones-medicas'] ? String(ultimoRegistro['condiciones-medicas']) : 'Ninguna registrada' },
+                { label: 'Medicamentos', valor: ultimoRegistro['medicamentos'] ? String(ultimoRegistro['medicamentos']) : 'Ninguno registrado' }
             ];
             
             infoAdicional.forEach(dato => {
@@ -1935,13 +2288,14 @@ async function generarPDFAvance(cliente) {
                 doc.text(`${dato.label}:`, 20, yPos);
                 doc.setFont('helvetica', 'normal');
                 
-                // Manejar textos largos
-                if (dato.valor && String(dato.valor).length > 40) {
-                    const lineas = doc.splitTextToSize(String(dato.valor), 110);
+                // Manejar textos largos - ASEGURARSE DE QUE EL VALOR SEA STRING
+                const valorTexto = String(dato.valor);
+                if (valorTexto.length > 40) {
+                    const lineas = doc.splitTextToSize(valorTexto, 110);
                     doc.text(lineas, 100, yPos);
                     yPos += (lineas.length - 1) * 7; // Ajustar posición Y basado en número de líneas
                 } else {
-                    doc.text(String(dato.valor), 100, yPos);
+                    doc.text(valorTexto, 100, yPos);
                 }
                 
                 yPos += 10;
@@ -1963,77 +2317,81 @@ async function generarPDFAvance(cliente) {
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(16);
-        doc.text('ANÁLISIS DE PROGRESO', 105, 13, { align: 'center' });
+        doc.text('ANÁLISIS VISUAL DE PROGRESO', 105, 13, { align: 'center' });
         
-        // Espacio para gráficos
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text('Evolución del Peso', 105, 35, { align: 'center' });
-        
-        // Placeholder para gráfico de peso
-        doc.setFillColor(240, 240, 240);
-        doc.roundedRect(30, 40, 150, 50, 3, 3, 'F');
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text('Gráfico de evolución de peso', 105, 65, { align: 'center' });
-        
-        // Gráfico de % de grasa
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text('Evolución del % de Grasa Corporal', 105, 110, { align: 'center' });
-        
-        // Placeholder para gráfico de grasa
-        doc.setFillColor(240, 240, 240);
-        doc.roundedRect(30, 115, 150, 50, 3, 3, 'F');
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text('Gráfico de evolución de grasa corporal', 105, 140, { align: 'center' });
-        
-        // Análisis y recomendaciones
-        doc.setFontSize(14);
-        doc.setTextColor(41, 128, 185);
-        doc.text('Análisis y Recomendaciones', 20, 180);
-        
-        doc.setFontSize(11);
-        doc.setTextColor(0, 0, 0);
-        
-        // Texto de análisis genérico que se adaptaría según los datos reales
-        let analisisTexto = 'Basado en sus resultados actuales, ';
-        
-        if (ultimoRegistro) {
-            if (ultimoRegistro['peso-inicial'] && ultimoRegistro['peso-actual']) {
-                const pesoInicial = parseFloat(String(ultimoRegistro['peso-inicial']));
-                const pesoActual = parseFloat(String(ultimoRegistro['peso-actual']));
+        // Verificar si hay suficientes datos para las gráficas
+        if (expedientesCliente && expedientesCliente.length > 0) {
+            // Verificar si tenemos gráficas capturadas
+            if (chartImages && Object.keys(chartImages).length > 0) {
+                // Agregar gráficas reales al PDF
+                let yPosition = 30;
+                const chartWidth = 170;
+                const chartHeight = 80;
+                const margin = 10;
                 
-                if (pesoActual < pesoInicial) {
-                    analisisTexto += `ha logrado reducir su peso en ${(pesoInicial - pesoActual).toFixed(1)} kg desde el inicio. `;
-                } else if (pesoActual > pesoInicial) {
-                    analisisTexto += `ha aumentado su peso en ${(pesoActual - pesoInicial).toFixed(1)} kg desde el inicio. `;
-                } else {
-                    analisisTexto += 'ha mantenido su peso estable desde el inicio. ';
+                // Si tenemos gráfica de peso, agregarla
+                if (chartImages.peso) {
+                    doc.setFontSize(14);
+                    doc.setTextColor(41, 128, 185);
+                    doc.text('Evolución del Peso', 20, yPosition);
+                    yPosition += 5;
+                    
+                    doc.addImage(chartImages.peso, 'PNG', 20, yPosition, chartWidth, chartHeight);
+                    yPosition += chartHeight + margin;
                 }
+                
+                // Si tenemos gráfica de grasa, agregarla
+                if (chartImages.grasa) {
+                    doc.setFontSize(14);
+                    doc.setTextColor(41, 128, 185);
+                    doc.text('Evolución del Porcentaje de Grasa', 20, yPosition);
+                    yPosition += 5;
+                    
+                    doc.addImage(chartImages.grasa, 'PNG', 20, yPosition, chartWidth, chartHeight);
+                    yPosition += chartHeight + margin;
+                }
+                
+                // Si tenemos otras gráficas, agregarlas
+                for (const key in chartImages) {
+                    if (key !== 'peso' && key !== 'grasa' && !key.startsWith('other_')) {
+                        doc.setFontSize(14);
+                        doc.setTextColor(41, 128, 185);
+                        doc.text(`Evolución de ${key.charAt(0).toUpperCase() + key.slice(1)}`, 20, yPosition);
+                        yPosition += 5;
+                        
+                        doc.addImage(chartImages[key], 'PNG', 20, yPosition, chartWidth, chartHeight);
+                        yPosition += chartHeight + margin;
+                    }
+                }
+            } else {
+                // Si no hay imágenes disponibles, mostrar texto explicativo
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Las gráficas de evolución están disponibles en la sección "Avance" de la aplicación.', 20, 50);
+                doc.text('Para incluir gráficas en el PDF, primero visualice la sección de avance del expediente.', 20, 60);
             }
             
-            if (ultimoRegistro['dias-entrenamiento']) {
-                const diasEntrenamiento = parseInt(String(ultimoRegistro['dias-entrenamiento']));
-                if (diasEntrenamiento >= 4) {
-                    analisisTexto += 'Su frecuencia de entrenamiento es excelente. ';
-                } else if (diasEntrenamiento >= 2) {
-                    analisisTexto += 'Su frecuencia de entrenamiento es adecuada. ';
-                } else {
-                    analisisTexto += 'Se recomienda aumentar la frecuencia de entrenamiento para mejores resultados. ';
-                }
-            }
+            // Mensaje sobre la tendencia general
+            doc.setFontSize(14);
+            doc.setTextColor(41, 128, 185);
+            doc.text('Interpretación de resultados', 20, 195);
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            
+            // Texto explicativo
+            const mensaje = "Con base en tu evaluación, continuaremos ajustando el plan de entrenamiento personalizado para optimizar tus resultados. Es importante mantener la constancia en los entrenamientos y seguir las recomendaciones nutricionales para alcanzar tus objetivos de forma efectiva.";
+            const lineasMensaje = doc.splitTextToSize(mensaje, 170);
+            doc.text(lineasMensaje, 20, 205);
         } else {
-            analisisTexto = 'No hay suficientes datos para realizar un análisis detallado. Es recomendable completar evaluaciones regulares para un seguimiento óptimo.';
+            // Mensaje si no hay suficientes datos
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text([
+                'No hay suficientes registros históricos para generar gráficos de evolución.',
+                'Se recomienda realizar al menos dos evaluaciones para poder visualizar tendencias.'
+            ], 20, 50);
         }
-        
-        // Añadir recomendaciones generales
-        analisisTexto += 'Recomendamos mantener una alimentación balanceada, hidratación adecuada y respetar los tiempos de descanso para optimizar los resultados de su entrenamiento.';
-        
-        // Escribir el análisis con formato multilínea
-        const lineasAnalisis = doc.splitTextToSize(analisisTexto, 170);
-        doc.text(lineasAnalisis, 20, 190);
         
         // --- Pie de documento ---
         // Número de página en todas las páginas
@@ -2045,14 +2403,18 @@ async function generarPDFAvance(cliente) {
             doc.text(`Página ${i} de ${numPages}`, 105, 285, { align: 'center' });
             
             // Footer en todas las páginas
-            doc.text('URUETA CRM - Informe de Avance de Entrenamiento', 105, 292, { align: 'center' });
+            doc.text('Pepe Urueta - Entrenador Personal - Reporte de Seguimiento', 105, 292, { align: 'center' });
         }
         
         // Guardar PDF
         const pdfBlob = doc.output('blob');
-        const pdfFileName = `Avance_${cliente.nombre.replace(/\s+/g, '_')}_${fechaFormateada.replace(/\//g, '-')}.pdf`;
+        const pdfFileName = `Reporte_Seguimiento_${cliente.nombre.replace(/\s+/g, '_')}_${fechaFormateada.replace(/\//g, '-')}.pdf`;
+        
+        // Crear URL para el blob
+        const pdfUrl = URL.createObjectURL(pdfBlob);
         
         return {
+            url: pdfUrl,
             blob: pdfBlob,
             fileName: pdfFileName
         };

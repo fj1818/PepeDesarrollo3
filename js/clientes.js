@@ -549,50 +549,84 @@ function mostrarFormularioCliente(clienteId = null) {
     let fechaNacFormateada = '';
     if (cliente['fecha-nacimiento']) {
         try {
-            const fecha = new Date(cliente['fecha-nacimiento']);
-            if (!isNaN(fecha)) {
-                fechaNacFormateada = fecha.toISOString().split('T')[0];
+            // Verificar si ya está en formato DD/MM/YYYY con o sin horas
+            if (cliente['fecha-nacimiento'].includes('/')) {
+                // Si tiene formato de fecha con hora (DD/MM/YYYY HH:MM:SS), extraer solo la fecha
+                if (cliente['fecha-nacimiento'].includes(' ')) {
+                    fechaNacFormateada = cliente['fecha-nacimiento'].split(' ')[0];
+                } else {
+                    fechaNacFormateada = cliente['fecha-nacimiento'];
+                }
+            } else {
+                const fecha = new Date(cliente['fecha-nacimiento']);
+                if (!isNaN(fecha)) {
+                    const dia = String(fecha.getDate()).padStart(2, '0');
+                    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                    const año = fecha.getFullYear();
+                    fechaNacFormateada = `${dia}/${mes}/${año}`;
+                }
             }
         } catch (e) {
             console.warn('Error al formatear fecha de nacimiento:', e);
+            // Si hay error, intentar usar el valor original pero extrayendo solo la fecha si es posible
+            const fechaOriginal = cliente['fecha-nacimiento'] || '';
+            if (fechaOriginal.includes(' ')) {
+                fechaNacFormateada = fechaOriginal.split(' ')[0];
+            } else {
+                fechaNacFormateada = fechaOriginal;
+            }
         }
     }
     
     let fechaProspectoFormateada = '';
     if (cliente['fecha-prospecto']) {
         try {
-            const fecha = new Date(cliente['fecha-prospecto']);
-            if (!isNaN(fecha)) {
-                const dia = String(fecha.getDate()).padStart(2, '0');
-                const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                const año = fecha.getFullYear();
-                const horas = String(fecha.getHours()).padStart(2, '0');
-                const minutos = String(fecha.getMinutes()).padStart(2, '0');
-                const segundos = String(fecha.getSeconds()).padStart(2, '0');
-                
-                fechaProspectoFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+            // Verificar si ya está en formato DD/MM/YYYY HH:MM:SS
+            if (cliente['fecha-prospecto'].includes('/')) {
+                fechaProspectoFormateada = cliente['fecha-prospecto'];
+            } else {
+                const fecha = new Date(cliente['fecha-prospecto']);
+                if (!isNaN(fecha)) {
+                    const dia = String(fecha.getDate()).padStart(2, '0');
+                    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                    const año = fecha.getFullYear();
+                    const horas = String(fecha.getHours()).padStart(2, '0');
+                    const minutos = String(fecha.getMinutes()).padStart(2, '0');
+                    const segundos = String(fecha.getSeconds()).padStart(2, '0');
+                    
+                    fechaProspectoFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+                }
             }
         } catch (e) {
             console.warn('Error al formatear fecha de prospecto:', e);
+            // Si hay error, intentar usar el valor original
+            fechaProspectoFormateada = cliente['fecha-prospecto'] || '';
         }
     }
     
     let fechaClienteFormateada = '';
     if (cliente['fecha-cliente']) {
         try {
-            const fecha = new Date(cliente['fecha-cliente']);
-            if (!isNaN(fecha)) {
-                const dia = String(fecha.getDate()).padStart(2, '0');
-                const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                const año = fecha.getFullYear();
-                const horas = String(fecha.getHours()).padStart(2, '0');
-                const minutos = String(fecha.getMinutes()).padStart(2, '0');
-                const segundos = String(fecha.getSeconds()).padStart(2, '0');
-                
-                fechaClienteFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+            // Verificar si ya está en formato DD/MM/YYYY HH:MM:SS
+            if (cliente['fecha-cliente'].includes('/')) {
+                fechaClienteFormateada = cliente['fecha-cliente'];
+            } else {
+                const fecha = new Date(cliente['fecha-cliente']);
+                if (!isNaN(fecha)) {
+                    const dia = String(fecha.getDate()).padStart(2, '0');
+                    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                    const año = fecha.getFullYear();
+                    const horas = String(fecha.getHours()).padStart(2, '0');
+                    const minutos = String(fecha.getMinutes()).padStart(2, '0');
+                    const segundos = String(fecha.getSeconds()).padStart(2, '0');
+                    
+                    fechaClienteFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+                }
             }
         } catch (e) {
             console.warn('Error al formatear fecha de cliente:', e);
+            // Si hay error, intentar usar el valor original
+            fechaClienteFormateada = cliente['fecha-cliente'] || '';
         }
     }
     
@@ -696,12 +730,17 @@ function mostrarFormularioCliente(clienteId = null) {
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#28a745',
         cancelButtonColor: '#6c757d',
+        buttonsStyling: true,
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'swal2-confirm fw-bold',
+        },
         didOpen: () => {
             // Inicializar datepickers utilizando el objeto jQuery de SweetAlert2
             try {
                 if (typeof jQuery !== 'undefined') {
                     jQuery('.datepicker').datepicker({
-                        format: 'yyyy-mm-dd',
+                        format: 'dd/mm/yyyy',
                         autoclose: true,
                         todayHighlight: true,
                         clearBtn: true,
@@ -731,21 +770,49 @@ function mostrarFormularioCliente(clienteId = null) {
                 return false;
             }
             
+            // Obtener valor de fecha de nacimiento
+            let fechaNacimientoValue = document.getElementById('fecha-nacimiento').value;
+            
+            // Si tiene horas (formato DD/MM/YYYY HH:MM:SS), quitar la parte de las horas
+            if (fechaNacimientoValue && fechaNacimientoValue.includes(' ')) {
+                fechaNacimientoValue = fechaNacimientoValue.split(' ')[0];
+            }
+            
+            // Asegurarnos de que la fecha de nacimiento se mantiene en formato DD/MM/YYYY
+            if (fechaNacimientoValue && !fechaNacimientoValue.includes('/')) {
+                try {
+                    const fecha = new Date(fechaNacimientoValue);
+                    if (!isNaN(fecha)) {
+                        const dia = String(fecha.getDate()).padStart(2, '0');
+                        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                        const año = fecha.getFullYear();
+                        fechaNacimientoValue = `${dia}/${mes}/${año}`;
+                    }
+                } catch (e) {
+                    console.warn('Error al formatear fecha de nacimiento en submit:', e);
+                }
+            }
+            
             // Formatear fecha cliente a formato requerido
             let fechaClienteValue = '';
             if (document.getElementById('fecha-cliente').value) {
-                const fecha = new Date(document.getElementById('fecha-cliente').value);
-                if (!isNaN(fecha)) {
-                    const dia = String(fecha.getDate()).padStart(2, '0');
-                    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                    const año = fecha.getFullYear();
-                    const horas = String(fecha.getHours()).padStart(2, '0');
-                    const minutos = String(fecha.getMinutes()).padStart(2, '0');
-                    const segundos = String(fecha.getSeconds()).padStart(2, '0');
-                    
-                    fechaClienteValue = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
-                } else {
+                // Si ya tiene formato DD/MM/YYYY, mantenerlo
+                if (document.getElementById('fecha-cliente').value.includes('/')) {
                     fechaClienteValue = document.getElementById('fecha-cliente').value;
+                } else {
+                    const fecha = new Date(document.getElementById('fecha-cliente').value);
+                    if (!isNaN(fecha)) {
+                        const dia = String(fecha.getDate()).padStart(2, '0');
+                        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                        const año = fecha.getFullYear();
+                        const horas = String(fecha.getHours()).padStart(2, '0');
+                        const minutos = String(fecha.getMinutes()).padStart(2, '0');
+                        const segundos = String(fecha.getSeconds()).padStart(2, '0');
+                        
+                        fechaClienteValue = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+                    } else {
+                        fechaClienteValue = document.getElementById('fecha-cliente').value;
+                    }
                 }
             }
             
@@ -754,7 +821,7 @@ function mostrarFormularioCliente(clienteId = null) {
                 nombre: document.getElementById('nombre').value,
                 telefono: document.getElementById('telefono').value,
                 email: document.getElementById('email').value,
-                'fecha-nacimiento': document.getElementById('fecha-nacimiento').value,
+                'fecha-nacimiento': fechaNacimientoValue,
                 genero: document.getElementById('genero').value,
                 ubicacion: document.getElementById('ubicacion').value,
                 'peso-inicial': document.getElementById('peso-inicial').value,
