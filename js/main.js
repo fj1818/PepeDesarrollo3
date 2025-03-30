@@ -79,8 +79,21 @@ function initSidebar() {
     // Toggle para mostrar/ocultar sidebar
     if (menuBtn && sidebar && mainContent) {
         menuBtn.addEventListener('click', function() {
-            sidebar.classList.toggle('close');
+            sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('expanded');
+            
+            // Si estamos en móvil y la barra lateral se expandió, asegurarnos de que el botón sea visible
+            if (window.innerWidth < 768) {
+                // Pequeño retraso para permitir que la transición CSS termine
+                setTimeout(() => {
+                    // Ajustar la posición del botón según el estado de la barra lateral
+                    if (sidebar.classList.contains('collapsed')) {
+                        menuBtn.style.left = (sidebar.offsetWidth + 15) + 'px';
+                    } else {
+                        menuBtn.style.left = '15px';
+                    }
+                }, 50);
+            }
         });
     }
     
@@ -102,12 +115,41 @@ function initSidebar() {
                 
                 // En móviles, cerrar el sidebar después de seleccionar
                 if (window.innerWidth < 768) {
-                    sidebar.classList.add('close');
+                    sidebar.classList.remove('collapsed');
                     mainContent.classList.add('expanded');
+                    
+                    // Restaurar posición del botón hamburguesa
+                    if (menuBtn) {
+                        menuBtn.style.left = '15px';
+                    }
                 }
             }
         });
     });
+    
+    // Agregar evento de redimensionamiento para manejar cambios en el tamaño de la ventana
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768) {
+            // En pantallas grandes, restaurar posición normal del botón
+            if (menuBtn) {
+                menuBtn.style.removeProperty('left');
+            }
+        } else {
+            // En móviles, ajustar posición según estado del sidebar
+            if (menuBtn) {
+                if (sidebar && sidebar.classList.contains('collapsed')) {
+                    menuBtn.style.left = (sidebar.offsetWidth + 15) + 'px';
+                } else {
+                    menuBtn.style.left = '15px';
+                }
+            }
+        }
+    });
+    
+    // Configuración inicial para dispositivos móviles
+    if (window.innerWidth < 768 && menuBtn) {
+        menuBtn.style.left = '15px';
+    }
     
     // Cargar contenido inicial basado en el elemento activo del menú
     const activeMenuItem = document.querySelector('.nav-item.active');

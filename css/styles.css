@@ -70,7 +70,7 @@ body {
     overflow-y: auto;
 }
 
-.sidebar.close {
+.sidebar.collapsed {
     width: var(--sidebar-width-collapsed);
 }
 
@@ -97,7 +97,7 @@ body {
     white-space: nowrap;
 }
 
-.sidebar.close .logo_name {
+.sidebar.collapsed .logo_name {
     display: none;
 }
 
@@ -141,7 +141,7 @@ body {
     white-space: nowrap;
 }
 
-.sidebar.close .link_name {
+.sidebar.collapsed .link_name {
     display: none;
 }
 
@@ -421,31 +421,57 @@ body {
 
 @media (max-width: 768px) {
     .sidebar {
-        width: var(--sidebar-width);
         transform: translateX(-100%);
+        width: var(--sidebar-width);
+        position: fixed;
+        z-index: 1000;
     }
     
-    .sidebar.close {
+    .sidebar.collapsed {
         transform: translateX(0);
         width: var(--sidebar-width);
     }
     
     .main-content {
-        width: 100%;
         margin-left: 0;
     }
     
     .main-content.expanded {
-        width: 100%;
         margin-left: 0;
     }
     
-    .sidebar.close .link_name {
-        display: inline;
+    /* Asegurar que el botón de hamburguesa siempre esté visible */
+    .menu-btn {
+        position: fixed;
+        z-index: 1001; /* Mayor que el sidebar para que siempre sea visible */
+        left: 15px;
+        top: 15px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 4px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
     
-    .sidebar.close .logo_name {
-        display: inline;
+    .menu-btn i {
+        color: white;
+    }
+    
+    /* Ajustar el header para que no se superponga con el botón */
+    .dashboard-header {
+        padding-left: 60px;
+    }
+    
+    .sidebar.collapsed .link_name {
+        display: none;
+    }
+    
+    .sidebar.collapsed .logo_name {
+        display: none;
     }
 }
 
