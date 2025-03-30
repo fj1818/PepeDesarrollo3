@@ -165,8 +165,6 @@ body {
     height: var(--header-height);
     width: 100%;
     background-color: white;
-    display: flex;
-    align-items: center;
     padding: 0 20px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     position: sticky;
@@ -175,12 +173,31 @@ body {
     margin-bottom: 20px;
 }
 
+/* Navbar dentro del header */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.header-title {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 .menu-btn {
     cursor: pointer;
     padding: 10px;
-    margin-right: 10px;
     font-size: 22px;
     color: var(--gray-700);
+    order: 3; /* Colocar al final de los elementos derechos */
 }
 
 .menu-btn i {
@@ -190,14 +207,6 @@ body {
 
 .menu-btn:hover i {
     color: var(--primary-color);
-}
-
-.header-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-left: 15px;
-    flex-grow: 1;
-    color: var(--gray-800);
 }
 
 .user-info {
@@ -442,28 +451,19 @@ body {
     
     /* Asegurar que el botón de hamburguesa siempre esté visible */
     .menu-btn {
-        position: fixed;
-        z-index: 1001; /* Mayor que el sidebar para que siempre sea visible */
-        left: 15px;
-        top: 15px;
-        background-color: var(--primary-color);
-        color: white;
-        border-radius: 4px;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 1001;
     }
     
-    .menu-btn i {
-        color: white;
-    }
-    
-    /* Ajustar el header para que no se superponga con el botón */
+    /* Ajustar el header para que no se superpongan los elementos */
     .dashboard-header {
-        padding-left: 60px;
+        padding: 15px;
+    }
+    
+    /* Cuando el sidebar está abierto, asegurarse que el navbar-right siga visible */
+    .navbar-right {
+        position: relative;
+        z-index: 1001;
     }
     
     .sidebar.collapsed .link_name {
