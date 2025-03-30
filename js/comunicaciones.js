@@ -5,108 +5,136 @@
 
 // Variables globales
 let selectedContact = null;
+// Cambiamos la definición de plantillas para usar las externas
 let messageTemplates = {
-    whatsapp: [
-        {
-            id: 'w1',
-            title: 'Saludo inicial',
-            content: 'Hola [nombre], soy [remitente], entrenador personal. Me gustaría ofrecerte mis servicios de entrenamiento personalizado para ayudarte a alcanzar tus metas físicas. ¿Tienes unos minutos para conocer más sobre cómo puedo ayudarte a mejorar tu condición física?'
-        },
-        {
-            id: 'w2',
-            title: 'Seguimiento',
-            content: 'Hola [nombre], espero que estés bien. Soy [remitente], tu entrenador personal. Te escribo para hacer seguimiento de tu plan de entrenamiento. ¿Cómo te has sentido con los ejercicios? ¿Has notado alguna mejora o tienes alguna dificultad que podamos resolver?'
-        },
-        {
-            id: 'w3',
-            title: 'Invitación a cita',
-            content: 'Hola [nombre], me gustaría invitarte a una sesión de evaluación física para diseñar un plan de entrenamiento personalizado que se adapte a tus objetivos y condición actual. ¿Te parece bien el [fecha] a las [hora]? Respóndeme para confirmar o sugerir otro horario que te resulte más conveniente.'
-        },
-        {
-            id: 'w4',
-            title: 'Reporte de seguimiento',
-            content: 'Hola [nombre], te envío un resumen de tu avance de entrenamiento hasta la fecha. He preparado un reporte detallado con tus progresos y gráficas de evolución.\n\nTus resultados son excelentes, has logrado [progreso_destacado]. Continuemos trabajando para alcanzar tu meta de [objetivo_cliente].\n\n¿Tienes alguna pregunta sobre los resultados o necesitas ajustes en tu rutina?',
-            requiresAttachment: true,
-            attachmentType: 'pdf'
-        },
-        {
-            id: 'w5',
-            title: 'Tips nutricionales',
-            content: 'Hola [nombre], como parte de tu programa de entrenamiento, quiero compartirte algunos consejos nutricionales que complementarán tu rutina de ejercicios:\n\n• Asegúrate de consumir proteínas después de cada entrenamiento\n• Mantente hidratado durante todo el día (mínimo 2 litros de agua)\n• Evita alimentos procesados y azúcares refinados\n• Incluye verduras en cada comida\n\n¿Necesitas recomendaciones más específicas para tu plan alimenticio?'
-        },
-        {
-            id: 'w6',
-            title: 'Recordatorio de rutina',
-            content: 'Hola [nombre], te recuerdo tu rutina de entrenamiento para esta semana:\n\n• Lunes: Entrenamiento de fuerza - piernas\n• Martes: Cardio - 30 minutos de intensidad moderada\n• Miércoles: Descanso activo\n• Jueves: Entrenamiento de fuerza - parte superior\n• Viernes: HIIT - 20 minutos\n• Fin de semana: Actividad recreativa y recuperación\n\nRecuerda mantener buena hidratación y seguir las técnicas correctas. ¿Necesitas alguna aclaración sobre los ejercicios?'
-        }
-    ],
-    email: [
-        {
-            id: 'e1',
-            title: 'Presentación de servicios',
-            content: 'Estimado/a [nombre],\n\nEspero que este correo te encuentre bien. Me pongo en contacto contigo para presentarte mis servicios como entrenador personal.\n\nPuedo ayudarte con:\n- Rutinas de ejercicio personalizadas según tus objetivos\n- Asesoramiento nutricional complementario\n- Seguimiento continuo de tu progreso\n- Apoyo motivacional durante todo el proceso\n\nMe especializo en ayudar a personas como tú a alcanzar sus metas físicas, ya sea perder peso, aumentar masa muscular, mejorar resistencia o simplemente adoptar un estilo de vida más saludable.\n\n¿Te gustaría agendar una sesión de evaluación inicial gratuita? Responde a este correo y coordinaremos una fecha conveniente para ti.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal'
-        },
-        {
-            id: 'e2',
-            title: 'Recordatorio de cita',
-            content: 'Estimado/a [nombre],\n\nTe escribo para confirmar nuestra sesión de entrenamiento programada para el [fecha] a las [hora].\n\nRecuerda traer:\n- Ropa cómoda para hacer ejercicio\n- Zapatillas deportivas adecuadas\n- Botella de agua\n- Toalla pequeña\n\nPor favor, confirma tu asistencia respondiendo a este correo o avísame con anticipación si necesitas reprogramar.\n\n¡Nos vemos pronto para una excelente sesión!\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal'
-        },
-        {
-            id: 'e3',
-            title: 'Plan de entrenamiento',
-            content: 'Estimado/a [nombre],\n\nAdjunto encontrarás tu plan de entrenamiento personalizado basado en la evaluación que realizamos y tus objetivos de [objetivo_cliente].\n\nEl plan incluye:\n- Rutinas de ejercicios detalladas con ilustraciones\n- Calendario de entrenamiento semanal\n- Recomendaciones de intensidad y descanso\n- Sugerencias nutricionales complementarias\n\nRecuerda que este plan está diseñado específicamente para ti y tus necesidades. Es importante que sigas las indicaciones de forma progresiva para maximizar resultados y evitar lesiones.\n\nEstaré disponible para resolver cualquier duda y realizaremos ajustes periódicos según tu progreso.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal',
-            requiresAttachment: true,
-            attachmentType: 'pdf'
-        },
-        {
-            id: 'e4',
-            title: 'Reporte de seguimiento',
-            content: 'Estimado/a [nombre],\n\nAdjunto a este correo encontrarás un reporte detallado de tu avance de entrenamiento con fecha [fecha_evaluacion].\n\nEn este reporte podrás revisar:\n\n- Tus medidas corporales actuales y comparativas\n- Gráficos de progreso en peso, masa muscular y porcentaje de grasa\n- Análisis de rendimiento en ejercicios clave\n- Recomendaciones personalizadas para la siguiente fase\n\nEstoy muy satisfecho con tu progreso, especialmente en [área_destacada]. Has mostrado gran compromiso y disciplina que están dando resultados visibles.\n\nTe animo a continuar con la misma dedicación y te recuerdo la importancia de mantener también los hábitos alimenticios recomendados para optimizar los resultados del entrenamiento.\n\nSi tienes alguna duda sobre los resultados o deseas programar una sesión para revisar el reporte en detalle, no dudes en contactarme.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal',
-            requiresAttachment: true,
-            attachmentType: 'pdf'
-        },
-        {
-            id: 'e5',
-            title: 'Recomendaciones nutricionales',
-            content: 'Estimado/a [nombre],\n\nComo complemento a tu programa de entrenamiento, te envío algunas recomendaciones nutricionales que te ayudarán a optimizar tus resultados.\n\nRecomendaciones generales:\n\n1. Distribución de macronutrientes:\n   - Proteínas: 25-30% de tu ingesta calórica diaria\n   - Carbohidratos: 40-50% (priorizando carbohidratos complejos)\n   - Grasas saludables: 20-30%\n\n2. Hidratación:\n   - Mínimo 2 litros de agua diarios\n   - Aumentar 500ml por cada hora de ejercicio intenso\n\n3. Timing nutricional:\n   - Comida pre-entrenamiento: 1-2 horas antes, rica en carbohidratos complejos\n   - Comida post-entrenamiento: dentro de los 30-60 minutos después, combinar proteínas y carbohidratos\n\n4. Alimentos recomendados:\n   - Proteínas: pollo, pavo, pescado, huevos, legumbres, tofu\n   - Carbohidratos: avena, arroz integral, patata, batata, frutas\n   - Grasas saludables: aguacate, frutos secos, aceite de oliva\n\nRecuerda que estas son recomendaciones generales. Para un plan nutricional más detallado y personalizado, te recomendaría consultar con un nutricionista especializado.\n\nSaludos cordiales,\n\n[remitente]\nEntrenador Personal'
-        }
-    ]
+    // Estas variables se inicializarán cuando se carguen los archivos externos
+    whatsapp: [],
+    email: []
 };
 
 // Inicializar módulo
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOMContentLoaded: Inicializando módulo de comunicaciones');
     try {
+        // Cargar bibliotecas necesarias
+        const libreriasACargar = [];
+        
         // Cargar biblioteca de calendario si no está disponible
         if (typeof flatpickr === 'undefined') {
-            // Cargar CSS de flatpickr
-            const linkElem = document.createElement('link');
-            linkElem.rel = 'stylesheet';
-            linkElem.href = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
-            document.head.appendChild(linkElem);
-            
-            // Cargar CSS del tema
-            const linkTheme = document.createElement('link');
-            linkTheme.rel = 'stylesheet';
-            linkTheme.href = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css';
-            document.head.appendChild(linkTheme);
-            
-            // Cargar JavaScript de flatpickr
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/flatpickr';
-            script.onload = function() {
-                console.log('Flatpickr cargado correctamente');
+            libreriasACargar.push(
+                // Cargar CSS de flatpickr
+                new Promise((resolve) => {
+                    const linkElem = document.createElement('link');
+                    linkElem.rel = 'stylesheet';
+                    linkElem.href = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
+                    document.head.appendChild(linkElem);
+                    resolve();
+                }),
+                
+                // Cargar CSS del tema
+                new Promise((resolve) => {
+                    const linkTheme = document.createElement('link');
+                    linkTheme.rel = 'stylesheet';
+                    linkTheme.href = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css';
+                    document.head.appendChild(linkTheme);
+                    resolve();
+                }),
+                
+                // Cargar JavaScript de flatpickr
+                new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/flatpickr';
+                    script.onload = () => {
+                        console.log('Flatpickr cargado correctamente');
+                        resolve();
+                    };
+                    script.onerror = (error) => {
+                        console.error('Error al cargar Flatpickr:', error);
+                        reject(error);
+                    };
+                    document.head.appendChild(script);
+                })
+            );
+        }
+        
+        // Cargar archivo emailPreview.js
+        libreriasACargar.push(
+            new Promise((resolve, reject) => {
+                const emailPreviewScript = document.createElement('script');
+                emailPreviewScript.src = 'js/emailPreview.js';
+                emailPreviewScript.onload = () => {
+                    console.log('emailPreview.js cargado correctamente');
+                    resolve();
+                };
+                emailPreviewScript.onerror = (error) => {
+                    console.error('Error al cargar emailPreview.js:', error);
+                    reject(error);
+                };
+                document.head.appendChild(emailPreviewScript);
+            })
+        );
+        
+        // Cargar plantillas de WhatsApp
+        libreriasACargar.push(
+            new Promise((resolve, reject) => {
+                const whatsappTemplatesScript = document.createElement('script');
+                whatsappTemplatesScript.src = 'js/templates/whatsappTemplates.js';
+                whatsappTemplatesScript.onload = () => {
+                    console.log('whatsappTemplates.js cargado correctamente');
+                    
+                    // Asignar plantillas cuando se cargue el archivo
+                    if (window.templates && window.templates.whatsapp) {
+                        messageTemplates.whatsapp = window.templates.whatsapp;
+                    } else {
+                        console.error('No se pudieron cargar las plantillas de WhatsApp');
+                    }
+                    
+                    resolve();
+                };
+                whatsappTemplatesScript.onerror = (error) => {
+                    console.error('Error al cargar whatsappTemplates.js:', error);
+                    reject(error);
+                };
+                document.head.appendChild(whatsappTemplatesScript);
+            })
+        );
+        
+        // Cargar plantillas de Email
+        libreriasACargar.push(
+            new Promise((resolve, reject) => {
+                const emailTemplatesScript = document.createElement('script');
+                emailTemplatesScript.src = 'js/templates/emailTemplates.js';
+                emailTemplatesScript.onload = () => {
+                    console.log('emailTemplates.js cargado correctamente');
+                    
+                    // Asignar plantillas cuando se cargue el archivo
+                    if (window.templates && window.templates.email) {
+                        messageTemplates.email = window.templates.email;
+                    } else {
+                        console.error('No se pudieron cargar las plantillas de Email');
+                    }
+                    
+                    resolve();
+                };
+                emailTemplatesScript.onerror = (error) => {
+                    console.error('Error al cargar emailTemplates.js:', error);
+                    reject(error);
+                };
+                document.head.appendChild(emailTemplatesScript);
+            })
+        );
+        
+        // Inicializar el módulo cuando se carguen todas las bibliotecas
+        Promise.all(libreriasACargar)
+            .then(() => {
+                console.log('Todas las bibliotecas cargadas correctamente');
                 initComunicaciones();
-            };
-            script.onerror = function(error) {
-                console.error('Error al cargar Flatpickr:', error);
+            })
+            .catch((error) => {
+                console.error('Error al cargar bibliotecas:', error);
                 // Intentar inicializar de todos modos
                 initComunicaciones();
-            };
-            document.head.appendChild(script);
-        } else {
-            initComunicaciones();
-        }
+            });
 
         // Verificar si hay errores de JavaScript
         window.addEventListener('error', function(event) {
@@ -130,18 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (error) {
         console.error('Error en inicialización de comunicaciones:', error);
         alert('Error al cargar el módulo de comunicaciones. Por favor, recargue la página.');
-    }
-});
-
-// Reiniciar si el script ya estaba cargado
-document.addEventListener('script-reloaded', function(e) {
-    if (e.detail.script === 'js/comunicaciones.js') {
-        console.log('Script de comunicaciones recargado, reinicializando...');
-        try {
-            initComunicaciones();
-        } catch (error) {
-            console.error('Error al reinicializar comunicaciones:', error);
-        }
     }
 });
 
@@ -834,6 +850,20 @@ function loadContacts() {
 function setupCommunicationEvents() {
     console.log('Configurando eventos de comunicación');
     
+    // Verificar que las plantillas estén disponibles
+    if (!window.templates) {
+        console.warn('window.templates no está definido, creando objeto vacío');
+        window.templates = { whatsapp: [], email: [] };
+    }
+    
+    // Log de verificación de plantillas
+    console.log('Estado de plantillas disponibles:',
+        'window.templates.whatsapp:', window.templates && window.templates.whatsapp ? window.templates.whatsapp.length : 0,
+        'window.templates.email:', window.templates && window.templates.email ? window.templates.email.length : 0,
+        'messageTemplates.whatsapp:', messageTemplates && messageTemplates.whatsapp ? messageTemplates.whatsapp.length : 0,
+        'messageTemplates.email:', messageTemplates && messageTemplates.email ? messageTemplates.email.length : 0
+    );
+    
     // Botones de tipo de mensaje (WhatsApp / Email)
     const whatsappBtn = document.getElementById('btn-type-whatsapp');
     const emailBtn = document.getElementById('btn-type-email');
@@ -1285,14 +1315,33 @@ function setMessageType(type) {
     // Actualizar selector de plantillas
     let templatesHtml = '';
     
-    const templates = messageTemplates[type];
-    templates.forEach(template => {
-        templatesHtml += `
-            <div class="template-option" data-id="${template.id}">
-                ${template.title}
-            </div>
-        `;
-    });
+    // Obtener plantillas de la fuente más confiable
+    let templates = [];
+    
+    // Primero intentar obtener plantillas desde window.templates (cargado de archivos externos)
+    if (window.templates && window.templates[type]) {
+        templates = window.templates[type];
+        console.log(`Usando plantillas de window.templates.${type}: ${templates.length} plantillas encontradas`);
+    } 
+    // Como respaldo, usar messageTemplates 
+    else if (messageTemplates && messageTemplates[type]) {
+        templates = messageTemplates[type];
+        console.log(`Usando plantillas de messageTemplates.${type}: ${templates.length} plantillas encontradas`);
+    }
+    
+    // Verificar si tenemos plantillas
+    if (templates.length === 0) {
+        console.error(`No se encontraron plantillas para el tipo ${type}`);
+        templatesHtml = '<div class="alert alert-warning">No hay plantillas disponibles</div>';
+    } else {
+        templates.forEach(template => {
+            templatesHtml += `
+                <div class="template-option" data-id="${template.id}">
+                    ${template.title}
+                </div>
+            `;
+        });
+    }
     
     templateSelector.innerHTML = templatesHtml;
     
@@ -1333,7 +1382,18 @@ function applyTemplate(templateId) {
     const previewSection = document.getElementById('message-preview').parentElement;
     const type = window.currentMessageType;
     
-    const templates = messageTemplates[type];
+    // Obtener plantillas de la fuente más confiable
+    let templates = [];
+    
+    // Primero intentar obtener plantillas desde window.templates (cargado de archivos externos)
+    if (window.templates && window.templates[type]) {
+        templates = window.templates[type];
+    } 
+    // Como respaldo, usar messageTemplates 
+    else if (messageTemplates && messageTemplates[type]) {
+        templates = messageTemplates[type];
+    }
+    
     const template = templates.find(t => t.id === templateId);
     
     if (template && messageContent) {
@@ -1342,36 +1402,46 @@ function applyTemplate(templateId) {
         // Reemplazar variables si hay un contacto seleccionado
         if (selectedContact) {
             content = content.replace(/\[nombre\]/g, selectedContact.nombre);
+            // También reemplazar formato {{nombre}}
+            content = content.replace(/\{\{nombre\}\}/g, selectedContact.nombre);
             
             // Si hay objetivo de cliente, intentar usarlo
             if (selectedContact.objetivo) {
                 content = content.replace(/\[objetivo_cliente\]/g, selectedContact.objetivo);
+                content = content.replace(/\{\{objetivo_cliente\}\}/g, selectedContact.objetivo);
             } else {
                 content = content.replace(/\[objetivo_cliente\]/g, "mejorar tu condición física");
+                content = content.replace(/\{\{objetivo_cliente\}\}/g, "mejorar tu condición física");
             }
             
             // Si hay progreso destacado, intentar usarlo
             if (selectedContact.progreso) {
                 content = content.replace(/\[progreso_destacado\]/g, selectedContact.progreso);
+                content = content.replace(/\{\{progreso_destacado\}\}/g, selectedContact.progreso);
             } else {
                 content = content.replace(/\[progreso_destacado\]/g, "avances significativos");
+                content = content.replace(/\{\{progreso_destacado\}\}/g, "avances significativos");
             }
             
             // Si hay área destacada, intentar usarla
             if (selectedContact.area_destacada) {
                 content = content.replace(/\[área_destacada\]/g, selectedContact.area_destacada);
+                content = content.replace(/\{\{área_destacada\}\}/g, selectedContact.area_destacada);
             } else {
                 content = content.replace(/\[área_destacada\]/g, "tus ejercicios de fuerza");
+                content = content.replace(/\{\{área_destacada\}\}/g, "tus ejercicios de fuerza");
             }
         }
         
         // Reemplazar remitente por defecto
         content = content.replace(/\[remitente\]/g, 'Pepe Urueta');
+        content = content.replace(/\{\{remitente\}\}/g, 'Pepe Urueta');
         
         // Reemplazar fecha actual en formato DD/MM/YYYY
         const fechaActual = new Date();
         const fechaFormateada = `${fechaActual.getDate().toString().padStart(2, '0')}/${(fechaActual.getMonth() + 1).toString().padStart(2, '0')}/${fechaActual.getFullYear()}`;
         content = content.replace(/\[fecha_evaluacion\]/g, fechaFormateada);
+        content = content.replace(/\{\{fecha_evaluacion\}\}/g, fechaFormateada);
         
         // Si es una plantilla de citas, añadir selector de fecha y hora
         if (templateId === 'w3' || templateId === 'e2') {
@@ -1478,6 +1548,9 @@ function applyTemplate(templateId) {
                         let nuevoContenido = messageContent.value;
                         nuevoContenido = nuevoContenido.replace(/\[fecha\]/g, fechaFormat);
                         nuevoContenido = nuevoContenido.replace(/\[hora\]/g, horaFormat);
+                        // También reemplazar marcadores con {{}} para plantillas usando ese formato
+                        nuevoContenido = nuevoContenido.replace(/\{\{fecha\}\}/g, fechaFormat);
+                        nuevoContenido = nuevoContenido.replace(/\{\{hora\}\}/g, horaFormat);
                         
                         // Actualizar el contenido y vista previa
                         messageContent.value = nuevoContenido;
@@ -1530,12 +1603,35 @@ function updateMessagePreview() {
         // Si está vacío, mostrar un mensaje predeterminado
         if (!content) {
             content = 'La vista previa del mensaje aparecerá aquí. Escribe un mensaje o selecciona una plantilla.';
+            messagePreview.innerHTML = content;
+            return;
         }
         
-        // Formatear contenido para HTML (mantener saltos de línea)
-        content = content.replace(/\n/g, '<br>');
+        // Determinar si es un email o WhatsApp
+        const type = window.currentMessageType;
         
-        messagePreview.innerHTML = content;
+        if (type === 'email') {
+            // Formatear como HTML para emails utilizando la función del módulo emailPreview
+            if (window.emailPreview && typeof window.emailPreview.createEmailHtmlPreview === 'function') {
+                const emailHtml = window.emailPreview.createEmailHtmlPreview(content);
+                messagePreview.innerHTML = emailHtml;
+            } else {
+                // Fallback si no se ha cargado el módulo emailPreview
+                content = content.replace(/\n/g, '<br>');
+                messagePreview.innerHTML = `
+                    <div style="padding: 15px; border: 1px solid #eee; border-radius: 5px;">
+                        <div style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                            <strong>Asunto:</strong> Mensaje importante - URUETA CRM
+                        </div>
+                        ${content}
+                    </div>
+                `;
+            }
+        } else {
+            // Formatear contenido simple para WhatsApp (mantener saltos de línea)
+            content = content.replace(/\n/g, '<br>');
+            messagePreview.innerHTML = content;
+        }
     }
 }
 
@@ -1627,7 +1723,8 @@ async function sendMessage() {
     }
     
     if (type === 'whatsapp') {
-        // Obtener el número de teléfono
+        // Código existente para WhatsApp
+        // [... código existente...]
         let telefono = selectedContact.telefono || '';
         console.log('Teléfono antes de procesar:', telefono, typeof telefono);
         
@@ -1703,7 +1800,7 @@ async function sendMessage() {
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Abrir WhatsApp con el mensaje
-                    const whatsappURL = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
+                    const whatsappURL = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
                     console.log('URL de WhatsApp:', whatsappURL);
                     window.open(whatsappURL, '_blank');
                     
@@ -1733,7 +1830,7 @@ async function sendMessage() {
             });
         }
     } else {
-        // Obtener el email
+        // Para Email
         let email = selectedContact.email || '';
         console.log('Email antes de procesar:', email, typeof email);
         
@@ -1753,8 +1850,255 @@ async function sendMessage() {
             email = String(email);
         }
         
-        // Si tenemos un PDF generado, ofrecer descargarlo
-        if (pdfInfo) {
+        // Si es la plantilla de presentación de servicios (e1), recordatorio de cita (e2) o reporte de seguimiento (e4), enviar a través de la API de AppScript
+        if ((templateId === 'e1' || templateId === 'e2' || templateId === 'e4') && type === 'email') {
+            // Crear objeto de comunicación para la API
+            const ahora = new Date();
+            const fechaFormateada = ahora.toLocaleDateString('es-ES', { 
+                day: '2-digit', 
+                month: '2-digit',
+                year: 'numeric'
+            }) + ' ' + ahora.toLocaleTimeString('es-ES', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            // Extraer fecha y hora de la cita si está en el mensaje (para e2)
+            let fechaCita = '';
+            let horaCita = '';
+            let plantillaEnviada = '';
+            let adjuntoId = ''; // Para enviar el ID del archivo adjunto a la API
+            
+            if (templateId === 'e1') {
+                plantillaEnviada = 'Presentación de servicios';
+            } else if (templateId === 'e2') {
+                plantillaEnviada = 'Recordatorio de cita';
+                
+                // Obtener fecha y hora directamente de los inputs del selector
+                const fechaInput = document.getElementById('cita-fecha');
+                const horaInput = document.getElementById('cita-hora');
+                
+                if (fechaInput && fechaInput.value && horaInput && horaInput.value) {
+                    // Formatear fecha seleccionada a DD/MM/YYYY
+                    const fechaObj = new Date(fechaInput.value);
+                    const dia = String(fechaObj.getDate()).padStart(2, '0');
+                    const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+                    const anio = fechaObj.getFullYear();
+                    fechaCita = `${dia}/${mes}/${anio}`;
+                    
+                    // Convertir hora de formato 24h a 12h con AM/PM
+                    const [hora] = horaInput.value.split(':');
+                    const horaNum = parseInt(hora, 10);
+                    const ampm = horaNum >= 12 ? 'PM' : 'AM';
+                    const hora12 = horaNum % 12 || 12;
+                    horaCita = `${hora12}:00 ${ampm}`;
+                } else {
+                    // Si no están disponibles los inputs, intentar extraer del mensaje como fallback
+                    const regexFecha = /programada para el (\d{2}\/\d{2}\/\d{4})/;
+                    const regexHora = /a las (\d{1,2}:\d{2} [APM]{2})/;
+                    
+                    const matchFecha = mensaje.match(regexFecha);
+                    const matchHora = mensaje.match(regexHora);
+                    
+                    fechaCita = matchFecha ? matchFecha[1] : '';
+                    horaCita = matchHora ? matchHora[1] : '';
+                }
+                
+                console.log('Fecha cita:', fechaCita);
+                console.log('Hora cita:', horaCita);
+            } else if (templateId === 'e4') {
+                plantillaEnviada = 'reporte de avance'; // En minúsculas como lo espera el servidor
+                
+                // Mostrar loader mientras se genera el PDF
+                Swal.fire({
+                    title: 'Generando informe de seguimiento',
+                    text: 'Estamos preparando el informe personalizado...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                try {
+                    // Generar PDF para adjuntar al correo
+                    const pdfResult = await generarPDFAvance(selectedContact);
+                    if (!pdfResult) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pudo generar el informe PDF. Verifica que el cliente tenga datos de seguimiento.',
+                            icon: 'error',
+                            confirmButtonColor: '#E63946'
+                        });
+                        return;
+                    }
+                    
+                    // Convertir el PDF a base64 para enviarlo al servidor
+                    const { blob, fileName } = pdfResult;
+                    const reader = new FileReader();
+                    
+                    // Usar una promesa para manejar la lectura del archivo
+                    const pdfBase64 = await new Promise((resolve, reject) => {
+                        reader.onload = () => {
+                            // El resultado es una cadena en base64 con un prefijo que debemos eliminar
+                            const base64String = reader.result.split(',')[1];
+                            resolve(base64String);
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                    
+                    // El archivo base64 se enviará directamente en la solicitud
+                    adjuntoId = fileName; // Usamos el nombre del archivo como identificador
+                    
+                    // Agregar el contenido del PDF a variables temporales para incluirlos después
+                    // en el objeto comunicacion
+                    window.tempPdfContent = pdfBase64;
+                    window.tempPdfFileName = fileName;
+                    
+                    Swal.close();
+                } catch (error) {
+                    console.error('Error al generar PDF:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al generar el informe PDF.',
+                        icon: 'error',
+                        confirmButtonColor: '#E63946'
+                    });
+                    return;
+                }
+            }
+            
+            // Crear el objeto comunicacion DESPUÉS de todos los procesamientos
+            const comunicacion = {
+                nombre: selectedContact.nombre || '',
+                email: email,
+                telefono: selectedContact.telefono || '',
+                fecha: fechaFormateada,
+                "fecha-cita": fechaCita,
+                "hora-cita": horaCita,
+                "tipo-plantilla": plantillaEnviada,
+                "adjunto": adjuntoId
+            };
+            
+            // Agregar contenido del PDF si existe
+            if (window.tempPdfContent && window.tempPdfFileName) {
+                comunicacion.pdfContent = window.tempPdfContent;
+                comunicacion.pdfFileName = window.tempPdfFileName;
+                
+                // Limpiar variables temporales
+                delete window.tempPdfContent;
+                delete window.tempPdfFileName;
+            }
+            
+            // Mostrar loader mientras se envía el correo
+            Swal.fire({
+                title: 'Enviando correo',
+                text: 'Estamos enviando tu mensaje...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            try {
+                // Enviar datos a la API de AppScript
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbwUTb4KT6D7jFNAnY8vY01xtkhtVbV1NeD3zQH12Pjmc4hRP_oHF77WbE0RBxnSqe1Vww/exec';
+                
+                // Asegurarnos de que los nombres de los parámetros coinciden exactamente con lo que espera el AppScript
+                const comunicacionAPI = {
+                    nombre: comunicacion.nombre,
+                    email: comunicacion.email,
+                    telefono: comunicacion.telefono,
+                    fecha: comunicacion.fecha,
+                    "fecha-cita": comunicacion["fecha-cita"],
+                    "hora-cita": comunicacion["hora-cita"],
+                    "tipo-plantilla": comunicacion["tipo-plantilla"]
+                };
+                
+                // Si tenemos contenido PDF, lo incluimos como adjunto
+                if (comunicacion.pdfContent && comunicacion.pdfFileName) {
+                    comunicacionAPI.adjunto = comunicacion.pdfContent;
+                    comunicacionAPI.pdfFileName = comunicacion.pdfFileName;
+                }
+                
+                // Depurar la información que se está enviando
+                console.log('====== DATOS ENVIADOS A LA API ======');
+                console.log('URL de la API:', apiUrl);
+                console.log('Objeto comunicacionAPI completo:', comunicacionAPI);
+                console.log('====================================');
+                
+                // Crear un iframe oculto para enviar los datos (evita problemas de CORS y no abre nueva pestaña)
+                const iframeId = 'hidden-email-sender';
+                let iframe = document.getElementById(iframeId);
+                
+                // Si el iframe ya existe, lo eliminamos
+                if (iframe) {
+                    document.body.removeChild(iframe);
+                }
+                
+                // Crear un nuevo iframe
+                iframe = document.createElement('iframe');
+                iframe.id = iframeId;
+                iframe.name = iframeId;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                // Crear un formulario para enviar dentro del iframe
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = apiUrl;
+                form.target = iframeId; // Apuntar al iframe en lugar de _blank
+                
+                // Agregar todos los campos al formulario
+                for (const key in comunicacionAPI) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = comunicacionAPI[key];
+                    form.appendChild(input);
+                }
+                
+                // Agregar el formulario al documento
+                document.body.appendChild(form);
+                
+                // Mostrar mensaje de proceso
+                Swal.fire({
+                    title: 'Enviando correo',
+                    text: 'Estamos procesando tu mensaje...',
+                    icon: 'info',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        // Enviar el formulario
+                        form.submit();
+                        
+                        // Esperar un poco y luego mostrar confirmación
+                        setTimeout(() => {
+                            Swal.close();
+                            Swal.fire({
+                                title: 'Correo enviado',
+                                text: 'Tu mensaje ha sido enviado y registrado correctamente.',
+                                icon: 'success',
+                                confirmButtonColor: '#4a6cf7'
+                            });
+                            
+                            // Eliminar el formulario después de enviarlo
+                            document.body.removeChild(form);
+                        }, 2000);
+                    }
+                });
+            } catch (error) {
+                console.error('Error al enviar correo vía API:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al enviar el correo. Por favor, intenta de nuevo.',
+                    icon: 'error',
+                    confirmButtonColor: '#E63946'
+                });
+            }
+        } else if (pdfInfo) {
+            // Si tenemos un PDF generado, ofrecer descargarlo
             const { blob, fileName } = pdfInfo;
             
             // Crear URL para descargar el PDF
@@ -1782,7 +2126,7 @@ async function sendMessage() {
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Abrir cliente de correo con el mensaje
-                    const subject = 'Informe de Avance de Entrenamiento - URUETA CRM';
+                    const subject = 'Informe de Avance de Entrenamiento - Pepe Urueta';
                     const mailtoURL = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mensaje)}`;
                     console.log('URL de correo:', mailtoURL);
                     window.location.href = mailtoURL;
@@ -1790,7 +2134,7 @@ async function sendMessage() {
             });
         } else {
             // Enviar correo normal
-            const subject = 'Mensaje importante - URUETA CRM';
+            const subject = 'Mensaje importante - Pepe Urueta';
             const mailtoURL = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mensaje)}`;
             console.log('URL de correo:', mailtoURL);
             window.location.href = mailtoURL;
@@ -2051,372 +2395,775 @@ async function generarPDFAvance(cliente) {
     try {
         // Comprobar si la biblioteca jsPDF está disponible
         if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
-            // Cargar dinámicamente jsPDF si no está disponible
             await cargarLibreriaPDF();
         }
         
-        console.log('Generando PDF para el cliente:', cliente);
+        console.log('Generando PDF para el cliente original:', cliente);
         
-        // Crear un nuevo documento PDF
-        const { jsPDF } = jspdf;
-        const doc = new jsPDF({
+        // PASO 1: Buscar el cliente en la base de datos por teléfono o email
+        let clienteCompleto = null;
+        if (cliente.telefono || cliente.email) {
+            const clientesArray = Object.values(window.apiData.clientes || {});
+            console.log(`Buscando cliente entre ${clientesArray.length} clientes`);
+            
+            // Normalizar teléfono para comparación (eliminar espacios, guiones, etc)
+            // Convertir a string antes de usar replace
+            const telefonoNormalizado = cliente.telefono ? String(cliente.telefono).replace(/\D/g, '') : '';
+            
+            clienteCompleto = clientesArray.find(c => {
+                // Convertir a string antes de usar replace
+                const cTelefonoNormalizado = c.telefono ? String(c.telefono).replace(/\D/g, '') : '';
+                const matchTelefono = telefonoNormalizado && cTelefonoNormalizado && 
+                                      cTelefonoNormalizado.includes(telefonoNormalizado);
+                
+                const matchEmail = cliente.email && c.email && 
+                                  c.email.toLowerCase() === cliente.email.toLowerCase();
+                
+                return matchTelefono || matchEmail;
+            });
+            
+            if (clienteCompleto) {
+                console.log('Cliente encontrado en la base de datos:', clienteCompleto);
+                console.log('Número de expediente del cliente:', clienteCompleto['numero-expediente']);
+                // Fusionar los datos del cliente
+                cliente = {...cliente, ...clienteCompleto};
+            } else {
+                console.warn('No se encontró el cliente en la base de datos');
+            }
+        }
+        
+        // PASO 2: Buscar todos los expedientes relacionados con el cliente
+        let expedientesCliente = [];
+        let ultimoRegistro = null;
+        
+        if (window.apiData && window.apiData.expedientes) {
+            console.log('Número de expediente a buscar:', cliente['numero-expediente']);
+            const expedientesArray = Object.values(window.apiData.expedientes || {});
+            console.log(`Total de expedientes disponibles: ${expedientesArray.length}`);
+            
+            // Buscar por número de expediente, que es la relación principal
+            expedientesCliente = expedientesArray.filter(exp => {
+                const matchNumeroExpediente = cliente['numero-expediente'] && 
+                                            exp['numero-expediente'] === cliente['numero-expediente'];
+                
+                // También buscar por otros posibles identificadores como respaldo
+                const matchClienteId = cliente.id && exp.clienteId === cliente.id;
+                const matchExpedienteId = cliente.expedienteId && exp.id === cliente.expedienteId;
+                
+                const isMatch = matchNumeroExpediente || matchClienteId || matchExpedienteId;
+                if (isMatch) {
+                    console.log('Expediente coincidente encontrado:', exp);
+                }
+                return isMatch;
+            });
+            
+            console.log(`Expedientes encontrados para el cliente: ${expedientesCliente.length}`);
+            
+            if (expedientesCliente.length > 0) {
+                // Ordenar por fecha para tener una secuencia cronológica
+                expedientesCliente.sort((a, b) => {
+                    const fechaA = a['fecha-registro'] ? new Date(a['fecha-registro'].split('/').reverse().join('-')) : new Date(0);
+                    const fechaB = b['fecha-registro'] ? new Date(b['fecha-registro'].split('/').reverse().join('-')) : new Date(0);
+                    return fechaA - fechaB;
+                });
+                
+                ultimoRegistro = expedientesCliente[expedientesCliente.length - 1];
+                console.log('Datos del último registro:', ultimoRegistro);
+                console.log('Total registros para gráficas:', expedientesCliente.length);
+            } else {
+                console.warn('No se encontraron expedientes para el cliente, verificando otras relaciones...');
+                
+                // Búsqueda alternativa - revisar todos los expedientes buscando cualquier relación
+                if (cliente.nombre) {
+                    console.log('Intentando búsqueda por nombre del cliente...');
+                    const nombreCliente = cliente.nombre.toLowerCase();
+                    
+                    expedientesCliente = expedientesArray.filter(exp => {
+                        // Buscar en campos que podrían contener el nombre
+                        const nombreEnNotas = exp.notas && exp.notas.toLowerCase().includes(nombreCliente);
+                        const nombreEnObjetivo = exp.objetivo && exp.objetivo.toLowerCase().includes(nombreCliente);
+                        
+                        return nombreEnNotas || nombreEnObjetivo;
+                    });
+                    
+                    console.log(`Expedientes encontrados por nombre: ${expedientesCliente.length}`);
+                }
+            }
+        }
+
+        // PASO 3: Verificar si tenemos suficientes datos para generar el PDF
+        if (expedientesCliente.length === 0) {
+            console.warn('No se encontraron expedientes para el cliente, no se puede generar PDF');
+            return null;
+        }
+        
+        // PASO 4: Extraer datos para gráficas
+        console.log('Extrayendo datos para gráficas...');
+        
+        // Preparar arrays para los datos
+        const fechas = [];
+        const fechasCompletas = []; // Para guardar fechas con año
+        const pesos = [];
+        const grasaCorporal = [];
+        const diasEntrenamiento = [];
+        const horasEntrenamiento = [];
+        
+        // Valor inicial y deseado para comparativas
+        let pesoInicial = null;
+        let pesoDeseado = null;
+        let grasaInicial = null;
+        let grasaDeseada = null;
+        let fechaInicial = null;
+        
+        // Recorrer los expedientes para extraer datos
+        expedientesCliente.forEach((exp, index) => {
+            // Extraer fecha formateada
+            let fecha = exp['fecha-registro'] || '';
+            let fechaCompleta = fecha;
+            if (fecha) {
+                // Guardar la fecha completa para mostrar en gráficos
+                const partesFecha = fecha.split('/');
+                if (partesFecha.length >= 3) {
+                    // Formato "DD/MM/AA" para eje X
+                    const año = partesFecha[2].substring(0, 4);
+                    fecha = `${partesFecha[0]}/${partesFecha[1]}/${año.substring(2)}`;
+                    
+                    // Guardar la fecha inicial para calcular días transcurridos
+                    if (index === 0) {
+                        fechaInicial = exp['fecha-registro'];
+                    }
+                }
+                fechas.push(fecha);
+                fechasCompletas.push(fechaCompleta);
+            }
+            
+            // Extraer métricas principales
+            const pesoActual = parseFloat(exp['peso-actual'] || 0);
+            pesos.push(pesoActual);
+            
+            const grasa = parseFloat(exp['grasa-actual'] || 0);
+            grasaCorporal.push(grasa);
+            
+            // Extraer datos de entrenamiento
+            const diasTrain = parseInt(exp['dias-entrenamiento'] || 0);
+            diasEntrenamiento.push(diasTrain);
+            
+            const horasTrain = parseFloat(exp['horas-entrenamiento'] || 0);
+            horasEntrenamiento.push(horasTrain);
+            
+            // Capturar valores iniciales y deseados (del primer registro)
+            if (index === 0) {
+                pesoInicial = parseFloat(exp['peso-inicial'] || exp['peso-actual'] || 0);
+                pesoDeseado = parseFloat(exp['peso-deseado'] || 0);
+                grasaInicial = parseFloat(exp['grasa-inicial'] || exp['grasa-actual'] || 0);
+                grasaDeseada = parseFloat(exp['grasa-deseada'] || 0);
+            }
+        });
+        
+        console.log('Datos extraídos para gráficas:', {
+            fechas, pesos, grasaCorporal, diasEntrenamiento, horasEntrenamiento,
+            pesoInicial, pesoDeseado, grasaInicial, grasaDeseada
+        });
+        
+        // PASO 5: Generar gráficas con Chart.js
+        // Primero comprobar si Chart.js está disponible
+        if (typeof Chart === 'undefined') {
+            await cargarLibreriaChart();
+        }
+        
+        // Crear canvas temporales para las gráficas
+        const chartContainer = document.createElement('div');
+        chartContainer.style.display = 'none';
+        document.body.appendChild(chartContainer);
+        
+        // Crear canvas para cada gráfica con dimensiones mayores para mejor calidad
+        const pesoCanvas = document.createElement('canvas');
+        pesoCanvas.width = 600;  // Aumentado para mejor resolución
+        pesoCanvas.height = 350; // Proporción mejorada para evitar que se vean aplastados
+        pesoCanvas.id = 'pesoChart';
+        chartContainer.appendChild(pesoCanvas);
+        
+        const grasaCanvas = document.createElement('canvas');
+        grasaCanvas.width = 600;
+        grasaCanvas.height = 350;
+        grasaCanvas.id = 'grasaChart';
+        chartContainer.appendChild(grasaCanvas);
+        
+        const diasCanvas = document.createElement('canvas');
+        diasCanvas.width = 600;
+        diasCanvas.height = 350;
+        diasCanvas.id = 'diasChart';
+        chartContainer.appendChild(diasCanvas);
+        
+        const horasCanvas = document.createElement('canvas');
+        horasCanvas.width = 600;
+        horasCanvas.height = 350;
+        horasCanvas.id = 'horasChart';
+        chartContainer.appendChild(horasCanvas);
+        
+        // Configuración común para gráficas
+        const commonConfig = {
+            type: 'line',
+            options: {
+                responsive: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 15
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            padding: 8,
+                            font: {
+                                size: 9
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        grid: {
+                            display: true
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            padding: 8,
+                            font: {
+                                size: 10
+                            },
+                            callback: function(value) {
+                                return value; // El valor numérico
+                            }
+                        },
+                        grid: {
+                            display: true
+                        }
+                    }
+                },
+                animation: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 10,
+                        top: 0,
+                        bottom: 30 // Mayor padding para acomodar fechas rotadas
+                    }
+                },
+                maintainAspectRatio: false
+            }
+        };
+        
+        // Crear gráfica de peso con peso inicial y deseado como líneas de referencia
+        const pesoChart = new Chart(pesoCanvas.getContext('2d'), {
+            ...commonConfig,
+            data: {
+                labels: fechas,
+                datasets: [
+                    {
+                        label: 'Peso Actual (kg)',
+                        data: pesos,
+                        borderColor: '#E63946',
+                        backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    },
+                    {
+                        label: 'Peso Inicial',
+                        data: Array(fechas.length).fill(pesoInicial),
+                        borderColor: '#FF0000',
+                        borderDash: [5, 5],
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: false
+                    },
+                    {
+                        label: 'Peso Objetivo',
+                        data: Array(fechas.length).fill(pesoDeseado),
+                        borderColor: '#00AA00',
+                        borderDash: [3, 3],
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                ...commonConfig.options,
+                plugins: {
+                    ...commonConfig.options.plugins,
+                    title: {
+                        ...commonConfig.options.plugins.title,
+                        text: 'Evolución del Peso'
+                    }
+                },
+                scales: {
+                    x: {
+                        ...commonConfig.options.scales.x,
+                    },
+                    y: {
+                        ...commonConfig.options.scales.y,
+                        title: {
+                            display: true,
+                            text: 'kg',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Crear gráfica de grasa corporal con objetivos
+        const grasaChart = new Chart(grasaCanvas.getContext('2d'), {
+            ...commonConfig,
+            data: {
+                labels: fechas,
+                datasets: [
+                    {
+                        label: 'Grasa Corporal (%)',
+                        data: grasaCorporal,
+                        borderColor: '#F4A261',
+                        backgroundColor: 'rgba(244, 162, 97, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    },
+                    {
+                        label: 'Grasa Inicial',
+                        data: Array(fechas.length).fill(grasaInicial),
+                        borderColor: '#FF0000',
+                        borderDash: [5, 5],
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: false
+                    },
+                    {
+                        label: 'Grasa Objetivo',
+                        data: Array(fechas.length).fill(grasaDeseada),
+                        borderColor: '#00AA00',
+                        borderDash: [3, 3],
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                ...commonConfig.options,
+                plugins: {
+                    ...commonConfig.options.plugins,
+                    title: {
+                        ...commonConfig.options.plugins.title,
+                        text: 'Evolución de Grasa Corporal'
+                    }
+                },
+                scales: {
+                    x: {
+                        ...commonConfig.options.scales.x,
+                    },
+                    y: {
+                        ...commonConfig.options.scales.y,
+                        title: {
+                            display: true,
+                            text: '%',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Crear gráfica de días de entrenamiento (convertida a línea)
+        const diasChart = new Chart(diasCanvas.getContext('2d'), {
+            ...commonConfig,
+            data: {
+                labels: fechas,
+                datasets: [{
+                    label: 'Días de Entrenamiento',
+                    data: diasEntrenamiento,
+                    borderColor: '#457B9D',
+                    backgroundColor: 'rgba(69, 123, 157, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                ...commonConfig.options,
+                plugins: {
+                    ...commonConfig.options.plugins,
+                    title: {
+                        ...commonConfig.options.plugins.title,
+                        text: 'Días de Entrenamiento por Semana'
+                    }
+                },
+                scales: {
+                    x: {
+                        ...commonConfig.options.scales.x,
+                    },
+                    y: {
+                        ...commonConfig.options.scales.y,
+                        beginAtZero: true,
+                        suggestedMax: 7,
+                        title: {
+                            display: true,
+                            text: 'días',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Crear gráfica de horas de entrenamiento (convertida a línea)
+        const horasChart = new Chart(horasCanvas.getContext('2d'), {
+            ...commonConfig,
+            data: {
+                labels: fechas,
+                datasets: [{
+                    label: 'Horas de Entrenamiento',
+                    data: horasEntrenamiento,
+                    borderColor: '#2A9D8F',
+                    backgroundColor: 'rgba(42, 157, 143, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                ...commonConfig.options,
+                plugins: {
+                    ...commonConfig.options.plugins,
+                    title: {
+                        ...commonConfig.options.plugins.title,
+                        text: 'Horas de Entrenamiento por Sesión'
+                    }
+                },
+                scales: {
+                    x: {
+                        ...commonConfig.options.scales.x,
+                    },
+                    y: {
+                        ...commonConfig.options.scales.y,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'horas',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Esperar un momento para que se renderizen las gráficas
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Obtener las URL de datos de las gráficas
+        const pesoChartUrl = pesoCanvas.toDataURL('image/png');
+        const grasaChartUrl = grasaCanvas.toDataURL('image/png');
+        const diasChartUrl = diasCanvas.toDataURL('image/png');
+        const horasChartUrl = horasCanvas.toDataURL('image/png');
+        
+        // PASO 6: Generar PDF
+        console.log('Generando documento PDF...');
+        
+        // Crear instancia de jsPDF
+        const doc = new jspdf.jsPDF({
             orientation: 'portrait',
             unit: 'mm',
             format: 'a4'
         });
         
-        // Configurar fuentes
+        // Configuración de página
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const contentWidth = pageWidth - 2 * margin;
+        
+        // Configurar tamaño para las gráficas
+        const chartWidth = contentWidth;
+        const chartHeight = 80; // Altura ajustada
+        
+        // Función para añadir encabezado a las páginas
+        function addHeader(page) {
+            doc.setPage(page);
+            doc.setFillColor(69, 123, 157);
+            doc.rect(0, 0, pageWidth, 30, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Reporte de Seguimiento', pageWidth / 2, 15, { align: 'center' });
+        }
+        
+        // Función para añadir pie de página con logo
+        function addFooter(page) {
+            doc.setPage(page);
+            
+            // Añadir rectángulo de fondo gris claro para el pie de página
+            doc.setFillColor(247, 247, 247); // #f7f7f7
+            doc.rect(0, pageHeight - 45, pageWidth, 45, 'F');
+            
+            try {
+                // Agregar logo al pie de página (ahora usando Footer.jpg que está en la raíz)
+                const logoPath = './Footer.jpg';
+                const footerWidth = 140;  // Ancho en mm para el logo
+                const footerHeight = 25;  // Alto en mm para el logo
+                const footerX = (pageWidth - footerWidth) / 2;  // Centrado horizontalmente
+                const footerY = pageHeight - footerHeight - 10;  // Posición desde abajo
+                
+                doc.addImage(logoPath, 'JPEG', footerX, footerY, footerWidth, footerHeight);
+            } catch (e) {
+                console.error('Error al agregar logo de pie de página:', e);
+                
+                // Intentar con ruta alternativa si falla la primera
+                try {
+                    const alternateLogoPath = 'Footer.jpg';
+                    const footerWidth = 140;
+                    const footerHeight = 25;
+                    const footerX = (pageWidth - footerWidth) / 2;
+                    const footerY = pageHeight - footerHeight - 10;
+                    
+                    doc.addImage(alternateLogoPath, 'JPEG', footerX, footerY, footerWidth, footerHeight);
+                } catch (e2) {
+                    console.error('No se pudo añadir el logo de pie de página:', e2);
+                }
+            }
+        }
+        
+        // PÁGINA 1 - Información del cliente y gráficas iniciales
+        addHeader(1);
+        
+        // Calcular la fecha actual en formato DD/MM/YYYY
+        const today = new Date();
+        const fechaActual = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+        
+        // Agregar información del cliente
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Reporte de seguimiento - ${fechaActual}`, margin, 40);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Datos del cliente:', margin, 50);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Nombre: ${cliente.nombre || 'No disponible'}`, margin, 55);
+        doc.text(`Email: ${cliente.email || 'No disponible'}`, margin, 60);
+        doc.text(`Teléfono: ${cliente.telefono || 'No disponible'}`, margin, 65);
+        
+        // Agregar resumen actual
+        if (ultimoRegistro) {
+            doc.setFont('helvetica', 'bold');
+            doc.text('Mediciones actuales:', margin, 75);
+            doc.setFont('helvetica', 'normal');
+            
+            // Formatear fecha para quitar la hora
+            let fechaFormateada = ultimoRegistro['fecha-registro'] || 'No disponible';
+            if (fechaFormateada.includes(' ')) {
+                fechaFormateada = fechaFormateada.split(' ')[0];
+            }
+            
+            doc.text(`Fecha: ${fechaFormateada}`, margin, 80);
+            doc.text(`Peso actual: ${ultimoRegistro['peso-actual'] || 'No disponible'} kg`, margin, 85);
+            doc.text(`Grasa corporal: ${ultimoRegistro['grasa-actual'] || 'No disponible'} %`, margin, 90);
+            doc.text(`Disciplina: ${ultimoRegistro['disciplina'] || 'No disponible'}`, margin, 95);
+            doc.text(`Nivel: ${ultimoRegistro['nivel'] || 'No disponible'}`, margin, 100);
+            doc.text(`Objetivo: ${ultimoRegistro['objetivo'] || 'No disponible'}`, margin, 105);
+            
+            // Datos adicionales de entrenamiento
+            doc.text(`Días de entrenamiento: ${ultimoRegistro['dias-entrenamiento'] || '0'} días/semana`, margin, 110);
+            doc.text(`Horas por sesión: ${ultimoRegistro['horas-entrenamiento'] || '0'} horas`, margin, 115);
+            
+            // Condiciones médicas si existen
+            if (ultimoRegistro['condiciones-medicas']) {
+                doc.text(`Condiciones médicas: ${ultimoRegistro['condiciones-medicas']}`, margin, 120);
+            }
+        }
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Evolución de mediciones', margin, 130);
+        
+        // Agregar gráfica de peso (ajustada para no solapar con el footer y aumentando altura)
+        const usableHeight = pageHeight - 160 - 35; // Restar encabezado, logo y márgenes
+        doc.addImage(pesoChartUrl, 'PNG', margin, 135, chartWidth, chartHeight);
+        
+        // Añadir el pie de página a la primera página
+        addFooter(1);
+        
+        // PÁGINA 2 - Continuación de gráficas
+        doc.addPage();
+        addHeader(2);
+        
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Evolución de Grasa Corporal', margin, 40);
+        
+        // Agregar gráfica de grasa corporal
+        doc.addImage(grasaChartUrl, 'PNG', margin, 45, chartWidth, chartHeight);
+        
+        // Agregar gráficas de entrenamiento
+        doc.setFont('helvetica', 'bold');
+        doc.text('Registro de entrenamiento', margin, 45 + chartHeight + 15);
+        
+        // Agregar gráfica de días de entrenamiento
+        doc.addImage(diasChartUrl, 'PNG', margin, 45 + chartHeight + 20, chartWidth, chartHeight);
+        
+        // Añadir pie de página a la segunda página
+        addFooter(2);
+        
+        // PÁGINA 3 - Horas de entrenamiento y resumen de progreso
+        doc.addPage();
+        addHeader(3);
+        
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Horas de Entrenamiento por Sesión', margin, 40);
+        
+        // Agregar gráfica de horas de entrenamiento
+        doc.addImage(horasChartUrl, 'PNG', margin, 45, chartWidth, chartHeight);
+        
+        // Calcular días transcurridos
+        let diasTranscurridos = 0;
+        if (fechaInicial && expedientesCliente.length > 0) {
+            const fechaIni = new Date(fechaInicial.split('/').reverse().join('-'));
+            const fechaFin = new Date(expedientesCliente[expedientesCliente.length - 1]['fecha-registro'].split('/').reverse().join('-'));
+            diasTranscurridos = Math.ceil((fechaFin - fechaIni) / (1000 * 60 * 60 * 24));
+        }
+        
+        // Calcular diferencias y progreso
+        const pesoPrimerRegistro = pesos[0] || 0;
+        const pesoUltimoRegistro = pesos[pesos.length - 1] || 0;
+        const diferenciaPeso = pesoUltimoRegistro - pesoPrimerRegistro;
+        const progresoHaciaMeta = pesoDeseado ? Math.abs(pesoUltimoRegistro - pesoDeseado) : 0;
+        
+        const grasaPrimerRegistro = grasaCorporal[0] || 0;
+        const grasaUltimoRegistro = grasaCorporal[grasaCorporal.length - 1] || 0;
+        const diferenciaGrasa = grasaUltimoRegistro - grasaPrimerRegistro;
+        const progresoGrasaHaciaMeta = grasaDeseada ? Math.abs(grasaUltimoRegistro - grasaDeseada) : 0;
+        
+        // Agregar resumen de progreso con estilo similar a "mediciones actuales"
+        doc.setFont('helvetica', 'bold');
+        doc.text('Resumen de progreso:', margin, 45 + chartHeight + 20);
+        
+        // Configuraciones para el texto
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        
+        // Variables para posicionar el texto
+        let yPos = 45 + chartHeight + 25;
+        const lineHeight = 5; // Mismo espaciado que en "mediciones actuales"
+        
+        // Usar formato normal para los valores
         doc.setFont('helvetica', 'normal');
         
-        // Obtener todos los registros de expediente del cliente para mostrar evolución
-        let expedientesCliente = [];
-        let ultimoRegistro = null;
-        if (window.apiData && window.apiData.expedientes) {
-            // Buscar registros asociados al cliente
-            expedientesCliente = Object.values(window.apiData.expedientes).filter(
-                exp => exp.clienteId === cliente.id || exp.id === cliente.expedienteId
-            );
-            
-            if (expedientesCliente.length > 0) {
-                // Ordenar por fecha
-                expedientesCliente.sort((a, b) => {
-                    const fechaA = a['fecha-registro'] ? new Date(a['fecha-registro'].split('/').reverse().join('-')) : new Date(0);
-                    const fechaB = b['fecha-registro'] ? new Date(b['fecha-registro'].split('/').reverse().join('-')) : new Date(0);
-                    return fechaA - fechaB; // Orden cronológico para las gráficas
-                });
-                
-                // El último registro es el más reciente
-                ultimoRegistro = expedientesCliente[expedientesCliente.length - 1];
-                console.log('Último registro encontrado:', ultimoRegistro);
-                console.log('Total registros para gráficas:', expedientesCliente.length);
-            }
-        }
-
-        // Intentar capturar las gráficas disponibles de la sección de Avance
-        let chartImages = {};
+        // Días transcurridos
+        doc.text(`Días desde el inicio del seguimiento: ${diasTranscurridos}`, margin, yPos);
+        yPos += lineHeight;
         
-        // Función para capturar cualquier gráfico visible en la página como imagen base64
-        const captureCharts = async () => {
-            try {
-                // Buscar todos los canvas de Chart.js en la página
-                const chartCanvases = document.querySelectorAll('canvas.chartjs-render-monitor');
-                if (chartCanvases.length > 0) {
-                    console.log(`Se encontraron ${chartCanvases.length} gráficas en la página`);
-                    
-                    // Identificar gráficas por su contenedor o ID
-                    for (let canvas of chartCanvases) {
-                        const parentId = canvas.parentElement.id || '';
-                        const chartId = canvas.id || '';
-                        
-                        if (parentId.includes('peso') || chartId.includes('peso')) {
-                            chartImages.peso = canvas.toDataURL('image/png');
-                            console.log('Capturada gráfica de peso');
-                        } else if (parentId.includes('grasa') || chartId.includes('grasa')) {
-                            chartImages.grasa = canvas.toDataURL('image/png');
-                            console.log('Capturada gráfica de grasa corporal');
-                        } else if (parentId.includes('entrenamiento') || chartId.includes('entrenamiento')) {
-                            chartImages.entrenamiento = canvas.toDataURL('image/png');
-                            console.log('Capturada gráfica de entrenamiento');
-                        } else {
-                            // Si no se puede identificar, guardar como otra gráfica
-                            const genericKey = `other_${Object.keys(chartImages).length}`;
-                            chartImages[genericKey] = canvas.toDataURL('image/png');
-                            console.log(`Capturada gráfica genérica: ${genericKey}`);
-                        }
-                    }
-                } else {
-                    console.warn('No se encontraron gráficas en la página');
-                }
-            } catch (e) {
-                console.error('Error al capturar gráficas:', e);
-            }
-            
-            return chartImages;
-        };
-        
-        // Intentar capturar gráficas si no tenemos las imágenes desde window
-        if (!window.chartImageBase64 || Object.keys(window.chartImageBase64).length === 0) {
-            console.log('Intentando capturar gráficas de la página actual');
-            chartImages = await captureCharts();
-            // Almacenar para uso futuro
-            window.chartImageBase64 = chartImages;
+        // Plantillas de texto para cambios de peso
+        if (Math.abs(diferenciaPeso) < 0.1) {
+            // Cuando el peso se mantiene
+            doc.text(`El peso se ha mantenido desde el inicio (${pesoPrimerRegistro.toFixed(1)} kg)`, margin, yPos);
+        } else if (diferenciaPeso < 0) {
+            // Cuando se pierde peso - texto normal
+            doc.text(`Se ha perdido ${Math.abs(diferenciaPeso).toFixed(1)} kg desde el inicio (${pesoPrimerRegistro.toFixed(1)} kg - ${pesoUltimoRegistro.toFixed(1)} kg)`, margin, yPos);
         } else {
-            console.log('Usando gráficas previamente capturadas');
-            chartImages = window.chartImageBase64;
+            // Cuando se gana peso - texto normal
+            doc.text(`Se ha ganado ${diferenciaPeso.toFixed(1)} kg desde el inicio (${pesoPrimerRegistro.toFixed(1)} kg - ${pesoUltimoRegistro.toFixed(1)} kg)`, margin, yPos);
         }
+        yPos += lineHeight;
         
-        // --- Portada ---
-        // Logo y encabezado
-        doc.setFillColor(41, 128, 185); // Azul corporativo
-        doc.rect(0, 0, 210, 40, 'F');
-        
-        // Título del documento
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(24);
-        doc.text('REPORTE DE SEGUIMIENTO', 105, 20, { align: 'center' });
-        
-        // Datos del cliente
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(14);
-        doc.text(`Cliente: ${cliente.nombre || 'Sin nombre'}`, 20, 60);
-        
-        // Fecha del informe
-        const fechaActual = new Date();
-        const fechaFormateada = `${fechaActual.getDate().toString().padStart(2, '0')}/${(fechaActual.getMonth() + 1).toString().padStart(2, '0')}/${fechaActual.getFullYear()}`;
-        doc.text(`Fecha del informe: ${fechaFormateada}`, 20, 70);
-        
-        // Si tenemos el último registro, mostrar su fecha
-        if (ultimoRegistro && ultimoRegistro['fecha-registro']) {
-            doc.text(`Fecha de última evaluación: ${ultimoRegistro['fecha-registro']}`, 20, 80);
-        }
-        
-        // Línea divisoria
-        doc.setDrawColor(200, 200, 200);
-        doc.line(20, 90, 190, 90);
-        
-        // Verificar si tenemos imagen de gráfica para la portada
-        if (chartImages && (chartImages.peso || chartImages.grasa)) {
-            // Usar la imagen de la gráfica de peso para la portada si está disponible
-            if (chartImages.peso) {
-                doc.addImage(chartImages.peso, 'PNG', 55, 100, 100, 60);
-                console.log('Agregada gráfica de peso a la portada');
-            } else if (chartImages.grasa) {
-                doc.addImage(chartImages.grasa, 'PNG', 55, 100, 100, 60);
-                console.log('Agregada gráfica de grasa a la portada');
-            }
-        } else {
-            // Rectángulo de ejemplo si no hay gráfica
-            doc.setFillColor(240, 240, 240);
-            doc.roundedRect(55, 100, 100, 60, 3, 3, 'F');
-            doc.setFontSize(12);
-            doc.setTextColor(100, 100, 100);
-            doc.text('Gráfica de Progreso', 105, 130, { align: 'center' });
-        }
-        
-        // Intro del documento
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.text([
-            'Este informe presenta un análisis detallado de su progreso en el programa de entrenamiento.',
-            'A continuación encontrará sus datos actuales, análisis comparativo y recomendaciones',
-            'personalizadas para optimizar sus resultados.'
-        ], 20, 180);
-        
-        // --- Segunda página: Datos del registro ---
-        doc.addPage();
-        
-        // Encabezado
-        doc.setFillColor(41, 128, 185);
-        doc.rect(0, 0, 210, 20, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.text('DATOS DE SEGUIMIENTO', 105, 13, { align: 'center' });
-        
-        // Si tenemos registro, mostrar sus datos
-        if (ultimoRegistro) {
-            // Datos actuales
-            doc.setFontSize(14);
-            doc.setTextColor(41, 128, 185);
-            doc.text('Mediciones Actuales', 20, 30);
+        // Objetivo de peso
+        if (pesoDeseado) {
+            const diferenciaObjetivo = pesoDeseado - pesoUltimoRegistro;
             
-            doc.setFontSize(11);
-            doc.setTextColor(0, 0, 0);
-            
-            // Tabla de datos principales - ASEGURARSE DE QUE TODO SEA STRING
-            const datosCliente = [
-                { label: 'Peso Actual', valor: ultimoRegistro['peso-actual'] ? `${ultimoRegistro['peso-actual']} kg` : 'No disponible' },
-                { label: 'Grasa Corporal', valor: ultimoRegistro['grasa-actual'] ? `${ultimoRegistro['grasa-actual']}%` : 'No disponible' },
-                { label: 'IMC', valor: ultimoRegistro['imc'] ? String(ultimoRegistro['imc']) : 'No calculado' },
-                { label: 'Días entrenados/semana', valor: ultimoRegistro['dias-entrenamiento'] ? String(ultimoRegistro['dias-entrenamiento']) : 'No registrado' },
-                { label: 'Horas totales', valor: ultimoRegistro['horas-entrenamiento'] ? String(ultimoRegistro['horas-entrenamiento']) : 'No registrado' }
-            ];
-            
-            let yPos = 40;
-            datosCliente.forEach(dato => {
-                doc.setFont('helvetica', 'bold');
-                doc.text(`${dato.label}:`, 20, yPos);
-                doc.setFont('helvetica', 'normal');
-                doc.text(String(dato.valor), 100, yPos);
-                yPos += 10;
-            });
-            
-            // Objetivos
-            yPos += 10;
-            doc.setFontSize(14);
-            doc.setTextColor(41, 128, 185);
-            doc.text('Objetivos Planteados', 20, yPos);
-            yPos += 10;
-            
-            doc.setFontSize(11);
-            doc.setTextColor(0, 0, 0);
-            
-            const objetivos = [
-                { label: 'Peso Objetivo', valor: ultimoRegistro['peso-deseado'] ? `${ultimoRegistro['peso-deseado']} kg` : 'No establecido' },
-                { label: 'Grasa Objetivo', valor: ultimoRegistro['grasa-deseada'] ? `${ultimoRegistro['grasa-deseada']}%` : 'No establecido' },
-                { label: 'Objetivo General', valor: ultimoRegistro['objetivo'] ? String(ultimoRegistro['objetivo']) : 'No especificado' }
-            ];
-            
-            objetivos.forEach(dato => {
-                doc.setFont('helvetica', 'bold');
-                doc.text(`${dato.label}:`, 20, yPos);
-                doc.setFont('helvetica', 'normal');
-                doc.text(String(dato.valor), 100, yPos);
-                yPos += 10;
-            });
-            
-            // Información adicional
-            yPos += 10;
-            doc.setFontSize(14);
-            doc.setTextColor(41, 128, 185);
-            doc.text('Información Adicional', 20, yPos);
-            yPos += 10;
-            
-            doc.setFontSize(11);
-            doc.setTextColor(0, 0, 0);
-            
-            // Disciplina y datos médicos
-            const infoAdicional = [
-                { label: 'Disciplina', valor: ultimoRegistro['disciplina'] ? String(ultimoRegistro['disciplina']) : 'No especificada' },
-                { label: 'Condiciones Médicas', valor: ultimoRegistro['condiciones-medicas'] ? String(ultimoRegistro['condiciones-medicas']) : 'Ninguna registrada' },
-                { label: 'Medicamentos', valor: ultimoRegistro['medicamentos'] ? String(ultimoRegistro['medicamentos']) : 'Ninguno registrado' }
-            ];
-            
-            infoAdicional.forEach(dato => {
-                doc.setFont('helvetica', 'bold');
-                doc.text(`${dato.label}:`, 20, yPos);
-                doc.setFont('helvetica', 'normal');
-                
-                // Manejar textos largos - ASEGURARSE DE QUE EL VALOR SEA STRING
-                const valorTexto = String(dato.valor);
-                if (valorTexto.length > 40) {
-                    const lineas = doc.splitTextToSize(valorTexto, 110);
-                    doc.text(lineas, 100, yPos);
-                    yPos += (lineas.length - 1) * 7; // Ajustar posición Y basado en número de líneas
-                } else {
-                    doc.text(valorTexto, 100, yPos);
-                }
-                
-                yPos += 10;
-            });
-        } else {
-            // Mensaje si no hay registros
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text('No se encontraron registros de seguimiento para este cliente.', 20, 40);
-            doc.text('Por favor, complete una evaluación para generar informes detallados.', 20, 50);
-        }
-        
-        // --- Tercera página: Gráficos y Análisis ---
-        doc.addPage();
-        
-        // Encabezado
-        doc.setFillColor(41, 128, 185);
-        doc.rect(0, 0, 210, 20, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.text('ANÁLISIS VISUAL DE PROGRESO', 105, 13, { align: 'center' });
-        
-        // Verificar si hay suficientes datos para las gráficas
-        if (expedientesCliente && expedientesCliente.length > 0) {
-            // Verificar si tenemos gráficas capturadas
-            if (chartImages && Object.keys(chartImages).length > 0) {
-                // Agregar gráficas reales al PDF
-                let yPosition = 30;
-                const chartWidth = 170;
-                const chartHeight = 80;
-                const margin = 10;
-                
-                // Si tenemos gráfica de peso, agregarla
-                if (chartImages.peso) {
-                    doc.setFontSize(14);
-                    doc.setTextColor(41, 128, 185);
-                    doc.text('Evolución del Peso', 20, yPosition);
-                    yPosition += 5;
-                    
-                    doc.addImage(chartImages.peso, 'PNG', 20, yPosition, chartWidth, chartHeight);
-                    yPosition += chartHeight + margin;
-                }
-                
-                // Si tenemos gráfica de grasa, agregarla
-                if (chartImages.grasa) {
-                    doc.setFontSize(14);
-                    doc.setTextColor(41, 128, 185);
-                    doc.text('Evolución del Porcentaje de Grasa', 20, yPosition);
-                    yPosition += 5;
-                    
-                    doc.addImage(chartImages.grasa, 'PNG', 20, yPosition, chartWidth, chartHeight);
-                    yPosition += chartHeight + margin;
-                }
-                
-                // Si tenemos otras gráficas, agregarlas
-                for (const key in chartImages) {
-                    if (key !== 'peso' && key !== 'grasa' && !key.startsWith('other_')) {
-                        doc.setFontSize(14);
-                        doc.setTextColor(41, 128, 185);
-                        doc.text(`Evolución de ${key.charAt(0).toUpperCase() + key.slice(1)}`, 20, yPosition);
-                        yPosition += 5;
-                        
-                        doc.addImage(chartImages[key], 'PNG', 20, yPosition, chartWidth, chartHeight);
-                        yPosition += chartHeight + margin;
-                    }
-                }
+            if (Math.abs(diferenciaObjetivo) < 0.1) {
+                doc.text(`Se ha alcanzado el objetivo de peso de ${pesoDeseado.toFixed(1)} kg`, margin, yPos);
+            } else if (diferenciaObjetivo > 0) {
+                doc.text(`Faltan ${diferenciaObjetivo.toFixed(1)} kg por ganar para alcanzar el objetivo de ${pesoDeseado.toFixed(1)} kg`, margin, yPos);
             } else {
-                // Si no hay imágenes disponibles, mostrar texto explicativo
-                doc.setFontSize(12);
-                doc.setTextColor(0, 0, 0);
-                doc.text('Las gráficas de evolución están disponibles en la sección "Avance" de la aplicación.', 20, 50);
-                doc.text('Para incluir gráficas en el PDF, primero visualice la sección de avance del expediente.', 20, 60);
+                doc.text(`Faltan ${Math.abs(diferenciaObjetivo).toFixed(1)} kg por perder para alcanzar el objetivo de ${pesoDeseado.toFixed(1)} kg`, margin, yPos);
             }
-            
-            // Mensaje sobre la tendencia general
-            doc.setFontSize(14);
-            doc.setTextColor(41, 128, 185);
-            doc.text('Interpretación de resultados', 20, 195);
-            
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            
-            // Texto explicativo
-            const mensaje = "Con base en tu evaluación, continuaremos ajustando el plan de entrenamiento personalizado para optimizar tus resultados. Es importante mantener la constancia en los entrenamientos y seguir las recomendaciones nutricionales para alcanzar tus objetivos de forma efectiva.";
-            const lineasMensaje = doc.splitTextToSize(mensaje, 170);
-            doc.text(lineasMensaje, 20, 205);
+            yPos += lineHeight;
+        }
+        
+        // Plantillas de texto para cambios de grasa corporal
+        if (Math.abs(diferenciaGrasa) < 0.1) {
+            // Cuando la grasa se mantiene
+            doc.text(`El porcentaje de grasa corporal se ha mantenido desde el inicio (${grasaPrimerRegistro.toFixed(1)}%)`, margin, yPos);
+        } else if (diferenciaGrasa < 0) {
+            // Cuando se reduce la grasa - texto normal
+            doc.text(`Se ha reducido ${Math.abs(diferenciaGrasa).toFixed(1)}% de grasa corporal desde el inicio (${grasaPrimerRegistro.toFixed(1)}% - ${grasaUltimoRegistro.toFixed(1)}%)`, margin, yPos);
         } else {
-            // Mensaje si no hay suficientes datos
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text([
-                'No hay suficientes registros históricos para generar gráficos de evolución.',
-                'Se recomienda realizar al menos dos evaluaciones para poder visualizar tendencias.'
-            ], 20, 50);
+            // Cuando aumenta la grasa - texto normal
+            doc.text(`Se ha aumentado ${diferenciaGrasa.toFixed(1)}% de grasa corporal desde el inicio (${grasaPrimerRegistro.toFixed(1)}% - ${grasaUltimoRegistro.toFixed(1)}%)`, margin, yPos);
         }
+        yPos += lineHeight;
         
-        // --- Pie de documento ---
-        // Número de página en todas las páginas
-        const numPages = doc.getNumberOfPages();
-        for (let i = 1; i <= numPages; i++) {
-            doc.setPage(i);
-            doc.setFontSize(10);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`Página ${i} de ${numPages}`, 105, 285, { align: 'center' });
+        // Objetivo de grasa
+        if (grasaDeseada) {
+            const diferenciaObjetivoGrasa = grasaDeseada - grasaUltimoRegistro;
             
-            // Footer en todas las páginas
-            doc.text('Pepe Urueta - Entrenador Personal - Reporte de Seguimiento', 105, 292, { align: 'center' });
+            if (Math.abs(diferenciaObjetivoGrasa) < 0.1) {
+                doc.text(`Se ha alcanzado el objetivo de grasa corporal de ${grasaDeseada.toFixed(1)}%`, margin, yPos);
+            } else if (diferenciaObjetivoGrasa > 0) {
+                doc.text(`Faltan ${diferenciaObjetivoGrasa.toFixed(1)}% por aumentar para alcanzar el objetivo de ${grasaDeseada.toFixed(1)}%`, margin, yPos);
+            } else {
+                doc.text(`Faltan ${Math.abs(diferenciaObjetivoGrasa).toFixed(1)}% por reducir para alcanzar el objetivo de ${grasaDeseada.toFixed(1)}%`, margin, yPos);
+            }
         }
         
-        // Guardar PDF
+        // Añadir pie de página a la tercera página
+        addFooter(3);
+        
+        // Limpiar recursos temporales
+        chartContainer.remove();
+        pesoChart.destroy();
+        grasaChart.destroy();
+        diasChart.destroy();
+        horasChart.destroy();
+        
+        // Generar el PDF como Blob
         const pdfBlob = doc.output('blob');
-        const pdfFileName = `Reporte_Seguimiento_${cliente.nombre.replace(/\s+/g, '_')}_${fechaFormateada.replace(/\//g, '-')}.pdf`;
-        
-        // Crear URL para el blob
         const pdfUrl = URL.createObjectURL(pdfBlob);
+        const fileName = `Reporte_${cliente.nombre.replace(/\s+/g, '_')}_${fechaActual.replace(/\//g, '-')}.pdf`;
         
+        console.log('PDF generado correctamente:', fileName);
+        
+        // Devolver la información del PDF
         return {
-            url: pdfUrl,
             blob: pdfBlob,
-            fileName: pdfFileName
+            url: pdfUrl,
+            fileName: fileName
         };
     } catch (error) {
         console.error('Error al generar PDF:', error);
@@ -2450,4 +3197,60 @@ async function cargarLibreriaPDF() {
         
         document.head.appendChild(script);
     });
+}
+
+/**
+ * Cargar la biblioteca Chart.js si no está disponible
+ */
+async function cargarLibreriaChart() {
+    return new Promise((resolve, reject) => {
+        if (typeof Chart !== 'undefined') {
+            resolve();
+            return;
+        }
+        
+        console.log('Cargando biblioteca Chart.js...');
+        
+        // Crear elemento script para cargar Chart.js
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js';
+        script.onload = () => {
+            console.log('Chart.js cargado correctamente');
+            resolve();
+        };
+        script.onerror = (error) => {
+            console.error('Error al cargar Chart.js:', error);
+            reject(error);
+        };
+        
+        document.head.appendChild(script);
+    });
+}
+
+/**
+ * Crear vista previa HTML de email
+ * @param {string} content - Contenido del correo
+ * @returns {string} HTML formateado para la vista previa
+ */
+function createEmailHtmlPreview(content) {
+    // Convertir saltos de línea en <br>
+    content = content.replace(/\n/g, '<br>');
+    
+    // Crear estructura HTML para el email
+    return `
+    <div style="max-width: 600px; font-family: Arial, sans-serif; border: 1px solid #e1e1e1; border-radius: 5px; overflow: hidden;">
+        <div style="background-color: #4a6cf7; padding: 15px; text-align: center;">
+            <h2 style="color: white; margin: 0;">URUETA CRM</h2>
+        </div>
+        <div style="padding: 20px; background-color: white;">
+            ${content}
+        </div>
+        <div style="background-color: #f7f7f7; padding: 15px; text-align: center; border-top: 1px solid #e1e1e1;">
+            <img src="Footer.jpg" alt="Pepe Urueta" style="max-width: 150px; height: auto;">
+            <p style="color: #666; margin-top: 10px; font-size: 12px;">
+                © ${new Date().getFullYear()} Pepe Urueta - Entrenador Personal
+            </p>
+        </div>
+    </div>
+    `;
 } 
