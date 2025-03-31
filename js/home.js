@@ -31,14 +31,8 @@ async function initHome() {
             await window.apiService.obtenerTodosLosDatos();
         }
         
-        // Calcular métricas
-        const metricas = calcularMetricasDashboard();
-        
-        // Actualizar UI con las métricas
-        actualizarIndicadores(metricas);
-        
-        // Actualizar notificación de prospectos sin atender
-        actualizarNotificacionProspectos(metricas.prospectosSinAtender);
+        // Cargar la UI del home
+        loadHomeUI();
         
         // Configurar botón de actualizar
         setupRefreshButton();
@@ -143,8 +137,20 @@ function setupNotifications() {
  * Cargar la interfaz del dashboard principal
  */
 function loadHomeUI() {
-    const contentSection = document.querySelector('.content-section');
-    if (!contentSection) return;
+    // Obtener el contenedor de contenido principal
+    const contentContainer = document.getElementById('content');
+    if (!contentContainer) {
+        console.error('Elemento de contenido no encontrado');
+        return;
+    }
+    
+    // Verificar si existe la sección de contenido o crearla
+    let contentSection = document.querySelector('.content-section');
+    if (!contentSection) {
+        contentSection = document.createElement('div');
+        contentSection.className = 'content-section';
+        contentContainer.appendChild(contentSection);
+    }
     
     // Verificar si tenemos datos
     if (!window.apiData || !window.apiData.prospectos) {
@@ -195,7 +201,7 @@ function loadHomeUI() {
             </div>
             
             <div class="col-md-4 mb-3">
-                <div class="crm-card stats-card">
+                <div class="crm-card stats-card" data-section="prospectos">
                     <div class="stats-icon primary">
                         <i class="fas fa-user-clock"></i>
                     </div>
@@ -207,7 +213,7 @@ function loadHomeUI() {
             </div>
             
             <div class="col-md-4 mb-3">
-                <div class="crm-card stats-card">
+                <div class="crm-card stats-card" data-section="prospectos">
                     <div class="stats-icon success">
                         <i class="fas fa-user-check"></i>
                     </div>
@@ -219,7 +225,7 @@ function loadHomeUI() {
             </div>
             
             <div class="col-md-4 mb-3">
-                <div class="crm-card stats-card">
+                <div class="crm-card stats-card" data-section="prospectos">
                     <div class="stats-icon secondary">
                         <i class="fas fa-users"></i>
                     </div>
@@ -238,7 +244,7 @@ function loadHomeUI() {
             </div>
             
             <div class="col-md-4 mb-3">
-                <div class="crm-card stats-card">
+                <div class="crm-card stats-card" data-section="clientes">
                     <div class="stats-icon primary">
                         <i class="fas fa-user-tie"></i>
                     </div>
@@ -250,7 +256,7 @@ function loadHomeUI() {
             </div>
             
             <div class="col-md-4 mb-3">
-                <div class="crm-card stats-card">
+                <div class="crm-card stats-card" data-section="clientes">
                     <div class="stats-icon warning">
                         <i class="fas fa-user-slash"></i>
                     </div>
@@ -262,7 +268,7 @@ function loadHomeUI() {
             </div>
             
             <div class="col-md-4 mb-3">
-                <div class="crm-card stats-card">
+                <div class="crm-card stats-card" data-section="clientes">
                     <div class="stats-icon secondary">
                         <i class="fas fa-users"></i>
                     </div>
@@ -281,7 +287,7 @@ function loadHomeUI() {
             </div>
             
             <div class="col-md-4 mb-3">
-                <div class="crm-card stats-card">
+                <div class="crm-card stats-card" data-section="expedientes">
                     <div class="stats-icon primary">
                         <i class="fas fa-folder-plus"></i>
                     </div>
@@ -293,7 +299,7 @@ function loadHomeUI() {
             </div>
             
             <div class="col-md-4 mb-3">
-                <div class="crm-card stats-card">
+                <div class="crm-card stats-card" data-section="expedientes">
                     <div class="stats-icon success">
                         <i class="fas fa-folder-minus"></i>
                     </div>
@@ -305,7 +311,7 @@ function loadHomeUI() {
             </div>
             
             <div class="col-md-4 mb-3">
-                <div class="crm-card stats-card">
+                <div class="crm-card stats-card" data-section="expedientes">
                     <div class="stats-icon secondary">
                         <i class="fas fa-folders"></i>
                     </div>
@@ -316,46 +322,23 @@ function loadHomeUI() {
                 </div>
             </div>
         </div>
-        
-        <!-- Gráficos -->
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <div class="crm-card">
-                    <div class="card-header">
-                        <h5 class="card-title">Prospectos</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="prospectosChart" height="250"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-3">
-                <div class="crm-card">
-                    <div class="card-header">
-                        <h5 class="card-title">Clientes</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="clientesChart" height="250"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-3">
-                <div class="crm-card">
-                    <div class="card-header">
-                        <h5 class="card-title">Expedientes</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="expedientesChart" height="250"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
     `;
     
-    // Inicializar gráficos
-    initCharts(metricas);
+    // Agregar eventos de clic a las tarjetas para navegar a las secciones
+    const tarjetas = contentSection.querySelectorAll('.stats-card');
+    tarjetas.forEach(tarjeta => {
+        tarjeta.style.cursor = 'pointer';
+        tarjeta.addEventListener('click', function() {
+            const seccion = this.getAttribute('data-section');
+            if (seccion) {
+                // Buscar y activar el elemento de navegación correspondiente
+                const menuItem = document.querySelector(`.nav-item[data-section="${seccion}"]`);
+                if (menuItem) {
+                    menuItem.click();
+                }
+            }
+        });
+    });
     
     // Configurar notificaciones
     setupNotifications();
@@ -612,105 +595,36 @@ function calcularMetricas(prospectos, clientes, expedientes) {
     };
 }
 
-// Función para actualizar los indicadores en la UI
+/**
+ * Actualizar indicadores del dashboard
+ */
 function actualizarIndicadores(metricas) {
-    const homeContainer = document.querySelector('#content');
-    if (!homeContainer) return;
+    // Actualizar sección de prospectos
+    const prospectosSinAtender = document.getElementById('prospectos-sin-atender');
+    const prospectosContactados = document.getElementById('prospectos-contactados');
+    const prospectosTotales = document.getElementById('prospectos-total');
     
-    homeContainer.innerHTML = `
-        <div class="dashboard-header">
-            <h1>Dashboard</h1>
-        </div>
-        
-        <div class="metrics-container">
-            <div class="metrics-section">
-                <h2>Prospectos</h2>
-                <div class="metrics-cards">
-                    <div class="metric-card">
-                        <div class="metric-value">${metricas.prospectosSinAtender}</div>
-                        <div class="metric-label">Sin atender</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${metricas.prospectosContactados}</div>
-                        <div class="metric-label">Contactados</div>
-                    </div>
-                    <div class="metric-card total">
-                        <div class="metric-value">${metricas.prospectosTotales}</div>
-                        <div class="metric-label">Total</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="metrics-section">
-                <h2>Clientes</h2>
-                <div class="metrics-cards">
-                    <div class="metric-card">
-                        <div class="metric-value">${metricas.clientesActivos}</div>
-                        <div class="metric-label">Activos</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${metricas.clientesFinalizados}</div>
-                        <div class="metric-label">Finalizados</div>
-                    </div>
-                    <div class="metric-card total">
-                        <div class="metric-value">${metricas.clientesTotales}</div>
-                        <div class="metric-label">Total</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="metrics-section">
-                <h2>Expedientes</h2>
-                <div class="metrics-cards">
-                    <div class="metric-card">
-                        <div class="metric-value">${metricas.expedientesAbiertos}</div>
-                        <div class="metric-label">Abiertos</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${metricas.expedientesCerrados}</div>
-                        <div class="metric-label">Cerrados</div>
-                    </div>
-                    <div class="metric-card total">
-                        <div class="metric-value">${metricas.expedientesTotales}</div>
-                        <div class="metric-label">Total</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="charts-container">
-            <div class="chart-section">
-                <h3>Distribución de Prospectos</h3>
-                <div class="chart-card">
-                    <canvas id="prospectosChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-section">
-                <h3>Estado de Clientes</h3>
-                <div class="chart-card">
-                    <canvas id="clientesChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-section">
-                <h3>Prospectos Recientes</h3>
-                <div class="recent-list">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Contacto</th>
-                                <th>Estado</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recent-prospectos">
-                            <!-- Contenido dinámico de prospectos recientes -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    `;
+    if (prospectosSinAtender) prospectosSinAtender.textContent = metricas.prospectosSinAtender;
+    if (prospectosContactados) prospectosContactados.textContent = metricas.prospectosContactados;
+    if (prospectosTotales) prospectosTotales.textContent = metricas.prospectosTotales;
+    
+    // Actualizar sección de clientes
+    const clientesActivos = document.getElementById('clientes-activos');
+    const clientesFinalizados = document.getElementById('clientes-finalizados');
+    const clientesTotales = document.getElementById('clientes-total');
+    
+    if (clientesActivos) clientesActivos.textContent = metricas.clientesActivos;
+    if (clientesFinalizados) clientesFinalizados.textContent = metricas.clientesFinalizados;
+    if (clientesTotales) clientesTotales.textContent = metricas.clientesTotales;
+    
+    // Actualizar sección de expedientes
+    const expedientesAbiertos = document.getElementById('expedientes-abiertos');
+    const expedientesCerrados = document.getElementById('expedientes-cerrados');
+    const expedientesTotales = document.getElementById('expedientes-total');
+    
+    if (expedientesAbiertos) expedientesAbiertos.textContent = metricas.expedientesAbiertos;
+    if (expedientesCerrados) expedientesCerrados.textContent = metricas.expedientesCerrados;
+    if (expedientesTotales) expedientesTotales.textContent = metricas.expedientesTotales;
 }
 
 // Función para actualizar la notificación de prospectos sin atender
