@@ -1529,11 +1529,17 @@ function applyTemplate(templateId) {
                     const horaInput = document.getElementById('cita-hora');
                     
                     if (fechaInput.value && horaInput.value) {
+                        // Guardar copia del mensaje original si no existe
+                        if (!messageContent.dataset.originalContent) {
+                            messageContent.dataset.originalContent = messageContent.value;
+                        }
+                        
                         // Formatear fecha seleccionada a DD/MM/YYYY
-                        const fechaObj = new Date(fechaInput.value);
-                        const dia = String(fechaObj.getDate()).padStart(2, '0');
-                        const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
-                        const anio = fechaObj.getFullYear();
+                        // Usar un método que no se vea afectado por la zona horaria
+                        const partesFecha = fechaInput.value.split('-');
+                        const anio = partesFecha[0];
+                        const mes = partesFecha[1];
+                        const dia = partesFecha[2];
                         const fechaFormat = `${dia}/${mes}/${anio}`;
                         
                         // Convertir hora de formato 24h a 12h con AM/PM
@@ -1544,13 +1550,17 @@ function applyTemplate(templateId) {
                         const hora12 = horaNum % 12 || 12;
                         horaFormat = `${hora12}:00 ${ampm}`;
                         
-                        // Aplicar al contenido actual
-                        let nuevoContenido = messageContent.value;
+                        // Aplicar al contenido original (con marcadores)
+                        let nuevoContenido = messageContent.dataset.originalContent;
                         nuevoContenido = nuevoContenido.replace(/\[fecha\]/g, fechaFormat);
                         nuevoContenido = nuevoContenido.replace(/\[hora\]/g, horaFormat);
                         // También reemplazar marcadores con {{}} para plantillas usando ese formato
                         nuevoContenido = nuevoContenido.replace(/\{\{fecha\}\}/g, fechaFormat);
                         nuevoContenido = nuevoContenido.replace(/\{\{hora\}\}/g, horaFormat);
+                        
+                        // Guardar valores actuales en atributos data para usarlos más tarde
+                        messageContent.dataset.citaFecha = fechaFormat;
+                        messageContent.dataset.citaHora = horaFormat;
                         
                         // Actualizar el contenido y vista previa
                         messageContent.value = nuevoContenido;
@@ -1565,6 +1575,57 @@ function applyTemplate(templateId) {
                         });
                     }
                 });
+
+                // Añadir eventos para actualizar automáticamente cuando cambian fecha u hora
+                const fechaInput = document.getElementById('cita-fecha');
+                const horaInput = document.getElementById('cita-hora');
+                
+                if (fechaInput && horaInput) {
+                    // Función para actualizar el mensaje cuando cambian los valores
+                    const actualizarFechaHora = function() {
+                        if (fechaInput.value && horaInput.value) {
+                            // Guardar copia del mensaje original si no existe
+                            if (!messageContent.dataset.originalContent) {
+                                messageContent.dataset.originalContent = messageContent.value;
+                            }
+                            
+                            // Formatear fecha seleccionada a DD/MM/YYYY
+                            const partesFecha = fechaInput.value.split('-');
+                            const anio = partesFecha[0];
+                            const mes = partesFecha[1];
+                            const dia = partesFecha[2];
+                            const fechaFormat = `${dia}/${mes}/${anio}`;
+                            
+                            // Convertir hora de formato 24h a 12h con AM/PM
+                            let horaFormat = '';
+                            const [hora] = horaInput.value.split(':');
+                            const horaNum = parseInt(hora, 10);
+                            const ampm = horaNum >= 12 ? 'PM' : 'AM';
+                            const hora12 = horaNum % 12 || 12;
+                            horaFormat = `${hora12}:00 ${ampm}`;
+                            
+                            // Aplicar al contenido original (con marcadores)
+                            let nuevoContenido = messageContent.dataset.originalContent;
+                            nuevoContenido = nuevoContenido.replace(/\[fecha\]/g, fechaFormat);
+                            nuevoContenido = nuevoContenido.replace(/\[hora\]/g, horaFormat);
+                            // También reemplazar marcadores con {{}} para plantillas usando ese formato
+                            nuevoContenido = nuevoContenido.replace(/\{\{fecha\}\}/g, fechaFormat);
+                            nuevoContenido = nuevoContenido.replace(/\{\{hora\}\}/g, horaFormat);
+                            
+                            // Guardar valores actuales en atributos data para usarlos más tarde
+                            messageContent.dataset.citaFecha = fechaFormat;
+                            messageContent.dataset.citaHora = horaFormat;
+                            
+                            // Actualizar el contenido y vista previa
+                            messageContent.value = nuevoContenido;
+                            updateMessagePreview();
+                        }
+                    };
+                    
+                    // Añadir eventos que escuchan cambios en fecha y hora
+                    fechaInput.addEventListener('change', actualizarFechaHora);
+                    horaInput.addEventListener('change', actualizarFechaHora);
+                }
             }
         } else {
             // Eliminar selector si existe y no es una plantilla de citas
@@ -1585,6 +1646,11 @@ function applyTemplate(templateId) {
         // Guardar la referencia a la plantilla seleccionada para saber si requiere adjunto
         messageContent.dataset.templateId = templateId;
         messageContent.dataset.requiresAttachment = template.requiresAttachment ? 'true' : 'false';
+        
+        // Limpiar cualquier contenido original almacenado de plantillas anteriores
+        delete messageContent.dataset.originalContent;
+        delete messageContent.dataset.citaFecha;
+        delete messageContent.dataset.citaHora;
         
         updateMessagePreview();
     }
@@ -1880,11 +1946,11 @@ async function sendMessage() {
                 const horaInput = document.getElementById('cita-hora');
                 
                 if (fechaInput && fechaInput.value && horaInput && horaInput.value) {
-                    // Formatear fecha seleccionada a DD/MM/YYYY
-                    const fechaObj = new Date(fechaInput.value);
-                    const dia = String(fechaObj.getDate()).padStart(2, '0');
-                    const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
-                    const anio = fechaObj.getFullYear();
+                    // Formatear fecha seleccionada a DD/MM/YYYY evitando problemas de zona horaria
+                    const partesFecha = fechaInput.value.split('-');
+                    const anio = partesFecha[0];
+                    const mes = partesFecha[1];
+                    const dia = partesFecha[2];
                     fechaCita = `${dia}/${mes}/${anio}`;
                     
                     // Convertir hora de formato 24h a 12h con AM/PM
@@ -2003,7 +2069,7 @@ async function sendMessage() {
             
             try {
                 // Enviar datos a la API de AppScript
-                const apiUrl = 'https://script.google.com/macros/s/AKfycbwUTb4KT6D7jFNAnY8vY01xtkhtVbV1NeD3zQH12Pjmc4hRP_oHF77WbE0RBxnSqe1Vww/exec';
+                const apiUrl = 'https://script.google.com/macros/s/AKfycbx7oiLvwYu8unhXCVCJsL4343orq3u-8tfjQE1FRZli9f2m6f0rujlgauXKGLsub5Hyyg/exec';
                 
                 // Asegurarnos de que los nombres de los parámetros coinciden exactamente con lo que espera el AppScript
                 const comunicacionAPI = {
