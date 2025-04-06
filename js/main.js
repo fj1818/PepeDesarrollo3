@@ -597,162 +597,335 @@ function preventCollapseOnMobile() {
     });
 }
 
-// Fix sidebar toggle functionality to ensure it works correctly
+// Fix sidebar toggle functionality specifically for mobile view
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing sidebar toggle - fixed version');
+    console.log('Initializing improved sidebar for mobile - fixed version');
     
-    // Get relevant elements
+    // Get all sidebar-related elements only once
     const menuBtn = document.querySelector('.menu-btn');
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
+    const menuItems = document.querySelectorAll('.nav-item');
     
+    // Add unified prevent collapse function
+    window.preventContentCollapseFixed = function() {
+        const contentContainer = document.getElementById('content');
+        if (!contentContainer) return;
+        
+        console.log('Preventing content collapse');
+        
+        // Force content width to prevent collapse
+        contentContainer.style.width = '100%';
+        contentContainer.style.maxWidth = 'none';
+        contentContainer.style.boxSizing = 'border-box';
+        
+        // Process all important containers
+        const containers = contentContainer.querySelectorAll('.card, .container, .row, .comunicaciones-container, .contacts-list, .message-composer');
+        containers.forEach(container => {
+            container.style.width = '100%';
+            container.style.maxWidth = 'none';
+            container.style.minWidth = '200px';
+            container.style.boxSizing = 'border-box';
+        });
+        
+        // Ensure tables don't break
+        const tables = document.querySelectorAll('table');
+        tables.forEach(table => {
+            table.style.width = '100%';
+            if (table.parentElement) {
+                table.parentElement.style.overflowX = 'auto';
+            }
+        });
+    };
+    
+    // Fix navigation buttons for improved mobile display
+    window.fixNavigationButtons = function() {
+        const isMobile = window.innerWidth <= 768;
+        
+        // Obtain navigation elements
+        const menuBtn = document.querySelector('.menu-btn');
+        const navbarRight = document.querySelector('.navbar-right');
+        const notificationContainer = document.querySelector('.notification-container');
+        const refreshContainer = document.querySelector('.refresh-container');
+        
+        if (isMobile) {
+            console.log('Fixing navigation buttons for mobile');
+            
+            // Ensure menu button is visible and functional
+            if (menuBtn) {
+                menuBtn.style.display = 'flex';
+                menuBtn.style.position = 'fixed';
+                menuBtn.style.top = '10px';
+                menuBtn.style.right = '10px';
+                menuBtn.style.zIndex = '2500';
+                menuBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                menuBtn.style.borderRadius = '50%';
+                menuBtn.style.width = '40px';
+                menuBtn.style.height = '40px';
+                menuBtn.style.alignItems = 'center';
+                menuBtn.style.justifyContent = 'center';
+                menuBtn.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
+            }
+            
+            // Ensure the right navbar buttons are visible
+            if (navbarRight) {
+                navbarRight.style.position = 'fixed';
+                navbarRight.style.top = '10px';
+                navbarRight.style.right = '60px';
+                navbarRight.style.zIndex = '2400';
+                navbarRight.style.display = 'flex';
+                navbarRight.style.alignItems = 'center';
+                navbarRight.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                navbarRight.style.borderRadius = '20px';
+                navbarRight.style.padding = '5px 10px';
+                navbarRight.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+            }
+            
+            // Ensure notification and refresh containers look good
+            if (notificationContainer) {
+                notificationContainer.style.marginRight = '8px';
+            }
+            
+            if (refreshContainer) {
+                refreshContainer.style.marginRight = '0';
+            }
+            
+            // If sidebar is expanded, adjust button positions
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar && sidebar.classList.contains('collapsed')) {
+                // When sidebar is open, slightly adjust position
+                if (menuBtn) menuBtn.style.right = '15px';
+                if (navbarRight) navbarRight.style.right = '65px';
+            }
+        } else {
+            // Reset styles for desktop view
+            if (menuBtn) {
+                menuBtn.style.position = '';
+                menuBtn.style.top = '';
+                menuBtn.style.right = '';
+                menuBtn.style.zIndex = '';
+                menuBtn.style.backgroundColor = '';
+                menuBtn.style.borderRadius = '';
+                menuBtn.style.width = '';
+                menuBtn.style.height = '';
+                menuBtn.style.alignItems = '';
+                menuBtn.style.justifyContent = '';
+                menuBtn.style.boxShadow = '';
+                menuBtn.style.display = '';
+            }
+            
+            if (navbarRight) {
+                navbarRight.style.position = '';
+                navbarRight.style.top = '';
+                navbarRight.style.right = '';
+                navbarRight.style.zIndex = '';
+                navbarRight.style.display = '';
+                navbarRight.style.alignItems = '';
+                navbarRight.style.backgroundColor = '';
+                navbarRight.style.borderRadius = '';
+                navbarRight.style.padding = '';
+                navbarRight.style.boxShadow = '';
+            }
+            
+            if (notificationContainer) {
+                notificationContainer.style.marginRight = '';
+            }
+            
+            if (refreshContainer) {
+                refreshContainer.style.marginRight = '';
+            }
+        }
+    };
+    
+    // Force initial state for mobile (IMPORTANT: on mobile, collapsed means VISIBLE)
+    function setInitialState() {
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            console.log('Setting initial mobile state');
+            // On mobile: sidebar should start hidden (not collapsed)
+            sidebar.classList.remove('collapsed');
+            mainContent.style.transform = 'translateX(0)';
+            mainContent.style.paddingLeft = '0';
+            
+            // Fix header and content position
+            const header = document.querySelector('.dashboard-header');
+            if (header) {
+                header.style.transform = 'translateX(0)';
+                header.style.paddingLeft = '0';
+            }
+        } else {
+            // On desktop: initialize according to default state
+            sidebar.classList.remove('collapsed'); // default expanded
+            mainContent.style.marginLeft = '';
+            mainContent.style.transform = '';
+            mainContent.style.paddingLeft = '';
+        }
+    }
+    
+    // Clean up by removing old event listeners from all relevant elements
     if (menuBtn && sidebar && mainContent) {
-        // Remove all existing click event listeners using cloneNode
+        // Remove existing click listeners by cloning
         const newMenuBtn = menuBtn.cloneNode(true);
         if (menuBtn.parentNode) {
             menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
         }
         
-        // Use the new reference for the button
-        newMenuBtn.addEventListener('click', function() {
-            console.log('Menu button clicked - toggle sidebar');
-            
-            // Toggle collapsed class
-            sidebar.classList.toggle('collapsed');
-            
-            // Determine if we're in mobile or desktop view
+        // Ensure each menu item also has fresh event handlers
+        menuItems.forEach(item => {
+            const newItem = item.cloneNode(true);
+            if (item.parentNode) {
+                item.parentNode.replaceChild(newItem, item);
+            }
+        });
+        
+        // Get the fresh references
+        const freshMenuBtn = document.querySelector('.menu-btn');
+        const freshMenuItems = document.querySelectorAll('.nav-item');
+        
+        // Add click handler for toggling sidebar
+        if (freshMenuBtn) {
+            console.log('Adding click handler to menu button');
+            freshMenuBtn.addEventListener('click', function(e) {
+                console.log('Menu button clicked');
+                e.preventDefault();
+                
+                // Toggle collapsed class (on mobile, collapsed means visible/open)
+                sidebar.classList.toggle('collapsed');
+                
+                // Apply appropriate styles based on device
+                const isMobile = window.innerWidth <= 768;
+                
+                if (isMobile) {
+                    console.log('Mobile: sidebar toggled, applying transform');
+                    if (sidebar.classList.contains('collapsed')) {
+                        // Sidebar is visible, move content right
+                        mainContent.style.transform = 'translateX(250px)';
+                        
+                        // Move header as well
+                        const header = document.querySelector('.dashboard-header');
+                        if (header) {
+                            header.style.transform = 'translateX(250px)';
+                        }
+                    } else {
+                        // Sidebar is hidden, move content back
+                        mainContent.style.transform = 'translateX(0)';
+                        mainContent.style.paddingLeft = '0';
+                        
+                        // Move header back
+                        const header = document.querySelector('.dashboard-header');
+                        if (header) {
+                            header.style.transform = 'translateX(0)';
+                        }
+                    }
+                    
+                    // Apply additional fixes for mobile
+                    setTimeout(function() {
+                        if (typeof preventContentCollapseFixed === 'function') {
+                            preventContentCollapseFixed();
+                        }
+                        if (typeof fixNavigationButtons === 'function') {
+                            fixNavigationButtons();
+                        }
+                    }, 300);
+                } else {
+                    // On desktop: handle with margin instead of transform
+                    if (sidebar.classList.contains('collapsed')) {
+                        mainContent.style.marginLeft = 'var(--sidebar-width-collapsed)';
+                    } else {
+                        mainContent.style.marginLeft = 'var(--sidebar-width)';
+                    }
+                }
+            });
+        }
+        
+        // Add click handlers to menu items - IMPORTANT for mobile
+        freshMenuItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Get all menu items with updated reference
+                const allMenuItems = document.querySelectorAll('.nav-item');
+                
+                // Remove active class from all items
+                allMenuItems.forEach(i => i.classList.remove('active'));
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Get and load section
+                const section = this.getAttribute('data-section');
+                if (section) {
+                    loadContent(section);
+                    
+                    // IMPORTANT: On mobile, CLOSE the sidebar after selecting menu item
+                    if (window.innerWidth <= 768) {
+                        console.log('Mobile: closing sidebar after menu selection');
+                        // On mobile: collapsed = open, not collapsed = closed
+                        sidebar.classList.remove('collapsed');
+                        mainContent.style.transform = 'translateX(0)';
+                        mainContent.style.paddingLeft = '0';
+                        
+                        // Reset header position
+                        const header = document.querySelector('.dashboard-header');
+                        if (header) {
+                            header.style.transform = 'translateX(0)';
+                        }
+                        
+                        // Apply mobile improvement fixes
+                        setTimeout(function() {
+                            if (typeof applyMobileImprovements === 'function') {
+                                applyMobileImprovements();
+                            }
+                        }, 300);
+                    }
+                }
+            });
+        });
+        
+        // Handle resize changes - critical for mobile/desktop transitions
+        window.addEventListener('resize', function() {
             const isMobile = window.innerWidth <= 768;
+            const wasDesktop = !isMobile && window.lastKnownWidth && window.lastKnownWidth > 768;
+            const wasMobile = isMobile && window.lastKnownWidth && window.lastKnownWidth <= 768;
             
+            // Store current width for next comparison
+            window.lastKnownWidth = window.innerWidth;
+            
+            // If switching between mobile/desktop, reset everything
+            if ((wasMobile && !isMobile) || (wasDesktop && isMobile)) {
+                console.log('Device type changed, resetting state');
+                setInitialState();
+            }
+            
+            // Always update based on current state
             if (isMobile) {
-                console.log('Mobile view - using transform');
-                // In mobile: we use transform to push content                
                 if (sidebar.classList.contains('collapsed')) {
-                    console.log('Sidebar is expanded');
+                    // Sidebar is open
                     mainContent.style.transform = 'translateX(250px)';
                     
-                    // Fix for header position
                     const header = document.querySelector('.dashboard-header');
                     if (header) {
                         header.style.transform = 'translateX(250px)';
                     }
                 } else {
-                    console.log('Sidebar is collapsed');
+                    // Sidebar is closed
                     mainContent.style.transform = 'translateX(0)';
+                    mainContent.style.paddingLeft = '0';
                     
-                    // Fix for header position
                     const header = document.querySelector('.dashboard-header');
                     if (header) {
                         header.style.transform = 'translateX(0)';
                     }
                 }
                 
-                // Apply additional fixes after transition
-                setTimeout(function() {
-                    console.log('Applying post-toggle fixes');
-                    
-                    // Fix navigation buttons
-                    if (typeof fixNavigationButtons === 'function') {
-                        fixNavigationButtons();
-                    }
-                    
-                    // Prevent content collapse
+                // Apply mobile improvements
+                if (typeof preventContentCollapseFixed === 'function') {
                     preventContentCollapseFixed();
-                }, 350);
+                }
+                if (typeof fixNavigationButtons === 'function') {
+                    fixNavigationButtons();
+                }
             } else {
-                console.log('Desktop view - using margin');
-                // In desktop mode
-                if (sidebar.classList.contains('collapsed')) {
-                    mainContent.style.marginLeft = 'var(--sidebar-width-collapsed)';
-                } else {
-                    mainContent.style.marginLeft = 'var(--sidebar-width)';
-                }
-            }
-        });
-        
-        // New unified prevent collapse function
-        window.preventContentCollapseFixed = function() {
-            const contentContainer = document.getElementById('content');
-            if (!contentContainer) return;
-            
-            console.log('Preventing content collapse');
-            
-            // Force content width to prevent collapse
-            contentContainer.style.width = '100%';
-            contentContainer.style.maxWidth = 'none';
-            contentContainer.style.boxSizing = 'border-box';
-            
-            // Process all important containers
-            const containers = contentContainer.querySelectorAll('.card, .container, .row, .comunicaciones-container, .contacts-list, .message-composer');
-            containers.forEach(container => {
-                container.style.width = '100%';
-                container.style.maxWidth = 'none';
-                container.style.minWidth = '200px';
-                container.style.boxSizing = 'border-box';
-            });
-            
-            // Ensure tables don't break
-            const tables = document.querySelectorAll('table');
-            tables.forEach(table => {
-                table.style.width = '100%';
-                if (table.parentElement) {
-                    table.parentElement.style.overflowX = 'auto';
-                }
-            });
-        };
-        
-        // Fix to make sure the navigation buttons handler is accessible
-        if (typeof fixNavigationButtons !== 'function') {
-            window.fixNavigationButtons = function() {
-                const isMobile = window.innerWidth <= 768;
-                
-                // Obtain navigation elements
-                const menuBtn = document.querySelector('.menu-btn');
-                const navbarRight = document.querySelector('.navbar-right');
-                const notificationContainer = document.querySelector('.notification-container');
-                const refreshContainer = document.querySelector('.refresh-container');
-                
-                if (isMobile) {
-                    console.log('Fixing navigation buttons for mobile');
-                    
-                    // Ensure menu button is visible and functional
-                    if (menuBtn) {
-                        menuBtn.style.display = 'flex';
-                        menuBtn.style.position = 'fixed';
-                        menuBtn.style.top = '10px';
-                        menuBtn.style.right = '10px';
-                        menuBtn.style.zIndex = '2500';
-                        menuBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-                        menuBtn.style.borderRadius = '50%';
-                        menuBtn.style.width = '40px';
-                        menuBtn.style.height = '40px';
-                        menuBtn.style.alignItems = 'center';
-                        menuBtn.style.justifyContent = 'center';
-                        menuBtn.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
-                    }
-                    
-                    // Ensure the right navbar buttons are visible
-                    if (navbarRight) {
-                        navbarRight.style.position = 'fixed';
-                        navbarRight.style.top = '10px';
-                        navbarRight.style.right = '60px';
-                        navbarRight.style.zIndex = '2400';
-                        navbarRight.style.display = 'flex';
-                        navbarRight.style.alignItems = 'center';
-                        navbarRight.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-                        navbarRight.style.borderRadius = '20px';
-                        navbarRight.style.padding = '5px 10px';
-                        navbarRight.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
-                    }
-                }
-            };
-        }
-        
-        // Handle resize events
-        window.addEventListener('resize', function() {
-            const isMobile = window.innerWidth <= 768;
-            
-            // Reset styles on resize
-            if (!isMobile) {
+                // Desktop behavior
                 mainContent.style.transform = '';
                 
                 const header = document.querySelector('.dashboard-header');
@@ -760,70 +933,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     header.style.transform = '';
                 }
                 
-                // In desktop mode
                 if (sidebar.classList.contains('collapsed')) {
                     mainContent.style.marginLeft = 'var(--sidebar-width-collapsed)';
                 } else {
                     mainContent.style.marginLeft = 'var(--sidebar-width)';
                 }
-            } else {
-                // In mobile mode
-                mainContent.style.marginLeft = '0';
-                
-                if (sidebar.classList.contains('collapsed')) {
-                    mainContent.style.transform = 'translateX(250px)';
-                    
-                    const header = document.querySelector('.dashboard-header');
-                    if (header) {
-                        header.style.transform = 'translateX(250px)';
-                    }
-                } else {
-                    mainContent.style.transform = 'translateX(0)';
-                    
-                    const header = document.querySelector('.dashboard-header');
-                    if (header) {
-                        header.style.transform = 'translateX(0)';
-                    }
-                }
-                
-                // Always ensure content doesn't collapse
-                if (typeof preventContentCollapseFixed === 'function') {
-                    preventContentCollapseFixed();
-                }
-                
-                // Fix navigation buttons
-                if (typeof fixNavigationButtons === 'function') {
-                    fixNavigationButtons();
-                }
             }
         });
         
-        // Initialize based on current window size
-        const initialIsMobile = window.innerWidth <= 768;
+        // Set initial state for everything
+        setInitialState();
         
-        if (initialIsMobile) {
-            console.log('Initializing for mobile');
-            // Start with sidebar closed on mobile
-            sidebar.classList.remove('collapsed');
-            mainContent.style.transform = 'translateX(0)';
-            
-            const header = document.querySelector('.dashboard-header');
-            if (header) {
-                header.style.transform = 'translateX(0)';
-            }
-            
-            // Ensure buttons are visible
-            if (typeof fixNavigationButtons === 'function') {
-                fixNavigationButtons();
-            }
-        } else {
-            console.log('Initializing for desktop');
-            // On desktop, initialize according to sidebar state
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = 'var(--sidebar-width-collapsed)';
-            } else {
-                mainContent.style.marginLeft = 'var(--sidebar-width)';
-            }
+        // Run mobile improvements if applicable
+        if (typeof fixNavigationButtons === 'function') {
+            fixNavigationButtons();
         }
+        
+        // Disable old initSidebar to prevent conflicts
+        window.originalInitSidebar = window.initSidebar;
+        window.initSidebar = function() {
+            console.log('Original initSidebar disabled to prevent conflicts');
+        };
     }
 }); 

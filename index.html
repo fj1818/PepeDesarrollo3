@@ -534,5 +534,51 @@
         window.addEventListener('resize', applyMobileImprovements);
     });
     </script>
+    
+    <!-- Script to ensure mobile functionality works properly -->
+    <script>
+        // Script to ensure mobile functionality works properly
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Mobile initialization script loaded');
+            
+            // Apply initial mobile improvements
+            setTimeout(function() {
+                // Ensure we apply mobile improvements
+                if (typeof applyMobileImprovements === 'function') {
+                    applyMobileImprovements();
+                }
+                
+                // Ensure navigation buttons are fixed
+                if (typeof fixNavigationButtons === 'function') {
+                    fixNavigationButtons();
+                }
+                
+                // Ensure content doesn't collapse
+                if (typeof preventContentCollapseFixed === 'function') {
+                    preventContentCollapseFixed();
+                }
+            }, 300);
+            
+            // Apply mobile improvements when content is loaded
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    console.log('Window loaded, applying mobile improvements');
+                    
+                    // Apply the same functions after window is fully loaded
+                    if (typeof applyMobileImprovements === 'function') {
+                        applyMobileImprovements();
+                    }
+                    
+                    if (typeof fixNavigationButtons === 'function') {
+                        fixNavigationButtons();
+                    }
+                    
+                    if (typeof preventContentCollapseFixed === 'function') {
+                        preventContentCollapseFixed();
+                    }
+                }, 500);
+            });
+        });
+    </script>
 </body>
 </html>

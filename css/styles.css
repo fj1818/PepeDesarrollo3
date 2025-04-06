@@ -885,87 +885,104 @@ body {
 
 /* Mobile view optimizations */
 @media (max-width: 767.98px) {
-    /* Sidebar positioning fixes */
+    /* Mobile-specific sidebar styling */
     .sidebar {
         position: fixed;
+        width: 250px; /* Fixed width for mobile */
         left: -250px; /* Start off-screen */
-        width: 250px;
+        top: 0;
         height: 100%;
         z-index: 2000;
         transition: transform 0.3s ease;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        overflow-y: auto;
+        box-shadow: 3px 0 15px rgba(0, 0, 0, 0.1);
     }
     
+    /* When .collapsed is applied, the sidebar becomes visible */
     .sidebar.collapsed {
-        transform: translateX(250px); /* Move on-screen */
+        transform: translateX(250px); /* Move on screen */
+    }
+
+    /* Reset margins and use transforms for content movement */
+    .main-content {
+        margin-left: 0 !important;
+        transition: transform 0.3s ease;
+        width: 100%;
+        overflow-x: hidden;
     }
     
-    /* Menu button must always be visible */
+    /* Style for fixed header in mobile view */
+    .dashboard-header {
+        transition: transform 0.3s ease;
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 1500;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Ensure content containers expand to full width */
+    #content, 
+    .card, 
+    .container,
+    .row,
+    .col,
+    .col-md-12,
+    .col-lg-12 {
+        width: 100% !important;
+        max-width: none !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Ensure smooth transition when sidebar is toggled */
+    .container, .row, .col, .card {
+        transition: width 0.3s ease;
+    }
+    
+    /* Fix for tables that might overflow */
+    table {
+        width: 100% !important;
+    }
+    
+    table-responsive {
+        overflow-x: auto !important;
+    }
+    
+    /* Menu button always visible */
     .menu-btn {
-        display: block !important;
+        display: flex !important;
+    }
+    
+    /* Specific styling for the menu button to ensure it's always visible */
+    #sidebar-toggle-btn {
+        display: flex !important;
         position: fixed !important;
         top: 10px !important;
-        right: 10px !important; /* Position on right side */
-        z-index: 2001 !important; /* Above sidebar */
+        right: 10px !important;
+        z-index: 2500 !important;
         background-color: rgba(255, 255, 255, 0.9) !important;
         border-radius: 50% !important;
         width: 40px !important;
         height: 40px !important;
-        display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
     }
     
-    /* Fix for navbar buttons */
+    /* Additional navbar buttons styling */
     .navbar-right {
         position: fixed !important;
         top: 10px !important;
-        right: 60px !important; /* Right of menu button */
-        z-index: 1999 !important;
+        right: 60px !important;
+        z-index: 2400 !important;
         display: flex !important;
         align-items: center !important;
         background-color: rgba(255, 255, 255, 0.9) !important;
         border-radius: 20px !important;
         padding: 5px 10px !important;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    .navbar-right .notification-container,
-    .navbar-right .refresh-container {
-        display: block !important;
-        margin-right: 15px !important;
-    }
-    
-    /* Ensure content doesn't get hidden by fixed elements */
-    .main-content {
-        padding-top: 60px !important; /* Space for fixed header */
-        width: 100% !important;
-        margin-left: 0 !important;
-        transition: transform 0.3s ease !important;
-    }
-    
-    /* When sidebar is open, push content */
-    .sidebar.collapsed ~ .main-content {
-        transform: translateX(250px) !important;
-    }
-    
-    /* Fix for dashboard header */
-    .dashboard-header {
-        position: fixed !important;
-        top: 0 !important;
-        width: 100% !important;
-        z-index: 1998 !important; /* Below navbar-right and menu-btn */
-        background-color: white !important;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    /* Ensure header title is visible and centered */
-    .header-title {
-        margin-left: auto !important;
-        margin-right: auto !important;
-        text-align: center !important;
-        font-size: 1.2rem !important;
     }
 }
 
