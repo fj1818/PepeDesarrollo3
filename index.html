@@ -291,6 +291,72 @@
     })();
     </script>
     
+    <!-- Fix específico para evitar que el contenido se colapse al abrir el sidebar -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener elementos relevantes
+        const menuBtn = document.querySelector('.menu-btn');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        
+        if (menuBtn && sidebar && mainContent) {
+            // Aplicar una solución específica para prevenir el colapso del contenido
+            menuBtn.addEventListener('click', function() {
+                // Dar tiempo a que se complete la transición
+                setTimeout(function() {
+                    // Especialmente importante para evitar el colapso
+                    const contentContainer = document.getElementById('content');
+                    if (contentContainer) {
+                        // Forzar el uso de ancho completo en todas las situaciones
+                        contentContainer.style.width = '100%';
+                        contentContainer.style.maxWidth = 'none';
+                        contentContainer.style.boxSizing = 'border-box';
+                        
+                        // Procesar todos los elementos hijos directos
+                        Array.from(contentContainer.children).forEach(child => {
+                            // Asegurar que cada elemento hijo use todo el ancho disponible
+                            child.style.width = '100%';
+                            child.style.maxWidth = 'none';
+                            child.style.boxSizing = 'border-box';
+                            
+                            // Prevenir específicamente el colapso de tarjetas y contenedores
+                            if (child.classList && (
+                                child.classList.contains('card') ||
+                                child.classList.contains('crm-card') ||
+                                child.classList.contains('stats-card') ||
+                                child.classList.contains('comunicaciones-container') ||
+                                child.classList.contains('container') ||
+                                child.classList.contains('row'))) {
+                                
+                                // Aplicar estilos agresivos anti-colapso
+                                child.style.minWidth = '200px';
+                                child.style.width = '100%';
+                                child.style.display = 'block';
+                                
+                                // Intentar prevenir problemas de anidamiento
+                                if (child.children && child.children.length > 0) {
+                                    Array.from(child.children).forEach(grandchild => {
+                                        grandchild.style.width = '100%';
+                                        grandchild.style.maxWidth = 'none';
+                                        grandchild.style.boxSizing = 'border-box';
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Verificar si necesitamos aplicar parches específicos para secciones
+                    const comunicacionesContainer = document.querySelector('.comunicaciones-container');
+                    if (comunicacionesContainer) {
+                        comunicacionesContainer.style.display = 'block';
+                        comunicacionesContainer.style.width = '100%';
+                    }
+                }, 300); // Esperar lo suficiente para que la animación termine
+            });
+        }
+    });
+    </script>
+    
     <!-- Mejoras para dispositivos móviles -->
     <script>
     var applyMobileImprovements; // Hacer la función disponible globalmente
@@ -334,6 +400,15 @@
                 const mainContent = document.querySelector('.main-content');
                 
                 if (sidebar && mainContent) {
+                    // Asegurar que el menú hamburguesa esté siempre visible
+                    const menuBtn = document.querySelector('.menu-btn');
+                    if (menuBtn) {
+                        menuBtn.style.position = 'fixed';
+                        menuBtn.style.right = '15px';
+                        menuBtn.style.top = '15px';
+                        menuBtn.style.zIndex = '1001';
+                    }
+                    
                     if (sidebar.classList.contains('collapsed')) {
                         // Si el sidebar está expandido
                         // 1. Asegurar que se vea el texto
@@ -341,30 +416,56 @@
                             el.style.display = 'inline-block';
                         });
                         
-                        // 2. Ajustar el margen del contenido principal
-                        mainContent.style.marginLeft = sidebarWidth;
+                        // 2. Ajustar el padding del contenido principal
+                        mainContent.style.paddingLeft = sidebarWidth;
+                        mainContent.style.marginLeft = '0';
                         
-                        // 3. Ajustar el ancho de los elementos internos para evitar desbordamiento
-                        document.querySelectorAll('#content > *, .content-section > *').forEach(el => {
-                            el.style.width = 'calc(100% - 20px)';
-                            el.style.boxSizing = 'border-box';
-                        });
-                        
-                        // 4. Ajustar header
+                        // 3. Ajustar el header
                         const header = document.querySelector('.dashboard-header');
                         if (header) {
-                            header.style.width = 'calc(100% - 10px)';
+                            header.style.paddingLeft = sidebarWidth;
+                            header.style.width = '100%';
+                        }
+                        
+                        // 4. Asegurar que los botones del navbar están visibles
+                        const navbarRight = document.querySelector('.navbar-right');
+                        if (navbarRight) {
+                            navbarRight.style.position = 'fixed';
+                            navbarRight.style.right = '10px';
+                            navbarRight.style.top = '12px';
+                            navbarRight.style.zIndex = '1001';
                         }
                     } else {
-                        // Si el sidebar está cerrado
-                        mainContent.style.marginLeft = '0';
+                        // Si el sidebar está cerrado, restaurar
+                        mainContent.style.paddingLeft = '0';
+                        
+                        // Restaurar header
+                        const header = document.querySelector('.dashboard-header');
+                        if (header) {
+                            header.style.paddingLeft = '12px';
+                        }
                     }
                     
-                    // Asegurar que los contenedores tengan overflow visible
-                    document.querySelectorAll('.wrapper, .main-content, #content, .content-section').forEach(el => {
-                        el.style.overflow = 'visible';
-                        el.style.width = sidebar.classList.contains('collapsed') ? 
-                            `calc(100% - ${parseInt(sidebarWidth)}px)` : '100%';
+                    // Prevenir que los elementos se compriman
+                    document.querySelectorAll('#content > *, .content-section > *').forEach(el => {
+                        // Para tarjetas y componentes principales
+                        if (el.classList && (
+                            el.classList.contains('card') || 
+                            el.classList.contains('crm-card') || 
+                            el.classList.contains('stats-card') ||
+                            el.classList.contains('metric-card') ||
+                            el.classList.contains('stat-card') ||
+                            el.classList.contains('action-card'))) {
+                            el.style.width = '100%';
+                            el.style.maxWidth = 'none';
+                            el.style.boxSizing = 'border-box';
+                        }
+                    });
+                    
+                    // Aplicar estilo a las tablas para que se ajusten correctamente
+                    document.querySelectorAll('table').forEach(table => {
+                        table.style.width = '100%';
+                        table.style.maxWidth = 'none';
                     });
                 }
             }
@@ -385,7 +486,10 @@
         const menuBtn = document.querySelector('.menu-btn');
         if (menuBtn) {
             menuBtn.addEventListener('click', function() {
+                // Dar tiempo a que se complete la animación del sidebar
                 setTimeout(applyMobileImprovements, 50);
+                // Aplicar mejoras adicionales después de un tiempo
+                setTimeout(applyMobileImprovements, 300);
             });
         }
     });

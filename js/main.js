@@ -81,22 +81,17 @@ function initSidebar() {
         menuBtn.addEventListener('click', function() {
             sidebar.classList.toggle('collapsed');
             
-            // En dispositivos móviles, gestionar el contenido principal
-            if (window.innerWidth <= 768) {
-                if (sidebar.classList.contains('collapsed')) {
-                    // Si el sidebar está abierto en móvil, ajustar el margen
-                    mainContent.style.marginLeft = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width');
-                    // Asegurar que los elementos internos tengan margen para ser visibles
-                    adjustContentForSidebar(true);
-                } else {
-                    // Si el sidebar está cerrado, restaurar el margen
-                    mainContent.style.marginLeft = '0';
-                    // Restaurar márgenes de elementos internos
-                    adjustContentForSidebar(false);
+            // Usar padding en lugar de margin para mejor visualización
+            if (sidebar.classList.contains('collapsed')) {
+                if (window.innerWidth <= 768) {
+                    mainContent.style.paddingLeft = '250px';
                 }
             } else {
-                mainContent.classList.toggle('expanded');
+                mainContent.style.paddingLeft = '0';
             }
+            
+            // Prevenir colapso después de la transición
+            setTimeout(preventCollapseOnMobile, 300);
         });
     }
     
@@ -119,7 +114,7 @@ function initSidebar() {
                 // En móviles, cerrar el sidebar después de seleccionar
                 if (window.innerWidth <= 768) {
                     sidebar.classList.remove('collapsed');
-                    mainContent.style.marginLeft = '0';
+                    mainContent.style.paddingLeft = '0';
                     // Restaurar márgenes de elementos internos
                     adjustContentForSidebar(false);
                 }
@@ -130,25 +125,39 @@ function initSidebar() {
     // Función para ajustar el contenido cuando el sidebar está abierto
     function adjustContentForSidebar(sidebarOpen) {
         if (window.innerWidth <= 768) {
-            const contentElements = document.querySelectorAll('#content > *, .content-section > *');
-            
-            contentElements.forEach(el => {
-                if (sidebarOpen) {
-                    // Ajustar elementos para ser visibles con sidebar abierto
-                    el.style.width = 'calc(100% - 20px)';
-                    el.style.boxSizing = 'border-box';
-                    el.style.overflow = 'visible';
-                } else {
-                    // Restaurar
-                    el.style.width = '100%';
-                }
-            });
-            
             // Ajustar el header
             const header = document.querySelector('.dashboard-header');
             if (header) {
-                header.style.width = sidebarOpen ? 'calc(100% - 10px)' : '100%';
+                header.style.paddingLeft = sidebarOpen ? getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') : '12px';
             }
+            
+            // Evitar que el contenido se comprima
+            const contentItems = document.querySelectorAll('#content > *, .content-section > *');
+            contentItems.forEach(el => {
+                // Asegurar que los elementos mantengan su ancho y no se compriman
+                if (el.classList) {
+                    if (el.classList.contains('crm-card') || 
+                        el.classList.contains('stats-card') || 
+                        el.classList.contains('metric-card') ||
+                        el.classList.contains('card')) {
+                        
+                        el.style.width = '100%';
+                        el.style.boxSizing = 'border-box';
+                        el.style.maxWidth = 'none';
+                    }
+                }
+            });
+            
+            // Asegurarse de que las filas y columnas usen todo el ancho disponible
+            document.querySelectorAll('.row, [class*="col-"]').forEach(el => {
+                el.style.width = '100%';
+                el.style.maxWidth = 'none';
+                el.style.paddingLeft = '5px';
+                el.style.paddingRight = '5px';
+                el.style.boxSizing = 'border-box';
+                el.style.marginLeft = '0';
+                el.style.marginRight = '0';
+            });
         }
     }
     
@@ -437,7 +446,8 @@ function handleResize() {
     if (window.innerWidth <= 768) {
         // Comportamiento en móvil
         sidebar.classList.remove('collapsed'); // Inicialmente cerrado en móvil
-        mainContent.style.marginLeft = '0'; // Usar margen en vez de transform
+        mainContent.style.paddingLeft = '0'; // Usar padding en vez de margin
+        mainContent.style.marginLeft = '0'; // Asegurar que no hay margen
         mainContent.classList.add('expanded');
         
         // Ajustar elementos para mejorar visualización en móvil
@@ -474,6 +484,7 @@ function handleResize() {
             el.style.paddingRight = '5px';
             el.style.maxWidth = 'none';
             el.style.width = '100%';
+            el.style.boxSizing = 'border-box';
         });
         
         // Garantizar que todas las tarjetas y contenedores sean visibles
@@ -489,6 +500,7 @@ function handleResize() {
         } else {
             mainContent.classList.remove('expanded');
         }
+        mainContent.style.paddingLeft = ''; // Eliminar padding inline
         mainContent.style.marginLeft = ''; // Eliminar margen inline
         mainContent.style.transform = ''; // Eliminar transformación en desktop
     }
@@ -550,4 +562,97 @@ async function enviarDatosAPI(dataToSend, esActualizacion) {
 
     // Enviar los datos
     xhr.send(JSON.stringify(dataToSend));
-} 
+}
+
+// Funcion para evitar que los elementos se colapsen en modo móvil
+function preventCollapseOnMobile() {
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) return;
+    
+    const contentContainer = document.getElementById('content');
+    if (!contentContainer) return;
+    
+    // Asegurar que todo el contenido tiene el ancho adecuado
+    contentContainer.style.width = '100%';
+    contentContainer.style.maxWidth = 'none';
+    contentContainer.style.boxSizing = 'border-box';
+    
+    // Procesar todos los contenedores importantes
+    const containers = document.querySelectorAll('#content .card, #content .container, #content .row, .comunicaciones-container, .contacts-list, .message-composer');
+    containers.forEach(container => {
+        container.style.width = '100%';
+        container.style.maxWidth = 'none';
+        container.style.minWidth = '200px';
+        container.style.boxSizing = 'border-box';
+    });
+    
+    // Asegurar que las tablas no se rompan
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        table.style.width = '100%';
+        table.style.minWidth = '200px';
+        if (table.parentElement) {
+            table.parentElement.style.overflowX = 'auto';
+        }
+    });
+}
+
+// Ejecutar al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    
+    // Configuración del sidebar
+    const menuBtn = document.querySelector('.menu-btn');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    
+    if (menuBtn && sidebar && mainContent) {
+        menuBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            
+            // Usar padding en lugar de margin para mejor visualización
+            if (sidebar.classList.contains('collapsed')) {
+                if (window.innerWidth <= 768) {
+                    mainContent.style.paddingLeft = '250px';
+                }
+            } else {
+                mainContent.style.paddingLeft = '0';
+            }
+            
+            // Prevenir colapso después de la transición
+            setTimeout(preventCollapseOnMobile, 300);
+        });
+        
+        // Ajustar cuando la ventana cambia de tamaño
+        window.addEventListener('resize', function() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (!isMobile) {
+                // En desktop, eliminar los estilos inline
+                mainContent.style.paddingLeft = '';
+                mainContent.style.marginLeft = '';
+                
+                // Resetear contenedores para desktop
+                const containers = document.querySelectorAll('#content .card, #content .container, #content .row');
+                containers.forEach(container => {
+                    container.style.width = '';
+                    container.style.maxWidth = '';
+                    container.style.minWidth = '';
+                });
+            } else {
+                // En móvil, aplicar estilos según el estado del sidebar
+                if (sidebar.classList.contains('collapsed')) {
+                    mainContent.style.paddingLeft = '250px';
+                } else {
+                    mainContent.style.paddingLeft = '0';
+                }
+                
+                // Prevenir colapso
+                preventCollapseOnMobile();
+            }
+        });
+        
+        // Aplicar inicialmente
+        preventCollapseOnMobile();
+    }
+}); 

@@ -466,23 +466,36 @@ body {
         overflow: visible;
     }
     
-    /* Ajustar el contenido principal cuando el sidebar está abierto */
-    .sidebar.collapsed ~ .main-content {
-        width: 100%;
-        /* En lugar de empujar todo el contenido con transform, ajustamos el margen y el ancho */
-        margin-left: var(--sidebar-width);
-        transform: none;
-        transition: margin-left 0.3s ease;
-        overflow-x: visible;
-    }
-    
-    /* Cuando el sidebar está cerrado, usar todo el ancho */
+    /* Contenedor principal - siempre ocupa el ancho completo en móvil */
     .main-content {
         margin-left: 0;
         width: 100%;
         padding: 0 5px;
-        transition: margin-left 0.3s ease;
+        transition: padding-left 0.3s ease;
+        position: relative;
         overflow-x: visible;
+    }
+    
+    /* Cuando el sidebar está abierto, usar padding en lugar de margin */
+    .sidebar.collapsed ~ .main-content {
+        padding-left: var(--sidebar-width);
+        width: 100%; /* Mantener ancho completo */
+        margin-left: 0; /* No usar margin */
+        transform: none; 
+    }
+    
+    /* Asegurar que el contenido se desplaza correctamente y mantiene su ancho */
+    .sidebar.collapsed ~ .main-content #content,
+    .sidebar.collapsed ~ .main-content .content-section {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Ajustar contenido dentro del content area */
+    #content > *,
+    .content-section > * {
+        max-width: 100%;
+        box-sizing: border-box;
     }
     
     /* Asegurar que todo el contenido sea visible */
@@ -493,26 +506,39 @@ body {
     
     /* Asegurar que el botón de hamburguesa siempre esté visible */
     .menu-btn {
-        position: relative;
+        position: fixed; /* Cambiar a fixed para que siempre sea visible */
         z-index: 1001;
+        right: 15px; /* Posicionar a la derecha */
+        top: 15px; /* Posicionar desde arriba */
     }
     
     /* Ajustar el header para que no se superpongan los elementos */
     .dashboard-header {
         padding: 12px;
-        width: calc(100% - 10px);
-        margin-right: 0;
+        width: 100%;
+        box-sizing: border-box;
+        position: relative;
+        transition: padding-left 0.3s ease;
     }
     
     /* Cuando el sidebar está abierto, ajustar el header */
     .sidebar.collapsed ~ .main-content .dashboard-header {
-        width: calc(100% - 10px);
+        width: 100%;
+        padding-left: var(--sidebar-width); /* Usar padding en lugar de ancho reducido */
     }
     
     /* Cuando el sidebar está abierto, asegurarse que el navbar-right siga visible */
     .navbar-right {
-        position: relative;
+        position: fixed;
         z-index: 1001;
+        right: 10px;
+        top: 12px;
+    }
+    
+    /* Asegurar que el título esté visible */
+    .header-title {
+        margin-left: 10px;
+        transition: margin-left 0.3s ease;
     }
     
     /* Ajustar las cards para que ocupen todo el ancho en móvil */
@@ -855,4 +881,89 @@ body {
 
 .cursor-pointer:hover {
     background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Mobile view optimizations */
+@media (max-width: 767.98px) {
+    /* Existing styles */
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        z-index: 2000;
+        transition: transform 0.3s ease;
+        width: 250px;
+    }
+    
+    .sidebar.collapsed {
+        transform: translateX(250px);
+    }
+    
+    .menu-btn {
+        display: block;
+        position: fixed;
+        z-index: 2001;
+        top: 10px;
+        left: 10px;
+    }
+    
+    /* Content anti-collapse optimizations */
+    .main-content {
+        transition: padding-left 0.3s ease;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 0;
+        box-sizing: border-box;
+    }
+    
+    /* When sidebar is open */
+    .sidebar.collapsed ~ .main-content {
+        padding-left: 250px;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Ensure content containers don't collapse */
+    #content, 
+    .card,
+    .container,
+    .row,
+    .card-body,
+    .table-container,
+    .comunicaciones-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        min-width: 200px !important;
+    }
+    
+    /* Ensure proper visibility of cards when sidebar is open */
+    .sidebar.collapsed ~ .main-content #content .card,
+    .sidebar.collapsed ~ .main-content #content .container,
+    .sidebar.collapsed ~ .main-content #content .row,
+    .sidebar.collapsed ~ .main-content #content .table-container,
+    .sidebar.collapsed ~ .main-content #content .comunicaciones-container {
+        width: 100% !important;
+        min-width: 200px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    /* Ensure tables remain usable */
+    table {
+        width: 100% !important;
+        min-width: 200px !important;
+        display: block;
+        overflow-x: auto;
+    }
+    
+    /* Force proper display for all major containers */
+    .comunicaciones-container,
+    .contacts-list,
+    .message-composer,
+    .whatsapp-preview,
+    .email-preview {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
 } 

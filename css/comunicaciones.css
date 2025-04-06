@@ -266,17 +266,12 @@
     }
     
     /* Corrección para la sección de comunicaciones con sidebar */
-    .sidebar.collapsed ~ .main-content .comunicaciones-container {
-        width: calc(100% - 20px) !important;
-        margin-left: 0;
+    .sidebar.collapsed ~ .main-content .comunicaciones-container,
+    .sidebar.collapsed ~ .main-content #content-comunicaciones {
+        width: 100% !important;
+        padding-left: 0;
         box-sizing: border-box;
         overflow-x: visible;
-    }
-    
-    /* Ajustar ancho cuando el sidebar está abierto */
-    .sidebar.collapsed ~ .main-content #content-comunicaciones {
-        width: 100%;
-        box-sizing: border-box;
     }
     
     /* Ensure all containers use full width */
@@ -293,6 +288,7 @@
         margin-right: 0;
         box-sizing: border-box;
         overflow-x: visible;
+        max-width: 100%;
     }
     
     /* Adjust margins and padding for better mobile view */
@@ -301,6 +297,13 @@
         margin: 0 0 10px 0;
         width: 100%;
         box-sizing: border-box;
+        max-width: 100%;
+    }
+    
+    /* Ensure contact list grid uses full width */
+    .comunicaciones-container {
+        width: 100%;
+        display: block; /* Cambiar de grid a block para mejor visualización */
     }
 }
 
