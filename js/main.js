@@ -81,14 +81,18 @@ function initSidebar() {
         menuBtn.addEventListener('click', function() {
             sidebar.classList.toggle('collapsed');
             
-            // En dispositivos móviles, gestionar el desplazamiento del contenido
+            // En dispositivos móviles, gestionar el contenido principal
             if (window.innerWidth <= 768) {
                 if (sidebar.classList.contains('collapsed')) {
-                    // Si el sidebar está abierto en móvil, desplazar el contenido
-                    mainContent.style.transform = 'translateX(' + getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') + ')';
+                    // Si el sidebar está abierto en móvil, ajustar el margen
+                    mainContent.style.marginLeft = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width');
+                    // Asegurar que los elementos internos tengan margen para ser visibles
+                    adjustContentForSidebar(true);
                 } else {
-                    // Si el sidebar está cerrado, restaurar la posición del contenido
-                    mainContent.style.transform = 'translateX(0)';
+                    // Si el sidebar está cerrado, restaurar el margen
+                    mainContent.style.marginLeft = '0';
+                    // Restaurar márgenes de elementos internos
+                    adjustContentForSidebar(false);
                 }
             } else {
                 mainContent.classList.toggle('expanded');
@@ -115,11 +119,38 @@ function initSidebar() {
                 // En móviles, cerrar el sidebar después de seleccionar
                 if (window.innerWidth <= 768) {
                     sidebar.classList.remove('collapsed');
-                    mainContent.style.transform = 'translateX(0)';
+                    mainContent.style.marginLeft = '0';
+                    // Restaurar márgenes de elementos internos
+                    adjustContentForSidebar(false);
                 }
             }
         });
     });
+    
+    // Función para ajustar el contenido cuando el sidebar está abierto
+    function adjustContentForSidebar(sidebarOpen) {
+        if (window.innerWidth <= 768) {
+            const contentElements = document.querySelectorAll('#content > *, .content-section > *');
+            
+            contentElements.forEach(el => {
+                if (sidebarOpen) {
+                    // Ajustar elementos para ser visibles con sidebar abierto
+                    el.style.width = 'calc(100% - 20px)';
+                    el.style.boxSizing = 'border-box';
+                    el.style.overflow = 'visible';
+                } else {
+                    // Restaurar
+                    el.style.width = '100%';
+                }
+            });
+            
+            // Ajustar el header
+            const header = document.querySelector('.dashboard-header');
+            if (header) {
+                header.style.width = sidebarOpen ? 'calc(100% - 10px)' : '100%';
+            }
+        }
+    }
     
     // Cargar contenido inicial basado en el elemento activo del menú
     const activeMenuItem = document.querySelector('.nav-item.active');
@@ -406,7 +437,7 @@ function handleResize() {
     if (window.innerWidth <= 768) {
         // Comportamiento en móvil
         sidebar.classList.remove('collapsed'); // Inicialmente cerrado en móvil
-        mainContent.style.transform = 'translateX(0)'; // Posición inicial del contenido
+        mainContent.style.marginLeft = '0'; // Usar margen en vez de transform
         mainContent.classList.add('expanded');
         
         // Ajustar elementos para mejorar visualización en móvil
@@ -415,6 +446,7 @@ function handleResize() {
             card.style.width = '100%';
             card.style.marginLeft = '0';
             card.style.marginRight = '0';
+            card.style.maxWidth = 'none';
         });
         
         // Asegurarnos que los iconos sean suficientemente grandes para interacción táctil
@@ -430,15 +462,25 @@ function handleResize() {
                 container.style.width = '100%';
                 container.style.padding = '10px 5px';
                 container.style.boxSizing = 'border-box';
+                container.style.overflow = 'visible';
             }
         });
         
         // Eliminar márgenes horizontales innecesarios
-        document.querySelectorAll('.row, .col, .col-12, .col-md-*').forEach(el => {
+        document.querySelectorAll('.row, .col, .col-12, [class*="col-md-"]').forEach(el => {
             el.style.marginLeft = '0';
             el.style.marginRight = '0';
             el.style.paddingLeft = '5px';
             el.style.paddingRight = '5px';
+            el.style.maxWidth = 'none';
+            el.style.width = '100%';
+        });
+        
+        // Garantizar que todas las tarjetas y contenedores sean visibles
+        document.querySelectorAll('.card, .crm-card, .metric-card, .stat-card, .action-card').forEach(el => {
+            el.style.maxWidth = 'none';
+            el.style.width = '100%';
+            el.style.boxSizing = 'border-box';
         });
     } else {
         // Comportamiento en desktop
@@ -447,6 +489,7 @@ function handleResize() {
         } else {
             mainContent.classList.remove('expanded');
         }
+        mainContent.style.marginLeft = ''; // Eliminar margen inline
         mainContent.style.transform = ''; // Eliminar transformación en desktop
     }
 }

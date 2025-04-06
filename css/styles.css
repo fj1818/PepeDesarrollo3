@@ -466,15 +466,29 @@ body {
         overflow: visible;
     }
     
-    /* Evitar que el contenido principal se superponga con el sidebar */
+    /* Ajustar el contenido principal cuando el sidebar está abierto */
     .sidebar.collapsed ~ .main-content {
-        transform: translateX(var(--sidebar-width));
+        width: 100%;
+        /* En lugar de empujar todo el contenido con transform, ajustamos el margen y el ancho */
+        margin-left: var(--sidebar-width);
+        transform: none;
+        transition: margin-left 0.3s ease;
+        overflow-x: visible;
     }
     
+    /* Cuando el sidebar está cerrado, usar todo el ancho */
     .main-content {
         margin-left: 0;
         width: 100%;
-        padding: 0 5px; /* Reduce side padding to use more screen width */
+        padding: 0 5px;
+        transition: margin-left 0.3s ease;
+        overflow-x: visible;
+    }
+    
+    /* Asegurar que todo el contenido sea visible */
+    .wrapper {
+        overflow-x: visible;
+        width: 100%;
     }
     
     /* Asegurar que el botón de hamburguesa siempre esté visible */
@@ -486,6 +500,13 @@ body {
     /* Ajustar el header para que no se superpongan los elementos */
     .dashboard-header {
         padding: 12px;
+        width: calc(100% - 10px);
+        margin-right: 0;
+    }
+    
+    /* Cuando el sidebar está abierto, ajustar el header */
+    .sidebar.collapsed ~ .main-content .dashboard-header {
+        width: calc(100% - 10px);
     }
     
     /* Cuando el sidebar está abierto, asegurarse que el navbar-right siga visible */
@@ -529,6 +550,7 @@ body {
     /* Reducir márgenes y paddings para aprovechar espacio */
     .content-section {
         padding: 15px 10px;
+        width: 100%;
     }
     
     /* Botones más grandes para mejor interacción táctil */

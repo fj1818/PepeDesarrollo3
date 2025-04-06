@@ -265,12 +265,18 @@
         font-size: 16px;
     }
     
-    /* Fix sidebar interaction with comunicaciones components */
+    /* Corrección para la sección de comunicaciones con sidebar */
     .sidebar.collapsed ~ .main-content .comunicaciones-container {
-        transform: translateX(0); /* Prevent double transformation */
+        width: calc(100% - 20px) !important;
+        margin-left: 0;
+        box-sizing: border-box;
+        overflow-x: visible;
+    }
+    
+    /* Ajustar ancho cuando el sidebar está abierto */
+    .sidebar.collapsed ~ .main-content #content-comunicaciones {
         width: 100%;
-        padding: 0;
-        margin: 0;
+        box-sizing: border-box;
     }
     
     /* Ensure all containers use full width */
@@ -286,6 +292,7 @@
         margin-left: 0;
         margin-right: 0;
         box-sizing: border-box;
+        overflow-x: visible;
     }
     
     /* Adjust margins and padding for better mobile view */

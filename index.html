@@ -245,8 +245,56 @@
     });
     </script>
     
+    <!-- Fix para el viewport en dispositivos móviles -->
+    <script>
+    (function() {
+        // Ajustar viewport para dispositivos móviles
+        function adjustViewport() {
+            // Hack para forzar reflow en dispositivos móviles
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // Forzar reflow
+            document.body.style.display = '';
+            
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                // Asegurar que el viewport se actualice correctamente
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover');
+                
+                // Para dispositivos iOS
+                if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                    document.documentElement.style.height = window.innerHeight + 'px';
+                }
+            }
+            
+            // Aplicar zoom de página para mejor visibilidad en dispositivos pequeños
+            if (window.innerWidth <= 375) {
+                document.body.style.zoom = "0.95";
+            } else {
+                document.body.style.zoom = "1";
+            }
+        }
+        
+        // Ejecutar ajuste cuando cambie el tamaño o orientación
+        window.addEventListener('resize', adjustViewport);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(adjustViewport, 100);
+            setTimeout(function() {
+                // Aplicar mejoras móviles después de cambio de orientación
+                if (typeof applyMobileImprovements === 'function') {
+                    applyMobileImprovements();
+                }
+            }, 200);
+        });
+        
+        // Ejecutar ajuste inicial
+        adjustViewport();
+    })();
+    </script>
+    
     <!-- Mejoras para dispositivos móviles -->
     <script>
+    var applyMobileImprovements; // Hacer la función disponible globalmente
+    
     document.addEventListener('DOMContentLoaded', function() {
         // Verificar si estamos en dispositivo móvil
         function isMobile() {
@@ -254,9 +302,12 @@
         }
         
         // Función para aplicar mejoras en móvil
-        function applyMobileImprovements() {
+        applyMobileImprovements = function() {
             if (isMobile()) {
                 console.log('Aplicando mejoras para móvil');
+                
+                // Obtener ancho de sidebar para cálculos
+                const sidebarWidth = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width');
                 
                 // Asegurar que todos los contenedores ocupen el ancho completo
                 document.querySelectorAll('.container, .container-fluid, .row, [class*="col-"]').forEach(el => {
@@ -266,30 +317,55 @@
                     el.style.paddingRight = '5px';
                     el.style.marginLeft = '0';
                     el.style.marginRight = '0';
+                    el.style.boxSizing = 'border-box';
                 });
                 
                 // Asegurar que las tarjetas ocupen el ancho completo
-                document.querySelectorAll('.card, .crm-card, .stats-card, .metric-card').forEach(card => {
+                document.querySelectorAll('.card, .crm-card, .stats-card, .metric-card, .action-card, .stat-card').forEach(card => {
                     card.style.width = '100%';
                     card.style.marginLeft = '0';
                     card.style.marginRight = '0';
                     card.style.boxSizing = 'border-box';
+                    card.style.maxWidth = 'none';
                 });
                 
                 // Corregir visualización del sidebar
                 const sidebar = document.querySelector('.sidebar');
                 const mainContent = document.querySelector('.main-content');
                 
-                if (sidebar && sidebar.classList.contains('collapsed')) {
-                    // Si el sidebar está expandido, asegurar que se vea el texto
-                    document.querySelectorAll('.link_name, .logo_name').forEach(el => {
-                        el.style.display = 'inline-block';
-                    });
-                    
-                    // Desplazar el contenido principal
-                    if (mainContent) {
-                        mainContent.style.transform = 'translateX(' + getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') + ')';
+                if (sidebar && mainContent) {
+                    if (sidebar.classList.contains('collapsed')) {
+                        // Si el sidebar está expandido
+                        // 1. Asegurar que se vea el texto
+                        document.querySelectorAll('.link_name, .logo_name').forEach(el => {
+                            el.style.display = 'inline-block';
+                        });
+                        
+                        // 2. Ajustar el margen del contenido principal
+                        mainContent.style.marginLeft = sidebarWidth;
+                        
+                        // 3. Ajustar el ancho de los elementos internos para evitar desbordamiento
+                        document.querySelectorAll('#content > *, .content-section > *').forEach(el => {
+                            el.style.width = 'calc(100% - 20px)';
+                            el.style.boxSizing = 'border-box';
+                        });
+                        
+                        // 4. Ajustar header
+                        const header = document.querySelector('.dashboard-header');
+                        if (header) {
+                            header.style.width = 'calc(100% - 10px)';
+                        }
+                    } else {
+                        // Si el sidebar está cerrado
+                        mainContent.style.marginLeft = '0';
                     }
+                    
+                    // Asegurar que los contenedores tengan overflow visible
+                    document.querySelectorAll('.wrapper, .main-content, #content, .content-section').forEach(el => {
+                        el.style.overflow = 'visible';
+                        el.style.width = sidebar.classList.contains('collapsed') ? 
+                            `calc(100% - ${parseInt(sidebarWidth)}px)` : '100%';
+                    });
                 }
             }
         }
@@ -304,6 +380,14 @@
         
         // Aplicar mejoras al cambiar tamaño de ventana
         window.addEventListener('resize', applyMobileImprovements);
+        
+        // Agregar listener para el toggle del sidebar
+        const menuBtn = document.querySelector('.menu-btn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', function() {
+                setTimeout(applyMobileImprovements, 50);
+            });
+        }
     });
     </script>
 </body>
