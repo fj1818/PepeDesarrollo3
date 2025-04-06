@@ -885,85 +885,130 @@ body {
 
 /* Mobile view optimizations */
 @media (max-width: 767.98px) {
-    /* Existing styles */
+    /* Sidebar positioning fixes */
     .sidebar {
         position: fixed;
-        left: -250px;
+        left: -250px; /* Start off-screen */
+        width: 250px;
+        height: 100%;
         z-index: 2000;
         transition: transform 0.3s ease;
-        width: 250px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     }
     
     .sidebar.collapsed {
-        transform: translateX(250px);
+        transform: translateX(250px); /* Move on-screen */
     }
     
+    /* Menu button must always be visible */
+    .menu-btn {
+        display: block !important;
+        position: fixed !important;
+        top: 10px !important;
+        right: 10px !important; /* Position on right side */
+        z-index: 2001 !important; /* Above sidebar */
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 50% !important;
+        width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* Fix for navbar buttons */
+    .navbar-right {
+        position: fixed !important;
+        top: 10px !important;
+        right: 60px !important; /* Right of menu button */
+        z-index: 1999 !important;
+        display: flex !important;
+        align-items: center !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 20px !important;
+        padding: 5px 10px !important;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .navbar-right .notification-container,
+    .navbar-right .refresh-container {
+        display: block !important;
+        margin-right: 15px !important;
+    }
+    
+    /* Ensure content doesn't get hidden by fixed elements */
+    .main-content {
+        padding-top: 60px !important; /* Space for fixed header */
+        width: 100% !important;
+        margin-left: 0 !important;
+        transition: transform 0.3s ease !important;
+    }
+    
+    /* When sidebar is open, push content */
+    .sidebar.collapsed ~ .main-content {
+        transform: translateX(250px) !important;
+    }
+    
+    /* Fix for dashboard header */
+    .dashboard-header {
+        position: fixed !important;
+        top: 0 !important;
+        width: 100% !important;
+        z-index: 1998 !important; /* Below navbar-right and menu-btn */
+        background-color: white !important;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Ensure header title is visible and centered */
+    .header-title {
+        margin-left: auto !important;
+        margin-right: auto !important;
+        text-align: center !important;
+        font-size: 1.2rem !important;
+    }
+}
+
+/* Desktop fixes */
+@media (min-width: 768px) {
+    /* Ensure sidebar works correctly */
+    .sidebar {
+        left: 0;
+        width: var(--sidebar-width);
+        position: fixed;
+    }
+    
+    .sidebar.collapsed {
+        width: var(--sidebar-width-collapsed);
+    }
+    
+    /* Fix main content margins */
+    .main-content {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        transition: margin-left 0.3s ease, width 0.3s ease;
+    }
+    
+    .sidebar.collapsed ~ .main-content {
+        margin-left: var(--sidebar-width-collapsed);
+        width: calc(100% - var(--sidebar-width-collapsed));
+    }
+    
+    /* Menu button should be visible */
     .menu-btn {
         display: block;
-        position: fixed;
-        z-index: 2001;
-        top: 10px;
-        left: 10px;
+        cursor: pointer;
     }
     
-    /* Content anti-collapse optimizations */
-    .main-content {
-        transition: padding-left 0.3s ease;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding-left: 0;
-        box-sizing: border-box;
+    /* Navbar elements should be properly aligned */
+    .navbar-right {
+        display: flex;
+        align-items: center;
     }
     
-    /* When sidebar is open */
-    .sidebar.collapsed ~ .main-content {
-        padding-left: 250px;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-    
-    /* Ensure content containers don't collapse */
-    #content, 
-    .card,
-    .container,
-    .row,
-    .card-body,
-    .table-container,
-    .comunicaciones-container {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        min-width: 200px !important;
-    }
-    
-    /* Ensure proper visibility of cards when sidebar is open */
-    .sidebar.collapsed ~ .main-content #content .card,
-    .sidebar.collapsed ~ .main-content #content .container,
-    .sidebar.collapsed ~ .main-content #content .row,
-    .sidebar.collapsed ~ .main-content #content .table-container,
-    .sidebar.collapsed ~ .main-content #content .comunicaciones-container {
-        width: 100% !important;
-        min-width: 200px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-    
-    /* Ensure tables remain usable */
-    table {
-        width: 100% !important;
-        min-width: 200px !important;
-        display: block;
-        overflow-x: auto;
-    }
-    
-    /* Force proper display for all major containers */
-    .comunicaciones-container,
-    .contacts-list,
-    .message-composer,
-    .whatsapp-preview,
-    .email-preview {
-        display: block !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+    .navbar-right .notification-container,
+    .navbar-right .refresh-container {
+        display: inline-flex;
+        margin-right: 15px;
     }
 } 

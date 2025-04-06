@@ -597,62 +597,233 @@ function preventCollapseOnMobile() {
     });
 }
 
-// Ejecutar al cargar la página
+// Fix sidebar toggle functionality to ensure it works correctly
 document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
+    console.log('Initializing sidebar toggle - fixed version');
     
-    // Configuración del sidebar
+    // Get relevant elements
     const menuBtn = document.querySelector('.menu-btn');
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
     
     if (menuBtn && sidebar && mainContent) {
-        menuBtn.addEventListener('click', function() {
+        // Remove all existing click event listeners using cloneNode
+        const newMenuBtn = menuBtn.cloneNode(true);
+        if (menuBtn.parentNode) {
+            menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
+        }
+        
+        // Use the new reference for the button
+        newMenuBtn.addEventListener('click', function() {
+            console.log('Menu button clicked - toggle sidebar');
+            
+            // Toggle collapsed class
             sidebar.classList.toggle('collapsed');
             
-            // Usar padding en lugar de margin para mejor visualización
-            if (sidebar.classList.contains('collapsed')) {
-                if (window.innerWidth <= 768) {
-                    mainContent.style.paddingLeft = '250px';
-                }
-            } else {
-                mainContent.style.paddingLeft = '0';
-            }
+            // Determine if we're in mobile or desktop view
+            const isMobile = window.innerWidth <= 768;
             
-            // Prevenir colapso después de la transición
-            setTimeout(preventCollapseOnMobile, 300);
+            if (isMobile) {
+                console.log('Mobile view - using transform');
+                // In mobile: we use transform to push content                
+                if (sidebar.classList.contains('collapsed')) {
+                    console.log('Sidebar is expanded');
+                    mainContent.style.transform = 'translateX(250px)';
+                    
+                    // Fix for header position
+                    const header = document.querySelector('.dashboard-header');
+                    if (header) {
+                        header.style.transform = 'translateX(250px)';
+                    }
+                } else {
+                    console.log('Sidebar is collapsed');
+                    mainContent.style.transform = 'translateX(0)';
+                    
+                    // Fix for header position
+                    const header = document.querySelector('.dashboard-header');
+                    if (header) {
+                        header.style.transform = 'translateX(0)';
+                    }
+                }
+                
+                // Apply additional fixes after transition
+                setTimeout(function() {
+                    console.log('Applying post-toggle fixes');
+                    
+                    // Fix navigation buttons
+                    if (typeof fixNavigationButtons === 'function') {
+                        fixNavigationButtons();
+                    }
+                    
+                    // Prevent content collapse
+                    preventContentCollapseFixed();
+                }, 350);
+            } else {
+                console.log('Desktop view - using margin');
+                // In desktop mode
+                if (sidebar.classList.contains('collapsed')) {
+                    mainContent.style.marginLeft = 'var(--sidebar-width-collapsed)';
+                } else {
+                    mainContent.style.marginLeft = 'var(--sidebar-width)';
+                }
+            }
         });
         
-        // Ajustar cuando la ventana cambia de tamaño
+        // New unified prevent collapse function
+        window.preventContentCollapseFixed = function() {
+            const contentContainer = document.getElementById('content');
+            if (!contentContainer) return;
+            
+            console.log('Preventing content collapse');
+            
+            // Force content width to prevent collapse
+            contentContainer.style.width = '100%';
+            contentContainer.style.maxWidth = 'none';
+            contentContainer.style.boxSizing = 'border-box';
+            
+            // Process all important containers
+            const containers = contentContainer.querySelectorAll('.card, .container, .row, .comunicaciones-container, .contacts-list, .message-composer');
+            containers.forEach(container => {
+                container.style.width = '100%';
+                container.style.maxWidth = 'none';
+                container.style.minWidth = '200px';
+                container.style.boxSizing = 'border-box';
+            });
+            
+            // Ensure tables don't break
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                table.style.width = '100%';
+                if (table.parentElement) {
+                    table.parentElement.style.overflowX = 'auto';
+                }
+            });
+        };
+        
+        // Fix to make sure the navigation buttons handler is accessible
+        if (typeof fixNavigationButtons !== 'function') {
+            window.fixNavigationButtons = function() {
+                const isMobile = window.innerWidth <= 768;
+                
+                // Obtain navigation elements
+                const menuBtn = document.querySelector('.menu-btn');
+                const navbarRight = document.querySelector('.navbar-right');
+                const notificationContainer = document.querySelector('.notification-container');
+                const refreshContainer = document.querySelector('.refresh-container');
+                
+                if (isMobile) {
+                    console.log('Fixing navigation buttons for mobile');
+                    
+                    // Ensure menu button is visible and functional
+                    if (menuBtn) {
+                        menuBtn.style.display = 'flex';
+                        menuBtn.style.position = 'fixed';
+                        menuBtn.style.top = '10px';
+                        menuBtn.style.right = '10px';
+                        menuBtn.style.zIndex = '2500';
+                        menuBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                        menuBtn.style.borderRadius = '50%';
+                        menuBtn.style.width = '40px';
+                        menuBtn.style.height = '40px';
+                        menuBtn.style.alignItems = 'center';
+                        menuBtn.style.justifyContent = 'center';
+                        menuBtn.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
+                    }
+                    
+                    // Ensure the right navbar buttons are visible
+                    if (navbarRight) {
+                        navbarRight.style.position = 'fixed';
+                        navbarRight.style.top = '10px';
+                        navbarRight.style.right = '60px';
+                        navbarRight.style.zIndex = '2400';
+                        navbarRight.style.display = 'flex';
+                        navbarRight.style.alignItems = 'center';
+                        navbarRight.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                        navbarRight.style.borderRadius = '20px';
+                        navbarRight.style.padding = '5px 10px';
+                        navbarRight.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+                    }
+                }
+            };
+        }
+        
+        // Handle resize events
         window.addEventListener('resize', function() {
             const isMobile = window.innerWidth <= 768;
             
+            // Reset styles on resize
             if (!isMobile) {
-                // En desktop, eliminar los estilos inline
-                mainContent.style.paddingLeft = '';
-                mainContent.style.marginLeft = '';
+                mainContent.style.transform = '';
                 
-                // Resetear contenedores para desktop
-                const containers = document.querySelectorAll('#content .card, #content .container, #content .row');
-                containers.forEach(container => {
-                    container.style.width = '';
-                    container.style.maxWidth = '';
-                    container.style.minWidth = '';
-                });
-            } else {
-                // En móvil, aplicar estilos según el estado del sidebar
-                if (sidebar.classList.contains('collapsed')) {
-                    mainContent.style.paddingLeft = '250px';
-                } else {
-                    mainContent.style.paddingLeft = '0';
+                const header = document.querySelector('.dashboard-header');
+                if (header) {
+                    header.style.transform = '';
                 }
                 
-                // Prevenir colapso
-                preventCollapseOnMobile();
+                // In desktop mode
+                if (sidebar.classList.contains('collapsed')) {
+                    mainContent.style.marginLeft = 'var(--sidebar-width-collapsed)';
+                } else {
+                    mainContent.style.marginLeft = 'var(--sidebar-width)';
+                }
+            } else {
+                // In mobile mode
+                mainContent.style.marginLeft = '0';
+                
+                if (sidebar.classList.contains('collapsed')) {
+                    mainContent.style.transform = 'translateX(250px)';
+                    
+                    const header = document.querySelector('.dashboard-header');
+                    if (header) {
+                        header.style.transform = 'translateX(250px)';
+                    }
+                } else {
+                    mainContent.style.transform = 'translateX(0)';
+                    
+                    const header = document.querySelector('.dashboard-header');
+                    if (header) {
+                        header.style.transform = 'translateX(0)';
+                    }
+                }
+                
+                // Always ensure content doesn't collapse
+                if (typeof preventContentCollapseFixed === 'function') {
+                    preventContentCollapseFixed();
+                }
+                
+                // Fix navigation buttons
+                if (typeof fixNavigationButtons === 'function') {
+                    fixNavigationButtons();
+                }
             }
         });
         
-        // Aplicar inicialmente
-        preventCollapseOnMobile();
+        // Initialize based on current window size
+        const initialIsMobile = window.innerWidth <= 768;
+        
+        if (initialIsMobile) {
+            console.log('Initializing for mobile');
+            // Start with sidebar closed on mobile
+            sidebar.classList.remove('collapsed');
+            mainContent.style.transform = 'translateX(0)';
+            
+            const header = document.querySelector('.dashboard-header');
+            if (header) {
+                header.style.transform = 'translateX(0)';
+            }
+            
+            // Ensure buttons are visible
+            if (typeof fixNavigationButtons === 'function') {
+                fixNavigationButtons();
+            }
+        } else {
+            console.log('Initializing for desktop');
+            // On desktop, initialize according to sidebar state
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = 'var(--sidebar-width-collapsed)';
+            } else {
+                mainContent.style.marginLeft = 'var(--sidebar-width)';
+            }
+        }
     }
 }); 

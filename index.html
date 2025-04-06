@@ -83,7 +83,7 @@
                                 <i class="fas fa-bell"></i>
                                 <span class="notification-badge">0</span>
                             </div>
-                            <div class="menu-btn">
+                            <div class="menu-btn" id="sidebar-toggle-btn">
                                 <i class="fas fa-bars"></i>
                             </div>
                         </div>
@@ -294,32 +294,31 @@
     <!-- Fix específico para evitar que el contenido se colapse al abrir el sidebar -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Obtener elementos relevantes
-        const menuBtn = document.querySelector('.menu-btn');
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
+        console.log('Anti-collapse script loaded - no event listener attached');
         
-        if (menuBtn && sidebar && mainContent) {
-            // Aplicar una solución específica para prevenir el colapso del contenido
-            menuBtn.addEventListener('click', function() {
-                // Dar tiempo a que se complete la transición
-                setTimeout(function() {
-                    // Especialmente importante para evitar el colapso
+        // Register the fix content function globally for use in main.js
+        window.fixContentAfterSidebarToggle = function() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // En móvil, ajustar usando transform
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar && sidebar.classList.contains('collapsed')) {
+                    // Cuando el sidebar está abierto
                     const contentContainer = document.getElementById('content');
                     if (contentContainer) {
-                        // Forzar el uso de ancho completo en todas las situaciones
+                        // Asegurar que el contenido no se colapsa
                         contentContainer.style.width = '100%';
                         contentContainer.style.maxWidth = 'none';
                         contentContainer.style.boxSizing = 'border-box';
                         
                         // Procesar todos los elementos hijos directos
                         Array.from(contentContainer.children).forEach(child => {
-                            // Asegurar que cada elemento hijo use todo el ancho disponible
                             child.style.width = '100%';
                             child.style.maxWidth = 'none';
                             child.style.boxSizing = 'border-box';
                             
-                            // Prevenir específicamente el colapso de tarjetas y contenedores
+                            // Asegurar que las tarjetas y contenedores mantienen su forma
                             if (child.classList && (
                                 child.classList.contains('card') ||
                                 child.classList.contains('crm-card') ||
@@ -328,12 +327,11 @@
                                 child.classList.contains('container') ||
                                 child.classList.contains('row'))) {
                                 
-                                // Aplicar estilos agresivos anti-colapso
                                 child.style.minWidth = '200px';
                                 child.style.width = '100%';
                                 child.style.display = 'block';
                                 
-                                // Intentar prevenir problemas de anidamiento
+                                // Procesar elementos anidados
                                 if (child.children && child.children.length > 0) {
                                     Array.from(child.children).forEach(grandchild => {
                                         grandchild.style.width = '100%';
@@ -345,15 +343,106 @@
                         });
                     }
                     
-                    // Verificar si necesitamos aplicar parches específicos para secciones
+                    // Ajustar contenedores específicos como comunicaciones
                     const comunicacionesContainer = document.querySelector('.comunicaciones-container');
                     if (comunicacionesContainer) {
                         comunicacionesContainer.style.display = 'block';
                         comunicacionesContainer.style.width = '100%';
                     }
-                }, 300); // Esperar lo suficiente para que la animación termine
-            });
-        }
+                }
+            }
+        };
+    });
+    </script>
+    
+    <!-- Fix para asegurar que el botón de menú y los botones superiores estén siempre visibles -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Navigation buttons fix script loaded');
+        
+        // Define the function globally but don't attach event handlers
+        window.fixNavigationButtons = function() {
+            const isMobile = window.innerWidth <= 768;
+            
+            // Obtener botones y elementos de navegación
+            const menuBtn = document.querySelector('.menu-btn');
+            const navbarRight = document.querySelector('.navbar-right');
+            const notificationContainer = document.querySelector('.notification-container');
+            const refreshContainer = document.querySelector('.refresh-container');
+            
+            if (isMobile) {
+                console.log('Fixing navigation buttons for mobile');
+                
+                // Asegurar que el botón de menú sea visible y funcional
+                if (menuBtn) {
+                    menuBtn.style.display = 'flex';
+                    menuBtn.style.position = 'fixed';
+                    menuBtn.style.top = '10px';
+                    menuBtn.style.right = '10px';
+                    menuBtn.style.zIndex = '2500';
+                    menuBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                    menuBtn.style.borderRadius = '50%';
+                    menuBtn.style.width = '40px';
+                    menuBtn.style.height = '40px';
+                    menuBtn.style.alignItems = 'center';
+                    menuBtn.style.justifyContent = 'center';
+                    menuBtn.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
+                }
+                
+                // Asegurar que los botones de la derecha sean visibles
+                if (navbarRight) {
+                    navbarRight.style.position = 'fixed';
+                    navbarRight.style.top = '10px';
+                    navbarRight.style.right = '60px';
+                    navbarRight.style.zIndex = '2400';
+                    navbarRight.style.display = 'flex';
+                    navbarRight.style.alignItems = 'center';
+                    navbarRight.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                    navbarRight.style.borderRadius = '20px';
+                    navbarRight.style.padding = '5px 10px';
+                    navbarRight.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+                }
+                
+                // Asegurar que los botones individuales sean visibles y funcionales
+                if (notificationContainer) {
+                    notificationContainer.style.display = 'flex';
+                    notificationContainer.style.marginRight = '15px';
+                }
+                
+                if (refreshContainer) {
+                    refreshContainer.style.display = 'flex';
+                    refreshContainer.style.marginRight = '15px';
+                }
+            } else {
+                // En desktop, restaurar estilos predeterminados
+                if (menuBtn) {
+                    menuBtn.style.position = '';
+                    menuBtn.style.top = '';
+                    menuBtn.style.right = '';
+                    menuBtn.style.zIndex = '';
+                    menuBtn.style.backgroundColor = '';
+                    menuBtn.style.borderRadius = '';
+                    menuBtn.style.width = '';
+                    menuBtn.style.height = '';
+                    menuBtn.style.display = 'inline-block';
+                }
+                
+                if (navbarRight) {
+                    navbarRight.style.position = '';
+                    navbarRight.style.top = '';
+                    navbarRight.style.right = '';
+                    navbarRight.style.zIndex = '';
+                    navbarRight.style.display = 'flex';
+                    navbarRight.style.backgroundColor = '';
+                    navbarRight.style.borderRadius = '';
+                    navbarRight.style.padding = '';
+                    navbarRight.style.boxShadow = '';
+                }
+            }
+        };
+        
+        // Initial run
+        window.fixNavigationButtons();
     });
     </script>
     
@@ -362,6 +451,8 @@
     var applyMobileImprovements; // Hacer la función disponible globalmente
     
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('Mobile improvements script loaded');
+        
         // Verificar si estamos en dispositivo móvil
         function isMobile() {
             return window.innerWidth <= 768;
@@ -370,10 +461,7 @@
         // Función para aplicar mejoras en móvil
         applyMobileImprovements = function() {
             if (isMobile()) {
-                console.log('Aplicando mejoras para móvil');
-                
-                // Obtener ancho de sidebar para cálculos
-                const sidebarWidth = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width');
+                console.log('Applying mobile improvements');
                 
                 // Asegurar que todos los contenedores ocupen el ancho completo
                 document.querySelectorAll('.container, .container-fluid, .row, [class*="col-"]').forEach(el => {
@@ -395,81 +483,44 @@
                     card.style.maxWidth = 'none';
                 });
                 
-                // Corregir visualización del sidebar
+                // Check sidebar and content state - no event handlers attached here
                 const sidebar = document.querySelector('.sidebar');
                 const mainContent = document.querySelector('.main-content');
                 
                 if (sidebar && mainContent) {
-                    // Asegurar que el menú hamburguesa esté siempre visible
-                    const menuBtn = document.querySelector('.menu-btn');
-                    if (menuBtn) {
-                        menuBtn.style.position = 'fixed';
-                        menuBtn.style.right = '15px';
-                        menuBtn.style.top = '15px';
-                        menuBtn.style.zIndex = '1001';
-                    }
-                    
+                    // Apply appropriate styles based on current sidebar state
+                    // without modifying event handlers
                     if (sidebar.classList.contains('collapsed')) {
-                        // Si el sidebar está expandido
-                        // 1. Asegurar que se vea el texto
-                        document.querySelectorAll('.link_name, .logo_name').forEach(el => {
-                            el.style.display = 'inline-block';
-                        });
-                        
-                        // 2. Ajustar el padding del contenido principal
-                        mainContent.style.paddingLeft = sidebarWidth;
-                        mainContent.style.marginLeft = '0';
-                        
-                        // 3. Ajustar el header
-                        const header = document.querySelector('.dashboard-header');
-                        if (header) {
-                            header.style.paddingLeft = sidebarWidth;
-                            header.style.width = '100%';
-                        }
-                        
-                        // 4. Asegurar que los botones del navbar están visibles
-                        const navbarRight = document.querySelector('.navbar-right');
-                        if (navbarRight) {
-                            navbarRight.style.position = 'fixed';
-                            navbarRight.style.right = '10px';
-                            navbarRight.style.top = '12px';
-                            navbarRight.style.zIndex = '1001';
-                        }
-                    } else {
-                        // Si el sidebar está cerrado, restaurar
-                        mainContent.style.paddingLeft = '0';
-                        
-                        // Restaurar header
-                        const header = document.querySelector('.dashboard-header');
-                        if (header) {
-                            header.style.paddingLeft = '12px';
-                        }
+                        console.log('Sidebar is expanded - applying appropriate styles');
+                        // Let main.js handle the transformations
                     }
-                    
-                    // Prevenir que los elementos se compriman
-                    document.querySelectorAll('#content > *, .content-section > *').forEach(el => {
-                        // Para tarjetas y componentes principales
-                        if (el.classList && (
-                            el.classList.contains('card') || 
-                            el.classList.contains('crm-card') || 
-                            el.classList.contains('stats-card') ||
-                            el.classList.contains('metric-card') ||
-                            el.classList.contains('stat-card') ||
-                            el.classList.contains('action-card'))) {
-                            el.style.width = '100%';
-                            el.style.maxWidth = 'none';
-                            el.style.boxSizing = 'border-box';
-                        }
-                    });
-                    
-                    // Aplicar estilo a las tablas para que se ajusten correctamente
-                    document.querySelectorAll('table').forEach(table => {
-                        table.style.width = '100%';
-                        table.style.maxWidth = 'none';
-                    });
                 }
+                
+                // Asegurar que los elementos del contenido no se comprimen
+                document.querySelectorAll('#content > *, .content-section > *').forEach(el => {
+                    if (el.classList && (
+                        el.classList.contains('card') || 
+                        el.classList.contains('crm-card') || 
+                        el.classList.contains('stats-card') ||
+                        el.classList.contains('metric-card') ||
+                        el.classList.contains('stat-card') ||
+                        el.classList.contains('action-card'))) {
+                        el.style.width = '100%';
+                        el.style.maxWidth = 'none';
+                        el.style.boxSizing = 'border-box';
+                    }
+                });
+                
+                // Aplicar estilo a las tablas para que se ajusten correctamente
+                document.querySelectorAll('table').forEach(table => {
+                    table.style.width = '100%';
+                    table.style.maxWidth = 'none';
+                    if (table.parentElement) {
+                        table.parentElement.style.overflowX = 'auto';
+                    }
+                });
             }
-        }
+        };
         
         // Aplicar mejoras al cargar
         applyMobileImprovements();
@@ -481,17 +532,6 @@
         
         // Aplicar mejoras al cambiar tamaño de ventana
         window.addEventListener('resize', applyMobileImprovements);
-        
-        // Agregar listener para el toggle del sidebar
-        const menuBtn = document.querySelector('.menu-btn');
-        if (menuBtn) {
-            menuBtn.addEventListener('click', function() {
-                // Dar tiempo a que se complete la animación del sidebar
-                setTimeout(applyMobileImprovements, 50);
-                // Aplicar mejoras adicionales después de un tiempo
-                setTimeout(applyMobileImprovements, 300);
-            });
-        }
     });
     </script>
 </body>
