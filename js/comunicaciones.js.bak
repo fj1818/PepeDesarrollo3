@@ -649,6 +649,71 @@ function loadComunicacionesContent() {
         console.warn('No se encontró el botón de WhatsApp');
     }
     
+    // Cargar script de diagnóstico
+    console.log('Cargando script de diagnóstico para la selección de contactos...');
+    const debugScript = document.createElement('script');
+    debugScript.src = 'js/debugContactSelection.js';
+    debugScript.onload = () => {
+        console.log('Script de diagnóstico cargado correctamente');
+    };
+    debugScript.onerror = (error) => {
+        console.error('Error al cargar script de diagnóstico:', error);
+    };
+    document.head.appendChild(debugScript);
+
+    // Reemplazar con:
+
+    // Cargar script de corrección
+    console.log('Cargando script de corrección para la selección de contactos...');
+    const fixScript = document.createElement('script');
+    fixScript.src = 'js/comunicaciones-fix.js';
+    fixScript.onload = () => {
+        console.log('Script de corrección cargado correctamente');
+    };
+    fixScript.onerror = (error) => {
+        console.error('Error al cargar script de corrección:', error);
+    };
+    document.head.appendChild(fixScript);
+
+    // Reemplazar con:
+
+    // Cargar script de corrección para la selección de contactos
+    console.log('Cargando script de corrección silenciosa para selección de contactos...');
+    const fixLoaderScript = document.createElement('script');
+    fixLoaderScript.src = 'js/comunicaciones-fix-loader.js';
+    fixLoaderScript.onload = () => {
+        console.log('Script de corrección cargado correctamente');
+    };
+    fixLoaderScript.onerror = (error) => {
+        console.error('Error al cargar script de corrección:', error);
+    };
+    document.head.appendChild(fixLoaderScript);
+
+    // Reemplazar con:
+
+    // Cargar script de corrección silenciosa para la selección de contactos
+    console.log('Cargando script de corrección silenciosa para la selección de contactos...');
+    const fixLoaderScript = document.createElement('script');
+    fixLoaderScript.src = 'js/comunicaciones-fix-loader.js';
+    fixLoaderScript.onload = () => {
+        console.log('Script de corrección silenciosa cargado correctamente');
+    };
+    fixLoaderScript.onerror = (error) => {
+        console.error('Error al cargar script de corrección:', error);
+    };
+    document.head.appendChild(fixLoaderScript);
+
+    // Reemplazar con:
+
+    // Por defecto, seleccionar WhatsApp como tipo de mensaje
+    const whatsappBtn = document.getElementById('btn-type-whatsapp');
+    if (whatsappBtn) {
+        console.log('Seleccionando WhatsApp como tipo de mensaje predeterminado');
+        whatsappBtn.click();
+    } else {
+        console.warn('No se encontró el botón de WhatsApp');
+    }
+    
     // Cargar script de corrección silenciosa para la selección de contactos
     console.log('Cargando script de corrección silenciosa para la selección de contactos...');
     const fixLoaderScript = document.createElement('script');
