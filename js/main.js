@@ -237,15 +237,39 @@ async function loadContent(section) {
                 
             case 'comunicaciones':
                 if (!window.comunicacionesInitialized) {
-                    await loadScript('js/comunicaciones.js');
+                    // Primero cargar el fixer para asegurar que initComunicaciones esté accesible
+                    await loadScript('js/comunicaciones-fix-init.js');
                     window.comunicacionesInitialized = true;
                 }
-                if (typeof initComunicaciones === 'function') {
-                    await initComunicaciones();
-                } else if (typeof window.initComunicaciones === 'function') {
-                    await window.initComunicaciones();
-                } else {
-                    throw new Error('La función initComunicaciones no está definida.');
+                try {
+                    // Esperar a que la función esté lista mediante la promesa
+                    if (window.initComunicacionesReady) {
+                        console.log('Esperando a que la función initComunicaciones esté disponible...');
+                        await window.initComunicacionesReady;
+                    }
+                    
+                    // Intentar usar la versión segura si está disponible
+                    if (typeof window._initComunicaciones === 'function') {
+                        console.log('Llamando a _initComunicaciones (función segura)');
+                        await window._initComunicaciones();
+                    } else if (typeof initComunicaciones === 'function') {
+                        console.log('Llamando a initComunicaciones (función local)');
+                        await initComunicaciones();
+                    } else if (typeof window.initComunicaciones === 'function') {
+                        console.log('Llamando a window.initComunicaciones (función global)');
+                        await window.initComunicaciones();
+                    } else {
+                        throw new Error('La función initComunicaciones no está definida.');
+                    }
+                } catch (error) {
+                    console.error('Error al inicializar comunicaciones:', error);
+                    contentElement.innerHTML = `
+                        <div class="alert alert-danger mt-3">
+                            <h4><i class="fas fa-exclamation-triangle"></i> Error en el módulo de comunicaciones</h4>
+                            <p>Se ha producido un error al cargar la sección de comunicaciones: ${error.message}</p>
+                            <button class="btn btn-sm btn-primary mt-2" onclick="location.reload()">Reintentar carga</button>
+                        </div>
+                    `;
                 }
                 break;
                 

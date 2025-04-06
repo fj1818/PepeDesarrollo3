@@ -1,32 +1,55 @@
 /**
- * Script para cargar el fix de selección de contactos (versión sin botones)
+ * comunicaciones-fix-loader.js
+ * Script para corregir problemas de carga en comunicaciones.js
  */
-(function() {
-    console.log('Cargando script de corrección silenciosa para la selección de contactos...');
+
+console.log('Cargando comunicaciones-fix-loader.js');
+
+// Primero, verificar si hay errores en el script original
+function ejecutarCorreccion() {
+    console.log('Aplicando corrección silenciosa en comunicaciones.js');
     
-    const fixScript = document.createElement('script');
-    fixScript.src = 'js/comunicaciones-fixed.js';
+    // Verificar si ya existe la función en el ámbito global
+    if (typeof window.initComunicaciones === 'function') {
+        console.log('La función initComunicaciones ya está disponible, no se requiere acción');
+        return;
+    }
     
-    fixScript.onload = () => {
-        console.log('Script de corrección silenciosa cargado correctamente');
-    };
+    // Si la función no existe, cargarla de forma explícita
+    console.log('Definiendo la función initComunicaciones explícitamente');
     
-    fixScript.onerror = (error) => {
-        console.error('Error al cargar script de corrección:', error);
+    window.initComunicaciones = function() {
+        console.log('Función reconstruida: initComunicaciones ejecutándose');
         
-        // En caso de error, intenta reparar manualmente
-        const activeContact = document.querySelector('.contact-item.active');
-        if (activeContact) {
-            console.log('Intentando reparación manual...');
-            const contactId = activeContact.getAttribute('data-id');
-            const contactType = activeContact.getAttribute('data-type');
-            
-            // Si existe la función selectContact, llamarla
-            if (window.selectContact && typeof window.selectContact === 'function') {
-                window.selectContact(contactId, contactType);
+        try {
+            // Si loadComunicacionesUI está disponible, llamarla
+            if (typeof window.loadComunicacionesUI === 'function') {
+                console.log('Llamando a loadComunicacionesUI desde la función reconstruida');
+                window.loadComunicacionesUI();
+            } else {
+                // Cargar la UI básica
+                console.warn('loadComunicacionesUI no disponible, generando UI básica');
+                const contentElement = document.getElementById('content') || document.querySelector('.content-section');
+                if (contentElement) {
+                    contentElement.innerHTML = `
+                        <div class="p-4">
+                            <h2>Centro de Comunicaciones</h2>
+                            <p>El módulo de comunicaciones está siendo cargado en modo de compatibilidad.</p>
+                            <div class="alert alert-warning">
+                                <p>Algunas funciones podrían no estar disponibles. Si encuentra problemas, por favor recargue la página.</p>
+                            </div>
+                            <button class="btn btn-primary" onclick="location.reload()">Recargar</button>
+                        </div>
+                    `;
+                }
             }
+        } catch (error) {
+            console.error('Error en initComunicaciones reconstruida:', error);
         }
     };
     
-    document.head.appendChild(fixScript);
-})(); 
+    console.log('Corrección aplicada, initComunicaciones disponible globalmente');
+}
+
+// Ejecutar la corrección
+ejecutarCorreccion(); 
