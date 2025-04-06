@@ -447,26 +447,34 @@ body {
 
 @media (max-width: 768px) {
     .sidebar {
-        transform: translateX(-100%);
         width: var(--sidebar-width);
+        transform: translateX(-100%); /* Inicialmente oculto */
         position: fixed;
         z-index: 1000;
     }
     
     .sidebar.collapsed {
-        transform: translateX(0);
         width: var(--sidebar-width);
+        transform: translateX(0); /* Mostrar al expandir */
+    }
+    
+    /* Cuando el sidebar está abierto en móvil, asegurar que el texto es visible */
+    .sidebar.collapsed .link_name,
+    .sidebar.collapsed .logo_name {
+        display: inline-block;
+        white-space: nowrap;
+        overflow: visible;
+    }
+    
+    /* Evitar que el contenido principal se superponga con el sidebar */
+    .sidebar.collapsed ~ .main-content {
+        transform: translateX(var(--sidebar-width));
     }
     
     .main-content {
         margin-left: 0;
         width: 100%;
-        padding: 0 10px;
-    }
-    
-    .main-content.expanded {
-        margin-left: 0;
-        width: 100%;
+        padding: 0 5px; /* Reduce side padding to use more screen width */
     }
     
     /* Asegurar que el botón de hamburguesa siempre esté visible */
@@ -486,18 +494,12 @@ body {
         z-index: 1001;
     }
     
-    .sidebar.collapsed .link_name {
-        display: none;
-    }
-    
-    .sidebar.collapsed .logo_name {
-        display: none;
-    }
-    
     /* Ajustar las cards para que ocupen todo el ancho en móvil */
     .crm-card {
         width: 100%;
         margin-bottom: 15px;
+        margin-left: 0;
+        margin-right: 0;
     }
     
     /* Hacer los componentes más grandes en móvil */
@@ -505,6 +507,9 @@ body {
         padding: 20px;
         margin-bottom: 15px;
         min-height: 120px;
+        width: 100%; /* Ensure full width */
+        margin-left: 0;
+        margin-right: 0;
     }
     
     .stats-icon {
@@ -545,6 +550,9 @@ body {
     .stats-card {
         padding: 18px;
         margin-bottom: 12px;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
     
     .dashboard-header {
@@ -579,6 +587,18 @@ body {
     
     .metric-label {
         font-size: 1rem;
+    }
+    
+    /* Contenido completo debe adaptarse al ancho total */
+    .content-section {
+        padding: 10px 5px;
+        width: 100%;
+    }
+    
+    /* Eliminar márgenes innecesarios */
+    #content {
+        padding: 0;
+        width: 100%;
     }
 }
 

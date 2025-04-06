@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid p-0">
         <div class="wrapper">
             <!-- Sidebar -->
             <div class="sidebar">
@@ -94,7 +94,7 @@
                 <div id="alert-container"></div>
                 
                 <!-- Content Section (dynamically loaded) -->
-                <div id="content"></div>
+                <div id="content" class="px-0"></div>
             </div>
         </div>
     </div>
@@ -242,6 +242,68 @@
                 }
             }
         }, 3000); // Esperar 3 segundos para verificar la carga
+    });
+    </script>
+    
+    <!-- Mejoras para dispositivos móviles -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si estamos en dispositivo móvil
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+        
+        // Función para aplicar mejoras en móvil
+        function applyMobileImprovements() {
+            if (isMobile()) {
+                console.log('Aplicando mejoras para móvil');
+                
+                // Asegurar que todos los contenedores ocupen el ancho completo
+                document.querySelectorAll('.container, .container-fluid, .row, [class*="col-"]').forEach(el => {
+                    el.style.maxWidth = '100%';
+                    el.style.width = '100%';
+                    el.style.paddingLeft = '5px';
+                    el.style.paddingRight = '5px';
+                    el.style.marginLeft = '0';
+                    el.style.marginRight = '0';
+                });
+                
+                // Asegurar que las tarjetas ocupen el ancho completo
+                document.querySelectorAll('.card, .crm-card, .stats-card, .metric-card').forEach(card => {
+                    card.style.width = '100%';
+                    card.style.marginLeft = '0';
+                    card.style.marginRight = '0';
+                    card.style.boxSizing = 'border-box';
+                });
+                
+                // Corregir visualización del sidebar
+                const sidebar = document.querySelector('.sidebar');
+                const mainContent = document.querySelector('.main-content');
+                
+                if (sidebar && sidebar.classList.contains('collapsed')) {
+                    // Si el sidebar está expandido, asegurar que se vea el texto
+                    document.querySelectorAll('.link_name, .logo_name').forEach(el => {
+                        el.style.display = 'inline-block';
+                    });
+                    
+                    // Desplazar el contenido principal
+                    if (mainContent) {
+                        mainContent.style.transform = 'translateX(' + getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') + ')';
+                    }
+                }
+            }
+        }
+        
+        // Aplicar mejoras al cargar
+        applyMobileImprovements();
+        
+        // Aplicar mejoras después de cargar contenido
+        document.addEventListener('load-content', function() {
+            setTimeout(applyMobileImprovements, 100);
+        });
+        
+        // Aplicar mejoras al cambiar tamaño de ventana
+        window.addEventListener('resize', applyMobileImprovements);
     });
     </script>
 </body>

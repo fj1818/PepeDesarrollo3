@@ -506,15 +506,21 @@ body {
         width: var(--sidebar-width);
     }
     
+    /* Ensure menu text is visible when sidebar is expanded on mobile */
+    .sidebar.collapsed .menu-text {
+        display: inline-block; /* Show menu text */
+    }
+    
     .main-content {
         margin-left: 0;
         width: 100%;
-        padding: 0 10px; /* Reducir el padding para aprovechar espacio */
+        padding: 0; /* Remove padding to use full width */
     }
     
     .sidebar.collapsed ~ .main-content {
         margin-left: 0;
         width: 100%;
+        transform: translateX(var(--sidebar-width)); /* Push content when sidebar is open */
     }
     
     /* Asegurar que el botón de hamburguesa siempre sea visible */
@@ -535,7 +541,9 @@ body {
     }
     
     .content-container {
-        padding: 15px 10px; /* Reducir padding lateral */
+        padding: 10px 5px; /* Reduce horizontal padding */
+        width: 100%;
+        box-sizing: border-box;
     }
     
     /* Mejorar el tamaño de los componentes en móvil */
@@ -545,6 +553,14 @@ body {
     
     .nav-item i {
         font-size: 22px; /* Íconos más grandes */
+    }
+    
+    /* Ensure card components use full width */
+    .card {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        box-sizing: border-box;
     }
     
     .user-avatar {
@@ -610,5 +626,15 @@ body {
     .whatsapp-btn, .email-btn {
         padding: 12px 20px;
         font-size: 1rem;
+    }
+    
+    /* Ensure full width for all containers */
+    .container, .container-fluid, .row, [class*="col-"] {
+        padding-left: 5px;
+        padding-right: 5px;
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+        max-width: 100%;
     }
 } 

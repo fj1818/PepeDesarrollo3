@@ -273,11 +273,18 @@
     .stats-container {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 15px;
+        width: 100%;
+        margin: 0;
+        padding: 0;
     }
     
     .stat-card {
         padding: 18px;
         min-height: 120px;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        box-sizing: border-box;
     }
     
     .stat-icon {
@@ -297,6 +304,7 @@
     
     .activity-item {
         padding: 15px;
+        width: 100%;
     }
     
     .activity-icon {
@@ -307,16 +315,42 @@
     
     .chart-card {
         margin-bottom: 20px;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    /* Content containers should use full width */
+    .home-section, .stats-overview, .quick-actions {
+        width: 100%;
+        padding-left: 5px;
+        padding-right: 5px;
+        margin-left: 0;
+        margin-right: 0;
+        box-sizing: border-box;
+    }
+    
+    /* Charts should adjust to smaller screens */
+    .chart-content {
+        width: 100%;
+        height: auto;
+        min-height: 250px;
     }
 }
 
 @media (max-width: 576px) {
     .stats-container {
         grid-template-columns: 1fr;
+        width: 100%;
+        padding: 0;
+        margin: 0;
     }
     
     .welcome-header {
         padding: 15px 10px;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
     
     .welcome-header h1 {
@@ -330,10 +364,14 @@
     .section-title {
         font-size: 1.2rem;
         margin-bottom: 15px;
+        width: 100%;
     }
     
     .action-card {
         padding: 18px;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
     
     .action-icon {
@@ -344,5 +382,13 @@
     
     .action-title {
         font-size: 1.2rem;
+    }
+    
+    /* Ensure content areas expand fully */
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
     }
 } 
