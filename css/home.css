@@ -263,16 +263,86 @@
     .chart-container {
         grid-template-columns: 1fr;
     }
+    
+    .welcome-header h1 {
+        font-size: 1.6rem;
+    }
 }
 
 @media (max-width: 768px) {
     .stats-container {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 15px;
+    }
+    
+    .stat-card {
+        padding: 18px;
+        min-height: 120px;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+    
+    .stat-value {
+        font-size: 1.7rem;
+        margin: 12px 0 6px;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+    }
+    
+    .activity-item {
+        padding: 15px;
+    }
+    
+    .activity-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+    
+    .chart-card {
+        margin-bottom: 20px;
     }
 }
 
 @media (max-width: 576px) {
     .stats-container {
         grid-template-columns: 1fr;
+    }
+    
+    .welcome-header {
+        padding: 15px 10px;
+    }
+    
+    .welcome-header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .welcome-header p {
+        font-size: 0.95rem;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+    
+    .action-card {
+        padding: 18px;
+    }
+    
+    .action-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 22px;
+    }
+    
+    .action-title {
+        font-size: 1.2rem;
     }
 } 

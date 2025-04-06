@@ -394,8 +394,34 @@ function handleResize() {
     if (window.innerWidth <= 768) {
         sidebar.classList.add('close');
         mainContent.classList.add('expanded');
+        
+        // Ajustar elementos para mejorar visualización en móvil
+        const cards = document.querySelectorAll('.crm-card, .stats-card, .metric-card');
+        cards.forEach(card => {
+            card.style.width = '100%';
+        });
+        
+        // Asegurarnos que los iconos sean suficientemente grandes para interacción táctil
+        const icons = document.querySelectorAll('.nav-item i, .menu-btn i, .notification i');
+        icons.forEach(icon => {
+            icon.style.fontSize = '22px';
+        });
     }
 }
+
+// Inicializar el evento de resize y ejecutarlo inmediatamente
+document.addEventListener('DOMContentLoaded', function() {
+    // Registrar el manejador de resize
+    window.addEventListener('resize', handleResize);
+    
+    // Ejecutar inmediatamente para configurar el layout inicial
+    handleResize();
+    
+    // También ejecutar después de cargar el contenido
+    document.addEventListener('load-content', function() {
+        setTimeout(handleResize, 100);
+    });
+});
 
 // Función para enviar datos a la API
 async function enviarDatosAPI(dataToSend, esActualizacion) {

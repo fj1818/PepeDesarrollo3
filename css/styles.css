@@ -460,10 +460,13 @@ body {
     
     .main-content {
         margin-left: 0;
+        width: 100%;
+        padding: 0 10px;
     }
     
     .main-content.expanded {
         margin-left: 0;
+        width: 100%;
     }
     
     /* Asegurar que el botón de hamburguesa siempre esté visible */
@@ -474,7 +477,7 @@ body {
     
     /* Ajustar el header para que no se superpongan los elementos */
     .dashboard-header {
-        padding: 15px;
+        padding: 12px;
     }
     
     /* Cuando el sidebar está abierto, asegurarse que el navbar-right siga visible */
@@ -489,6 +492,93 @@ body {
     
     .sidebar.collapsed .logo_name {
         display: none;
+    }
+    
+    /* Ajustar las cards para que ocupen todo el ancho en móvil */
+    .crm-card {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    /* Hacer los componentes más grandes en móvil */
+    .stats-card {
+        padding: 20px;
+        margin-bottom: 15px;
+        min-height: 120px;
+    }
+    
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+    
+    .stats-info h4 {
+        font-size: 1.5rem;
+    }
+    
+    .stats-info p {
+        font-size: 1rem;
+    }
+    
+    /* Reducir márgenes y paddings para aprovechar espacio */
+    .content-section {
+        padding: 15px 10px;
+    }
+    
+    /* Botones más grandes para mejor interacción táctil */
+    .crm-btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+    
+    /* Mejorar la tabla de datos */
+    .data-table th,
+    .data-table td {
+        padding: 12px 10px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Para dispositivos muy pequeños */
+    .stats-card {
+        padding: 18px;
+        margin-bottom: 12px;
+    }
+    
+    .dashboard-header {
+        padding: 10px;
+    }
+    
+    .header-title {
+        font-size: 1.2rem;
+    }
+    
+    /* Mayor tamaño para elementos interactivos */
+    .notification i,
+    .menu-btn i,
+    .refresh-container i {
+        font-size: 22px;
+    }
+    
+    /* Mejorar espaciado */
+    .navbar-right {
+        gap: 18px;
+    }
+    
+    /* Tarjetas con mejor espacio */
+    .metric-card {
+        padding: 15px;
+        margin-bottom: 12px;
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+    }
+    
+    .metric-label {
+        font-size: 1rem;
     }
 }
 

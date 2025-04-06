@@ -195,10 +195,13 @@
 @media (max-width: 767.98px) {
     .whatsapp-preview, .email-preview {
         width: 100%;
+        min-height: 300px;
     }
     
     .template-btn {
         margin-bottom: 0.5rem;
+        padding: 10px 15px;
+        font-size: 0.95rem;
     }
     
     .page-title {
@@ -207,6 +210,76 @@
     
     .page-description {
         font-size: 1rem;
+    }
+    
+    .contact-item {
+        padding: 15px;
+    }
+    
+    .contact-avatar {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+    
+    .contact-name {
+        font-size: 16px;
+    }
+    
+    .contact-meta {
+        font-size: 13px;
+    }
+    
+    .contact-actions button {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .composer-field select,
+    .composer-field input {
+        height: 45px;
+        font-size: 16px;
+    }
+    
+    .composer-field textarea {
+        min-height: 120px;
+        font-size: 16px;
+    }
+    
+    .message-composer {
+        padding: 15px;
+    }
+    
+    .composer-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .composer-actions button {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+    }
+}
+
+/* Para dispositivos muy pequeños */
+@media (max-width: 576px) {
+    .contact-item {
+        padding: 12px 10px;
+    }
+    
+    .list-header {
+        padding: 12px 10px;
+    }
+    
+    .list-header h3 {
+        font-size: 15px;
+    }
+    
+    .composer-title {
+        font-size: 16px;
     }
 }
 
