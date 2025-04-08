@@ -366,6 +366,13 @@ function setupExpedientesEventos() {
         // Obtener clientes y expedientes
         const clientes = window.apiData.clientes || {};
         const expedientes = window.apiData.expedientes || {};
+        const useSelect2 = typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined';
+        
+        // Obtener valores actuales de los filtros
+        const nombreSeleccionado = filtroNombre ? filtroNombre.value : '';
+        const numeroClienteSeleccionado = filtroNumeroCliente ? filtroNumeroCliente.value : '';
+        const numeroExpedienteSeleccionado = filtroNumeroExpediente ? filtroNumeroExpediente.value : '';
+        const fechaRegistroSeleccionada = filtroFechaRegistro ? filtroFechaRegistro.value : '';
         
         // Si no hay selección, no filtramos
         if (!valorSeleccionado) {
@@ -373,12 +380,17 @@ function setupExpedientesEventos() {
             return;
         }
         
-        console.log(`Actualizando filtros - Campo: ${campoSeleccionado}, Valor: ${valorSeleccionado}`);
+        console.log('Actualizando filtros:', {
+            campo: campoSeleccionado,
+            valor: valorSeleccionado,
+            nombreSeleccionado,
+            numeroClienteSeleccionado,
+            numeroExpedienteSeleccionado,
+            fechaRegistroSeleccionada
+        });
         
-        // Cliente seleccionado
+        // Buscar cliente y expediente según los filtros actuales
         let clienteSeleccionado = null;
-        
-        // Expediente seleccionado
         let expedienteSeleccionado = null;
         
         // Buscar cliente según el campo seleccionado
@@ -389,10 +401,53 @@ function setupExpedientesEventos() {
         } else if (campoSeleccionado === 'numero-expediente') {
             // Buscar cliente por número de expediente
             clienteSeleccionado = Object.values(clientes).find(cliente => cliente['numero-expediente'] === valorSeleccionado);
-            // Buscar expediente por número de expediente del cliente
-            if (clienteSeleccionado && clienteSeleccionado['numero-expediente']) {
-                expedienteSeleccionado = Object.values(expedientes).find(expediente => 
-                    expediente['numero-expediente'] === clienteSeleccionado['numero-expediente']);
+            
+            // Si hay una fecha seleccionada, buscar el expediente específico
+            if (clienteSeleccionado && clienteSeleccionado['numero-expediente'] && fechaRegistroSeleccionada) {
+                // Buscar expediente por número y fecha
+                expedienteSeleccionado = Object.values(expedientes).find(expediente => {
+                    if (expediente['numero-expediente'] !== clienteSeleccionado['numero-expediente']) {
+                        return false;
+                    }
+                    
+                    // Verificar si la fecha coincide
+                    try {
+                        let fecha;
+                        const fechaRegistro = expediente['fecha-registro'];
+                        
+                        if (typeof fechaRegistro === 'string' && fechaRegistro.includes('/')) {
+                            const partesFecha = fechaRegistro.split(' ')[0].split('/');
+                            if (partesFecha.length === 3) {
+                                const dia = parseInt(partesFecha[0], 10);
+                                const mes = parseInt(partesFecha[1], 10) - 1;
+                                const anio = parseInt(partesFecha[2], 10);
+                                
+                                if (!isNaN(dia) && !isNaN(mes) && !isNaN(anio)) {
+                                    fecha = new Date(anio, mes, dia);
+                                }
+                            }
+                        }
+                        
+                        if (!fecha || isNaN(fecha)) {
+                            fecha = new Date(fechaRegistro);
+                        }
+                        
+                        if (isNaN(fecha)) return false;
+                        
+                        const dia = String(fecha.getDate()).padStart(2, '0');
+                        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                        const anio = fecha.getFullYear();
+                        const fechaFormateada = `${dia}/${mes}/${anio}`;
+                        
+                        return fechaFormateada === fechaRegistroSeleccionada;
+                    } catch (e) {
+                        console.warn('Error al comparar fechas para expediente específico:', e);
+                        return false;
+                    }
+                });
+            } else {
+                // Si no hay fecha seleccionada, cargar las fechas disponibles
+                cargarFechasDeRegistro(valorSeleccionado, 'numero-expediente');
             }
         } else if (campoSeleccionado === 'fecha-registro') {
             // Obtener la fecha formateada
@@ -444,7 +499,7 @@ function setupExpedientesEventos() {
                     
                     return fechaFormateada === fechaSeleccionada;
                 } catch (e) {
-                    console.warn('Error al comparar fechas:', e);
+                    console.warn('Error al parsear fecha:', e);
                     return false;
                 }
             });
@@ -452,25 +507,20 @@ function setupExpedientesEventos() {
             console.log('Expedientes encontrados con esta fecha:', expedientesConEstaFecha.length);
             
             if (expedientesConEstaFecha.length > 0) {
-                // Tomamos el primer expediente encontrado
+                // Tomar el primer expediente que coincida con la fecha
                 expedienteSeleccionado = expedientesConEstaFecha[0];
+                console.log('Expediente seleccionado por fecha:', expedienteSeleccionado);
                 
-                // Buscar cliente relacionado con el expediente
+                // Buscar el cliente asociado a este expediente
                 if (expedienteSeleccionado['numero-expediente']) {
                     clienteSeleccionado = Object.values(clientes).find(cliente => 
                         cliente['numero-expediente'] === expedienteSeleccionado['numero-expediente']);
-                }
-            }
+                    console.log('Cliente asociado al expediente:', clienteSeleccionado);
         }
         
-        // Actualizar los selectores utilizando Select2 si está disponible
-        const useSelect2 = typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined';
-        
-        // Actualizar los otros selectores sin disparar sus eventos
+                // Actualizar los otros filtros para reflejar el expediente y cliente seleccionados
         if (clienteSeleccionado) {
-            console.log('Cliente seleccionado:', clienteSeleccionado.nombre);
-            
-            // Si es un campo diferente al nombre, actualizar el selector de nombre
+                    // Actualizar filtro de nombre si no fue el origen del cambio
             if (campoSeleccionado !== 'nombre' && filtroNombre) {
                 if (useSelect2) {
                     jQuery(filtroNombre).val(clienteSeleccionado['id-contacto'] || '').trigger('change.select2');
@@ -479,7 +529,7 @@ function setupExpedientesEventos() {
                 }
             }
             
-            // Si es un campo diferente al número de cliente, actualizar el selector de número de cliente
+                    // Actualizar filtro de número de cliente si no fue el origen del cambio
             if (campoSeleccionado !== 'numero-cliente' && filtroNumeroCliente) {
                 if (useSelect2) {
                     jQuery(filtroNumeroCliente).val(clienteSeleccionado['numero-cliente'] || '').trigger('change.select2');
@@ -488,110 +538,63 @@ function setupExpedientesEventos() {
                 }
             }
             
-            // Si es un campo diferente al número de expediente y el usuario ha seleccionado un expediente, actualizar el selector de fechas
-            if (campoSeleccionado !== 'numero-expediente' && filtroNumeroExpediente && clienteSeleccionado && clienteSeleccionado['numero-expediente']) {
+                    // Actualizar filtro de número de expediente si no fue el origen del cambio
+                    if (campoSeleccionado !== 'numero-expediente' && filtroNumeroExpediente) {
                 if (useSelect2) {
-                    jQuery(filtroNumeroExpediente).val(clienteSeleccionado['numero-expediente'] || '').trigger('change.select2');
+                            jQuery(filtroNumeroExpediente).val(expedienteSeleccionado['numero-expediente'] || '').trigger('change.select2');
                 } else {
-                    filtroNumeroExpediente.value = clienteSeleccionado['numero-expediente'] || '';
-                }
-                
-                // Cargar fechas de registro asociadas al expediente
-                // Si la selección viene del nombre o número de cliente, no autoseleccionamos fecha
-                if (campoSeleccionado === 'nombre' || campoSeleccionado === 'numero-cliente') {
-                    cargarFechasDeRegistro(clienteSeleccionado['numero-expediente'], campoSeleccionado, false);
-                    
-                    // Mostrar tarjeta con el botón para crear registro
-                    expedienteDetalleContainer.innerHTML = `
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title mb-4">${clienteSeleccionado.nombre} - ${clienteSeleccionado['numero-expediente'] || 'Sin expediente'}</h5>
-                                <div class="d-grid gap-2 col-md-6 mx-auto">
-                                    <button class="btn btn-success btn-crear-registro" data-numero-expediente="${clienteSeleccionado['numero-expediente'] || ''}">
-                                        <i class="fas fa-plus-circle me-2"></i> Crear Registro
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Asignar evento al botón
-                    const btnCrearRegistro = expedienteDetalleContainer.querySelector('.btn-crear-registro');
-                    if (btnCrearRegistro) {
-                        btnCrearRegistro.addEventListener('click', function() {
-                            const numExpediente = this.getAttribute('data-numero-expediente');
-                            mostrarFormularioRegistro(numExpediente, false);
-                        });
-                    }
-                    
-                    return; // Detenemos la ejecución aquí
-                } else if (campoSeleccionado !== 'fecha-registro') {
-                    // Si venimos de otro campo que no sea fecha, cargar fechas normalmente
-                    cargarFechasDeRegistro(clienteSeleccionado['numero-expediente'], campoSeleccionado);
-                }
-            }
-            
-            // Buscar expediente si no lo tenemos ya
-            if (!expedienteSeleccionado && clienteSeleccionado['numero-expediente'] && campoSeleccionado === 'fecha-registro') {
-                // Cuando seleccionamos una fecha, buscar el expediente específico con esa fecha
-                const numeroExpediente = clienteSeleccionado['numero-expediente'];
-                const fechaSeleccionada = valorSeleccionado;
-                
-                const expedientesConEstaFecha = Object.values(expedientes).filter(exp => {
-                    if (exp['numero-expediente'] !== numeroExpediente) return false;
-                    
-                    try {
-                        // Formatear la fecha del expediente para compararla
-                        let fecha;
-                        const fechaRegistro = exp['fecha-registro'];
-                        
-                        if (typeof fechaRegistro === 'string' && fechaRegistro.includes('/')) {
-                            const partesFecha = fechaRegistro.split(' ')[0].split('/');
-                            if (partesFecha.length === 3) {
-                                const dia = parseInt(partesFecha[0], 10);
-                                const mes = parseInt(partesFecha[1], 10) - 1;
-                                const anio = parseInt(partesFecha[2], 10);
-                                
-                                if (!isNaN(dia) && !isNaN(mes) && !isNaN(anio)) {
-                                    fecha = new Date(anio, mes, dia);
-                                }
-                            }
+                            filtroNumeroExpediente.value = expedienteSeleccionado['numero-expediente'] || '';
                         }
-                        
-                        if (!fecha || isNaN(fecha)) {
-                            fecha = new Date(fechaRegistro);
-                        }
-                        
-                        if (isNaN(fecha)) return false;
-                        
-                        const dia = String(fecha.getDate()).padStart(2, '0');
-                        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                        const anio = fecha.getFullYear();
-                        const fechaFormateada = `${dia}/${mes}/${anio}`;
-                        
-                        return fechaFormateada === fechaSeleccionada;
-                    } catch (e) {
-                        console.warn('Error al comparar fechas para expediente específico:', e);
-                        return false;
                     }
-                });
-                
-                if (expedientesConEstaFecha.length > 0) {
-                    expedienteSeleccionado = expedientesConEstaFecha[0];
-                    console.log('Expediente específico encontrado para fecha seleccionada:', expedienteSeleccionado);
-                }
-            } else if (!expedienteSeleccionado && clienteSeleccionado['numero-expediente']) {
-                expedienteSeleccionado = Object.values(expedientes).find(expediente => 
-                    expediente['numero-expediente'] === clienteSeleccionado['numero-expediente']);
             }
 
             // Mostrar detalles del cliente y expediente
             mostrarDetallesClienteExpediente(clienteSeleccionado, expedienteSeleccionado);
+                return;
+            }
+        }
+        
+        // Si encontramos cliente pero no expediente
+        if (clienteSeleccionado && !expedienteSeleccionado) {
+            console.log('Cliente seleccionado:', clienteSeleccionado.nombre);
+            
+            // Si tiene número de expediente pero sin fechas (puede ser un cliente nuevo)
+            if (clienteSeleccionado['numero-expediente']) {
+                // Cargar fechas disponibles para la UI
+                cargarFechasDeRegistro(clienteSeleccionado['numero-expediente'], campoSeleccionado, false);
+                
+                // Mostrar tarjeta con el botón para crear registro
+                expedienteDetalleContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-4">${clienteSeleccionado.nombre} - ${clienteSeleccionado['numero-expediente'] || 'Sin expediente'}</h5>
+                            <div class="d-grid gap-2 col-md-6 mx-auto">
+                                <button class="btn btn-success btn-crear-registro" data-numero-expediente="${clienteSeleccionado['numero-expediente'] || ''}">
+                                    <i class="fas fa-plus-circle me-2"></i> Crear Registro
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Asignar evento al botón
+                const btnCrearRegistro = expedienteDetalleContainer.querySelector('.btn-crear-registro');
+                if (btnCrearRegistro) {
+                    btnCrearRegistro.addEventListener('click', function() {
+                        const numExpediente = this.getAttribute('data-numero-expediente');
+                        mostrarFormularioRegistro(numExpediente, false);
+                    });
+                }
+                
+                return; // Detenemos la ejecución aquí
+            }
         } else if (expedienteSeleccionado) {
             // Ya tenemos el expediente pero no el cliente, buscar de nuevo por si acaso
-            clienteSeleccionado = Object.values(clientes).find(cliente => 
-                cliente['numero-expediente'] === expedienteSeleccionado['numero-expediente']);
-                
+            if (!clienteSeleccionado) {
+                clienteSeleccionado = Object.values(clientes).find(cliente => 
+                    cliente['numero-expediente'] === expedienteSeleccionado['numero-expediente']);
+            }
+            
             // Actualizar campos si tenemos el cliente
             if (clienteSeleccionado) {
                 if (campoSeleccionado !== 'nombre' && filtroNombre) {
@@ -897,8 +900,99 @@ function mostrarFormularioRegistro(numeroExpediente, esCargar) {
             exp['numero-expediente'] === numeroExpediente);
         
         if (expedientesConEsteNumero.length > 0) {
-            // Tomar el primero disponible o mostrar selector
-            expedienteActual = expedientesConEsteNumero[0];
+            // Verificar si hay una fecha seleccionada en el filtro
+            const filtroFechaRegistro = document.getElementById('filtro-fecha-registro');
+            const fechaSeleccionada = filtroFechaRegistro && filtroFechaRegistro.value ? filtroFechaRegistro.value : null;
+            
+            console.log('Fecha seleccionada en el filtro:', fechaSeleccionada);
+            
+            if (fechaSeleccionada) {
+                // Si hay una fecha seleccionada, buscar el expediente específico para esa fecha
+                const expedienteEspecifico = expedientesConEsteNumero.find(exp => {
+                    try {
+                        // Formatear la fecha del expediente para compararla
+                        let fecha;
+                        const fechaRegistro = exp['fecha-registro'];
+                        
+                        if (typeof fechaRegistro === 'string' && fechaRegistro.includes('/')) {
+                            const partesFecha = fechaRegistro.split(' ')[0].split('/');
+                            if (partesFecha.length === 3) {
+                                const dia = parseInt(partesFecha[0], 10);
+                                const mes = parseInt(partesFecha[1], 10) - 1;
+                                const anio = parseInt(partesFecha[2], 10);
+                                
+                                if (!isNaN(dia) && !isNaN(mes) && !isNaN(anio)) {
+                                    fecha = new Date(anio, mes, dia);
+                                }
+                            }
+                        }
+                        
+                        if (!fecha || isNaN(fecha)) {
+                            fecha = new Date(fechaRegistro);
+                        }
+                        
+                        if (isNaN(fecha)) return false;
+                        
+                        const dia = String(fecha.getDate()).padStart(2, '0');
+                        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                        const anio = fecha.getFullYear();
+                        const fechaFormateada = `${dia}/${mes}/${anio}`;
+                        
+                        console.log('Comparando fechas:', fechaFormateada, fechaSeleccionada);
+                        return fechaFormateada === fechaSeleccionada;
+                    } catch (e) {
+                        console.warn('Error al comparar fechas para expediente específico:', e);
+                        return false;
+                    }
+                });
+                
+                if (expedienteEspecifico) {
+                    console.log('Expediente específico encontrado para la fecha seleccionada:', expedienteEspecifico);
+                    expedienteActual = expedienteEspecifico;
+                } else {
+                    console.warn('No se encontró expediente para la fecha seleccionada, usando el primero disponible');
+                    expedienteActual = expedientesConEsteNumero[0];
+                }
+            } else {
+                // Si no hay fecha seleccionada, mostrar mensaje indicando que se debe seleccionar una fecha
+                // y mostrar las fechas disponibles
+                const fechasDisponibles = expedientesConEsteNumero
+                    .map(exp => {
+                        try {
+                            const fechaRegistro = exp['fecha-registro'];
+                            if (!fechaRegistro) return null;
+                            
+                            let fecha;
+                            if (typeof fechaRegistro === 'string' && fechaRegistro.includes('/')) {
+                                const partesFecha = fechaRegistro.split(' ')[0].split('/');
+                                if (partesFecha.length === 3) {
+                                    return partesFecha.join('/');
+                                }
+                            }
+                            return fechaRegistro;
+                        } catch (e) {
+                            return null;
+                        }
+                    })
+                    .filter(fecha => fecha !== null)
+                    .join(', ');
+                
+                Swal.fire({
+                    title: 'Seleccione una fecha',
+                    html: `
+                        <p>Este cliente tiene múltiples registros. Por favor, seleccione una fecha específica en el filtro de fechas.</p>
+                        <p><strong>Fechas disponibles:</strong> ${fechasDisponibles}</p>
+                    `,
+                    icon: 'info',
+                    confirmButtonText: 'Entendido'
+                });
+                
+                // Asegúrate de que el filtro de fechas tenga opciones
+                cargarFechasDeRegistro(numeroExpediente, null, false);
+                
+                // No continuar con la carga del formulario
+                return;
+            }
             
             // Llenar datos del expediente - esto sobrescribirá los valores iniciales si existen
             Object.keys(datosRegistro).forEach(key => {
